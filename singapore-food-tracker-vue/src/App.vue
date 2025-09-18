@@ -1,0 +1,126 @@
+<template>
+  <div class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600">
+    <div class="flex h-screen">
+      <!-- Mobile toggle button -->
+      <button 
+        @click="toggleSidebar"
+        class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2 rounded-md shadow-lg hover:bg-gray-50"
+      >
+        ☰
+      </button>
+      
+      <!-- Mobile backdrop -->
+      <div 
+        v-if="showSidebar"
+        @click="toggleSidebar"
+        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[80]"
+      ></div>
+      
+      <!-- Sidebar -->
+      <div 
+        :class="[
+          'transition-transform duration-300 ease-in-out',
+          showSidebar ? 'translate-x-0' : '-translate-x-full',
+          'lg:translate-x-0'
+        ]"
+        class="lg:relative fixed lg:static top-0 left-0 z-[90] flex-shrink-0"
+      >
+        <Sidebar 
+          :places="places"
+          :visited-places="visitedPlaces"
+          :want-to-visit-places="wantToVisitPlaces"
+          :search-query="searchQuery"
+          @update-search="searchQuery = $event"
+          @upload-csv="handleFileUpload"
+          @place-added="handlePlaceAdded"
+          @mark-visited="markAsVisited"
+          @mark-want-to-visit="markAsWantToVisit"
+          @clear-status="clearStatus"
+          @focus-place="focusOnPlace"
+        />
+      </div>
+      
+      <!-- Map Container -->
+      <div class="flex-1 relative z-[1]">
+        <MapContainer 
+          :places="places"
+          :visited-places="visitedPlaces"
+          :want-to-visit-places="wantToVisitPlaces"
+          :loading="loading"
+          @mark-visited="markAsVisited"
+          @mark-want-to-visit="markAsWantToVisit"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted } from 'vue'
+import Sidebar from './components/Sidebar.vue'
+import MapContainer from './components/MapContainer.vue'
+import { useFoodTracker } from './composables/useFoodTracker'
+
+export default {
+  name: 'App',
+  components: {
+    Sidebar,
+    MapContainer
+  },
+  setup() {
+    const showSidebar = ref(true)
+    
+    const {
+      places,
+      visitedPlaces,
+      wantToVisitPlaces,
+      searchQuery,
+      loading,
+      handleFileUpload,
+      addPlace,
+      markAsVisited,
+      markAsWantToVisit,
+      clearStatus,
+      focusOnPlace,
+      loadSavedData
+    } = useFoodTracker()
+    
+    const toggleSidebar = () => {
+      showSidebar.value = !showSidebar.value
+    }
+
+    const handlePlaceAdded = async (place) => {
+      try {
+        const added = await addPlace(place)
+        if (added) {
+          console.log('Place added successfully:', place)
+        } else {
+          console.log('Place already exists:', place)
+        }
+      } catch (error) {
+        console.error('Error adding place:', error)
+      }
+    }
+
+    onMounted(() => {
+      loadSavedData()
+    })
+
+    return {
+      showSidebar,
+      toggleSidebar,
+      places,
+      visitedPlaces,
+      wantToVisitPlaces,
+      searchQuery,
+      loading,
+      handleFileUpload,
+      handlePlaceAdded,
+      markAsVisited,
+      markAsWantToVisit,
+      clearStatus,
+      focusOnPlace
+    }
+  }
+}
+</script>
