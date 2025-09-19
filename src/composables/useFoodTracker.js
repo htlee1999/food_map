@@ -114,8 +114,14 @@ export function useFoodTracker() {
             lat: parseFloat(result.LATITUDE),
             lng: parseFloat(result.LONGITUDE)
           }
-          console.log(`✅ Geocoding successful: ${cleanAddress} -> ${coords.lat}, ${coords.lng}`)
-          return coords
+          // Validate coordinates are reasonable for Singapore
+          if (coords.lat >= 1.0 && coords.lat <= 2.0 && coords.lng >= 103.0 && coords.lng <= 105.0) {
+            console.log(`✅ Geocoding successful: ${cleanAddress} -> ${coords.lat}, ${coords.lng}`)
+            return coords
+          } else {
+            console.log(`⚠️ Invalid coordinates from geocoding: ${coords.lat}, ${coords.lng}`)
+            return null
+          }
         } else {
           console.log(`❌ No results found for: ${cleanAddress}`)
           // Try with a shorter address (remove last part)
@@ -137,106 +143,181 @@ export function useFoodTracker() {
     return null
   }
 
-  // Extract coordinates or address from Google Maps URL
-  const extractLocationFromGoogleMapsUrl = (url) => {
+  // Fix invalid coordinates in existing places
+  const fixInvalidCoordinates = async () => {
+    console.log('🔧 Starting to fix invalid coordinates...')
+    const invalidPlaces = places.value.filter(place => 
+      place.coords.lat === 1024 && place.coords.lng === 768
+    )
+    
+    console.log(`📍 Found ${invalidPlaces.length} places with invalid coordinates`)
+    
+    for (let i = 0; i < invalidPlaces.length; i++) {
+      const place = invalidPlaces[i]
+      console.log(`🔧 Fixing coordinates for: ${place.name}`)
+      
+      // Try to geocode the place name
+      let coords = await geocodeAddress(place.name)
+      
+      // If that fails, try with the address
+      if (!coords && place.address && place.address !== 'Location from Google Maps') {
+        coords = await geocodeAddress(place.address)
+      }
+      
+      // If still no coordinates, try with common Singapore areas
+      if (!coords) {
+        const singaporeAreas = ['Marina Bay', 'Orchard', 'Chinatown', 'Little India', 'Clarke Quay', 'Sentosa', 'Jurong', 'Tampines', 'Woodlands', 'Ang Mo Kio']
+        for (const area of singaporeAreas) {
+          coords = await geocodeAddress(`${place.name}, ${area}, Singapore`)
+          if (coords) break
+        }
+      }
+      
+      if (coords) {
+        place.coords = coords
+        place.source = 'fixed_coordinates'
+        console.log(`✅ Fixed coordinates for ${place.name}: ${coords.lat}, ${coords.lng}`)
+      } else {
+        console.log(`❌ Could not fix coordinates for ${place.name}`)
+      }
+      
+      // Add delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    
+    // Save the fixed places
     try {
-      console.log(`🔗 Extracting location from URL: ${url}`)
+      const result = await placesApi.addBatch(places.value)
+      console.log(`✅ Fixed coordinates saved to backend`)
+    } catch (error) {
+      console.error('Failed to save fixed coordinates to backend:', error)
+    }
+    
+    console.log('🎉 Finished fixing invalid coordinates')
+  }
+
+  // Extract coordinates by actually visiting the Google Maps URL
+  const extractLocationFromGoogleMapsUrl = async (url) => {
+    try {
+      // Check if URL is empty or invalid
+      if (!url || url.trim() === '') {
+        console.log(`❌ Empty URL provided`)
+        return null
+      }
+      
+      console.log(`🔗 Fetching webpage content from: ${url}`)
+      
+      // First try URL parsing for direct coordinates (faster)
       const urlObj = new URL(url)
       
-      // Method 1: Extract coordinates from URL path (e.g., /@lat,lng,zoom)
-      const pathMatch = urlObj.pathname.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/)
-      if (pathMatch) {
-        const coords = {
-          lat: parseFloat(pathMatch[1]),
-          lng: parseFloat(pathMatch[2])
-        }
-        console.log(`📍 Extracted coordinates from path: ${coords.lat}, ${coords.lng}`)
-        return { type: 'coordinates', data: coords }
-      }
+      // Try multiple URL patterns for coordinates
+      const urlPatterns = [
+        // Pattern 1: @lat,lng format
+        /@(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+        // Pattern 2: !3dlat!4dlng format
+        /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/,
+        // Pattern 3: /@lat,lng,zoom format
+        /@(-?\d+\.?\d*),(-?\d+\.?\d*),\d+z/,
+        // Pattern 4: data=!4m2!3m1!1s format (Google Place ID)
+        /data=!4m2!3m1!1s([a-zA-Z0-9_-]+)/
+      ]
       
-      // Method 2: Extract from query parameters
-      const searchParams = urlObj.searchParams
-      
-      // Check for ll parameter (lat,lng)
-      const llParam = searchParams.get('ll')
-      if (llParam) {
-        const [lat, lng] = llParam.split(',').map(Number)
-        if (!isNaN(lat) && !isNaN(lng)) {
-          const coords = { lat, lng }
-          console.log(`📍 Extracted coordinates from 'll' param: ${coords.lat}, ${coords.lng}`)
-          return { type: 'coordinates', data: coords }
-        }
-      }
-      
-      // Check for q parameter (address query)
-      const qParam = searchParams.get('q')
-      if (qParam) {
-        const address = decodeURIComponent(qParam)
-        console.log(`📍 Extracted address from 'q' param: ${address}`)
-        return { type: 'address', data: address }
-      }
-      
-      // Method 3: Extract from data parameter (encoded coordinates)
-      const dataParam = searchParams.get('data')
-      if (dataParam) {
-        try {
-          const decodedData = decodeURIComponent(dataParam)
-          console.log(`📊 Data param content: ${decodedData.substring(0, 200)}...`)
-          
-          // Look for coordinate patterns in the data
-          const coordMatch = decodedData.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/)
-          if (coordMatch) {
+      for (let i = 0; i < urlPatterns.length; i++) {
+        const match = urlObj.pathname.match(urlPatterns[i])
+        if (match) {
+          if (i === 3) {
+            // This is a Google Place ID, we'll need to fetch the page
+            console.log(`📍 Found Google Place ID in URL: ${match[1]}`)
+            break
+          } else {
             const coords = {
-              lat: parseFloat(coordMatch[1]),
-              lng: parseFloat(coordMatch[2])
+              lat: parseFloat(match[1]),
+              lng: parseFloat(match[2])
             }
-            console.log(`📍 Extracted coordinates from data param: ${coords.lat}, ${coords.lng}`)
+            // Validate coordinates are reasonable for Singapore
+            if (coords.lat >= 1.0 && coords.lat <= 2.0 && coords.lng >= 103.0 && coords.lng <= 105.0) {
+              console.log(`📍 Found coordinates in URL: ${coords.lat}, ${coords.lng}`)
+              return { type: 'coordinates', data: coords }
+            } else {
+              console.log(`⚠️ Invalid coordinates in URL: ${coords.lat}, ${coords.lng}`)
+            }
+          }
+        }
+      }
+      
+      // If no coordinates in URL, fetch the webpage via backend proxy (to bypass CORS)
+      console.log(`🌐 Fetching webpage content via proxy...`)
+      const proxyUrl = `http://localhost:3001/api/proxy/google-maps?url=${encodeURIComponent(url)}`
+      const response = await fetch(proxyUrl)
+      
+      if (!response.ok) {
+        console.log(`❌ Failed to fetch webpage via proxy: ${response.status}`)
+        return null
+      }
+      
+      const data = await response.json()
+      if (!data.success) {
+        console.log(`❌ Proxy error: ${data.error}`)
+        return null
+      }
+      
+      const html = data.html
+      console.log(`📄 Fetched ${html.length} characters of HTML via proxy`)
+      
+      // Extract coordinates from various patterns in the HTML
+      const coordPatterns = [
+        // Pattern 1: "center": [lat, lng]
+        /"center":\s*\[(-?\d+\.?\d*),\s*(-?\d+\.?\d*)\]/,
+        // Pattern 2: "lat": lat, "lng": lng
+        /"lat":\s*(-?\d+\.?\d*),\s*"lng":\s*(-?\d+\.?\d*)/,
+        // Pattern 3: data-lat and data-lng attributes
+        /data-lat="(-?\d+\.?\d*)"[^>]*data-lng="(-?\d+\.?\d*)"/,
+        // Pattern 4: window.APP_INITIALIZATION_STATE
+        /window\.APP_INITIALIZATION_STATE.*?\[(-?\d+\.?\d*),(-?\d+\.?\d*)\]/,
+        // Pattern 5: Google Maps specific patterns
+        /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/,
+        // Pattern 6: Coordinates in script tags
+        /\[(-?\d+\.?\d*),\s*(-?\d+\.?\d*)\].*?zoom/,
+        // Pattern 7: More specific Google Maps patterns
+        /"@(-?\d+\.?\d*),(-?\d+\.?\d*),\d+z"/,
+        // Pattern 8: Coordinates in meta tags
+        /<meta[^>]*content="(-?\d+\.?\d*),(-?\d+\.?\d*)"[^>]*name="geo\.position"/,
+        // Pattern 9: Coordinates in JSON-LD
+        /"geo":\s*{\s*"latitude":\s*(-?\d+\.?\d*),\s*"longitude":\s*(-?\d+\.?\d*)\s*}/,
+        // Pattern 10: Coordinates in microdata
+        /itemprop="latitude"[^>]*content="(-?\d+\.?\d*)"[^>]*itemprop="longitude"[^>]*content="(-?\d+\.?\d*)"/
+      ]
+      
+      for (let i = 0; i < coordPatterns.length; i++) {
+        const match = html.match(coordPatterns[i])
+        if (match) {
+          const coords = {
+            lat: parseFloat(match[1]),
+            lng: parseFloat(match[2])
+          }
+          // Validate coordinates are reasonable for Singapore
+          if (coords.lat >= 1.0 && coords.lat <= 2.0 && coords.lng >= 103.0 && coords.lng <= 105.0) {
+            console.log(`📍 Extracted coordinates from HTML pattern ${i + 1}: ${coords.lat}, ${coords.lng}`)
             return { type: 'coordinates', data: coords }
-          }
-        } catch (e) {
-          console.log(`⚠️ Could not decode data param`)
-        }
-      }
-      
-      // Method 3.5: Extract from URL path with coordinates (e.g., /place/name/@lat,lng,zoom/data=...)
-      const pathWithCoordsMatch = urlObj.pathname.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*),?\d*z/)
-      if (pathWithCoordsMatch) {
-        const coords = {
-          lat: parseFloat(pathWithCoordsMatch[1]),
-          lng: parseFloat(pathWithCoordsMatch[2])
-        }
-        console.log(`📍 Extracted coordinates from path with coords: ${coords.lat}, ${coords.lng}`)
-        return { type: 'coordinates', data: coords }
-      }
-      
-      // Method 4: Extract place name from URL path as fallback
-      const pathParts = urlObj.pathname.split('/')
-      const placeIndex = pathParts.findIndex(part => part === 'place')
-      if (placeIndex !== -1 && placeIndex + 1 < pathParts.length) {
-        const encodedPlaceName = pathParts[placeIndex + 1]
-        const decodedPlaceName = decodeURIComponent(encodedPlaceName.replace(/\+/g, ' '))
-        console.log(`📍 Extracted place name from path: ${decodedPlaceName}`)
-        
-        // Try to extract location from the place name
-        if (decodedPlaceName.includes('—') || decodedPlaceName.includes('in ')) {
-          const parts = decodedPlaceName.split(/[—|in]/)
-          if (parts.length > 1) {
-            const location = parts[parts.length - 1].trim()
-            console.log(`📍 Extracted location from place name: ${location}`)
-            return { type: 'address', data: location }
+          } else {
+            console.log(`⚠️ Invalid coordinates from HTML pattern ${i + 1}: ${coords.lat}, ${coords.lng}`)
           }
         }
-        
-        // For place names without location context, try to add Singapore context
-        const placeNameWithContext = `${decodedPlaceName}, Singapore`
-        console.log(`📍 Adding Singapore context: ${placeNameWithContext}`)
-        return { type: 'address', data: placeNameWithContext }
       }
       
-      console.log(`❌ Could not extract location from URL`)
+      // Try to extract place name and address from HTML
+      const titleMatch = html.match(/<title[^>]*>([^<]+)</i)
+      if (titleMatch) {
+        const title = titleMatch[1].replace(/ - Google Maps$/, '').trim()
+        console.log(`📍 Extracted title from HTML: ${title}`)
+        return { type: 'address', data: `${title}, Singapore` }
+      }
+      
+      console.log(`❌ No coordinates or useful data found in webpage`)
       return null
+      
     } catch (error) {
-      console.error('Error extracting location from Google Maps URL:', error)
+      console.error('Error fetching Google Maps URL:', error)
       return null
     }
   }
@@ -266,7 +347,7 @@ export function useFoodTracker() {
           if (row.Title && row.URL) {
             // Your CSV format: Title, Note, URL
             placeName = row.Title?.trim()
-            const locationData = extractLocationFromGoogleMapsUrl(row.URL)
+            const locationData = await extractLocationFromGoogleMapsUrl(row.URL)
             
             if (locationData) {
               if (locationData.type === 'coordinates') {
@@ -317,7 +398,7 @@ export function useFoodTracker() {
             if (nameKey) placeName = row[nameKey]?.trim()
             if (addressKey) address = row[addressKey]?.trim()
             if (urlKey && !address) {
-              const locationData = extractLocationFromGoogleMapsUrl(row[urlKey])
+              const locationData = await extractLocationFromGoogleMapsUrl(row[urlKey])
               if (locationData) {
                 if (locationData.type === 'coordinates') {
                   // We have coordinates directly - no need to geocode
@@ -536,6 +617,7 @@ export function useFoodTracker() {
     markAsWantToVisit,
     clearStatus,
     focusOnPlace,
-    loadSavedData
+    loadSavedData,
+    fixInvalidCoordinates
   }
 }

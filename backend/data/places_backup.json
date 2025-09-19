@@ -1,0 +1,2272 @@
+[
+  {
+    "id": "place_4_1758188289384",
+    "name": "Menya Saku by Oh Some Bowls",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_1_1758188289415",
+    "name": "Lucia The Brownie Bar @ CIMB Plaza",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_2_1758188289478",
+    "name": "SHAO 燒 @ Holland Village | Modern Teochew Tapas 潮汕小馆",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_3_1758188289684",
+    "name": "ANTO pizza e aperitivi",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_5_1758188291319",
+    "name": "La Pona Snack Bar (Nasi Lemak)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_6_1758188291400",
+    "name": "Sweet Garden Dining Cafe",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_8_1758188291495",
+    "name": "Er Xiao Jie Handmade Chilli Noodles",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_7_1758188291512",
+    "name": "Chix Hot Chicken | Nashville Hot Fried Chicken Singapore",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_9_1758188293380",
+    "name": "Open Farm Community",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_12_1758188295242",
+    "name": "Namu Bulgogi (Hillion)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_14_1758188295376",
+    "name": "Salt & Soul",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_13_1758188295394",
+    "name": "Carnaby @ Robertson Quay",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_10_1758188295694",
+    "name": "Genkai Koya",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_11_1758188295715",
+    "name": "Smiths Authentic British Fish and Chips - Balmoral Plaza",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_17_1758188297411",
+    "name": "Sin Hock Heng Scissors Cut Curry Rice",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_19_1758188297615",
+    "name": "Anyi Noodles 安逸面馆",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_16_1758188297686",
+    "name": "Zhou Zhen Zhen Vermicelli & Noodles (周真真南昌粉面)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_15_1758188297766",
+    "name": "bag me up Bagel House",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_18_1758188297808",
+    "name": "The Plump Frenchman",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_21_1758188299479",
+    "name": "nakey",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_23_1758188299626",
+    "name": "MENSHO TOKYO SG",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_20_1758188299703",
+    "name": "Urban eats factory",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_22_1758188299806",
+    "name": "Burgs Singapore",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_24_1758188299875",
+    "name": "Heartland by Enjoy",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_26_1758188301581",
+    "name": "Singapore 150011",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_27_1758188301765",
+    "name": "PÖONSTI",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_29_1758188301945",
+    "name": "Bee Kia Seafood Restaurant",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_25_1758188301977",
+    "name": "Xin Yue Lai Bak Kut Teh (Herbal Soup)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_28_1758188302063",
+    "name": "Ootori Club Produced by Waka",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_31_1758188303972",
+    "name": "Koki Bakery & Brew Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_30_1758188304177",
+    "name": "Daisy's Dream Kitchen",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_33_1758188304202",
+    "name": "BreakfastGrill - Kilat",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_34_1758188304209",
+    "name": "Charlie's Peranakan Food",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_32_1758188304286",
+    "name": "Cafe Wabi Sabi Joo Chiat",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_38_1758188306281",
+    "name": "En Sushi Japanese Restaurant Singapore",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_37_1758188306548",
+    "name": "Steakville",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_35_1758188306656",
+    "name": "2 Béo Vietnamese Restaurant",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_36_1758188306663",
+    "name": "La Pizzaiola @ Bukit Timah",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_39_1758188306703",
+    "name": "Sum Kee Food (Telok Blangah)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_41_1758188309647",
+    "name": "Lao Ma Ban Mian",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_42_1758188309823",
+    "name": "Chu And Co",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_44_1758188309947",
+    "name": "Burma Social",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_43_1758188310066",
+    "name": "South Union Park",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_40_1758188310077",
+    "name": "Un-Yang-Kor-Dai Singapore",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_46_1758188311948",
+    "name": "KinDee Thai Hotpot",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_49_1758188311954",
+    "name": "Shang Hao Kopi Taiwanese Breakfast Shop",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_48_1758188312305",
+    "name": "June Coffee",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_47_1758188312333",
+    "name": "Lee Do Restaurant",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_45_1758188312470",
+    "name": "Ma Cuisine",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_51_1758188314331",
+    "name": "The Flour Department",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_54_1758188314385",
+    "name": "Yoshi's Kitchen",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_50_1758188314429",
+    "name": "Jeong’s Jjajang",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_52_1758188314698",
+    "name": "Ipoh River Fish Tai Pai Tong",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_53_1758188314705",
+    "name": "Seng House — Hainanese-Western Café in Tanjong Katong",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_58_1758188316776",
+    "name": "The Noodle Memories",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_57_1758188316842",
+    "name": "Whisk & Paddle (Bt Gombak Park)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_56_1758188316863",
+    "name": "Yummy Palace Pte Ltd",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_59_1758188316959",
+    "name": "SOTPOT",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_55_1758188316982",
+    "name": "SMAC BBQ (Tanjong Pagar) 木炭串烧（丹戎巴葛）",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_62_1758188318946",
+    "name": "Bao Makers Cluny",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_60_1758188319050",
+    "name": "Fat Po",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_64_1758188319222",
+    "name": "Knead Kopi",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_63_1758188319233",
+    "name": "Grace Espresso",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_61_1758188319479",
+    "name": "Bread Yard",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_69_1758188321721",
+    "name": "Murger Han",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_66_1758188321751",
+    "name": "Camp Caribbean",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_68_1758188321777",
+    "name": "Jin Wee Restaurant",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_65_1758188321817",
+    "name": "Bari-Uma Ramen Novena Gardens",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_67_1758188322259",
+    "name": "Warm Up Cafe @Mackenzie Road",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_72_1758188324541",
+    "name": "Laifaba Authentic Wood-Fired Roast & Noodles",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_74_1758188324740",
+    "name": "iO Italian Osteria - HillV2 (Singapore)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_71_1758188324781",
+    "name": "Apartment Coffee",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_70_1758188324797",
+    "name": "Lechon Republic Singapore",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_73_1758188324992",
+    "name": "One Prawn & Co",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_77_1758188327658",
+    "name": "DON LECHON (Grandlink Square)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_76_1758188327780",
+    "name": "Kozen Sushi Bar & Restaurant",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_79_1758188327809",
+    "name": "Red Star Restaurant",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_75_1758188327922",
+    "name": "MARTINA'S KITCHEN",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_78_1758188327940",
+    "name": "Forbidden Duck",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_82_1758188330655",
+    "name": "Paradise Pizza & Elixir Coffee and Wine - Holland",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_80_1758188330749",
+    "name": "THE BUTTER CHICKEN PLACE real PUNJABI taste",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_83_1758188330840",
+    "name": "Running Egg",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_84_1758188330867",
+    "name": "Yokohama Ramen",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_81_1758188330943",
+    "name": "Within The Walls Dessert Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_89_1758188333517",
+    "name": "FAM Roasted 家家好传统烧腊 Chinatown",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_85_1758188333645",
+    "name": "Morimori Yogashi Pte Ltd",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_87_1758188333691",
+    "name": "酒処 栄三郎 | Sakedokoro Eizaburo",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_86_1758188333751",
+    "name": "Torasho Ramen & Charcoal Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_88_1758188333777",
+    "name": "Nana Bunsik",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_93_1758188336792",
+    "name": "RAPPU | Sushi Handrolls, Izakaya & Sakes",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_94_1758188336912",
+    "name": "FUKUSUKE(ふくすけ)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_90_1758188336920",
+    "name": "Jang San Korean Restaurant 장산왕족발",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_91_1758188336978",
+    "name": "Bao Er Cafe",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_92_1758188337152",
+    "name": "馥苑 Fu Yuan Teochew Dining @ Clarke Quay",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_96_1758188339783",
+    "name": "M&T",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_95_1758188339807",
+    "name": "Fat Belly Steakhouse",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_99_1758188339810",
+    "name": "A Beautiful Day Café Tea Room + Cocktail Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_98_1758188340049",
+    "name": "Boeuf",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_97_1758188340115",
+    "name": "Hopscotch (Gillman Barracks)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_102_1758188342675",
+    "name": "Flips N Dips (Paya Lebar)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_101_1758188342730",
+    "name": "Sweedy",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_104_1758188342842",
+    "name": "Buta Kizoku 豚貴族",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_103_1758188342941",
+    "name": "Myung Ga (명가) II",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_100_1758188343149",
+    "name": "SYIP (Farrer Park)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_109_1758188345677",
+    "name": "Chirashizushi Shou",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_108_1758188345685",
+    "name": "Wanglee Cafe 旺利茶室",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_105_1758188345784",
+    "name": "Cha Chaan Teng",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_106_1758188345816",
+    "name": "Fangko + Coffee And Beer",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_107_1758188345898",
+    "name": "Sagye Korean Pot Rice and BBQ",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_113_1758188348667",
+    "name": "Beast & Butterflies",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_114_1758188348786",
+    "name": "Mad Charcoal",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_110_1758188348813",
+    "name": "白家潮州糜 White House Teochew Porridge",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_112_1758188348814",
+    "name": "Umai Artisanal Udon Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_111_1758188349602",
+    "name": "Ramen-ya",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_118_1758188351362",
+    "name": "New Station Rice Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_115_1758188351818",
+    "name": "Nana Dolly's",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_116_1758188351870",
+    "name": "Seoul Noodle Shop_Tanjong Pagar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_117_1758188351926",
+    "name": "Liu Lang Mian Noodle Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_119_1758188351967",
+    "name": "Leong Kee (Klang) Bak Kut Teh",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_124_1758188354575",
+    "name": "Feng Food",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_123_1758188354772",
+    "name": "Marymount Bakehouse Singapore",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_120_1758188354795",
+    "name": "Carrara",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_122_1758188354969",
+    "name": "Coucou Authentic Swiss Restaurant and Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_121_1758188355007",
+    "name": "HARU-HARU はるはる",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_129_1758188357818",
+    "name": "Fi Woodfire Thai | Thai Restaurant (Robertson Quay)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_125_1758188357834",
+    "name": "South Side Keppel | Signature Rosti & Roast Chicken",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_127_1758188357864",
+    "name": "Micasa Kitchen & Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_128_1758188357906",
+    "name": "Shiok Burger",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_126_1758188358023",
+    "name": "Eightisfy Western",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_133_1758188360625",
+    "name": "BAKERY 1946 Suntec City",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_134_1758188360647",
+    "name": "Tomahawk King: Steakhouse and Grill",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_130_1758188360723",
+    "name": "王记西安面馆",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_131_1758188360802",
+    "name": "Wang Ji Xi'an Noodle House 2",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_132_1758188360884",
+    "name": "Vernacular Coffee",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_139_1758188363678",
+    "name": "Eng Kee Bak Kut Teh",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_136_1758188363798",
+    "name": "Shimbashi Soba, 新橋そば",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_135_1758188363798",
+    "name": "US Pizza - Ang Mo Kio",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_137_1758188363904",
+    "name": "Pilot Kitchen",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_138_1758188363931",
+    "name": "Kokoyo Nyonya Delights",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_142_1758188366799",
+    "name": "Bedok Reservoir Food Centre",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_144_1758188366808",
+    "name": "Papi’s Tacos - Seah Street",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_143_1758188366818",
+    "name": "Bigmama Korean Restaurant",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_141_1758188366819",
+    "name": "Frying Fish Club (FFC) Owen Road",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_140_1758188366916",
+    "name": "ORTO",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_146_1758188369680",
+    "name": "Cai Lin Ji 蔡林记",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_149_1758188369747",
+    "name": "GRILL by CUT",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_148_1758188369819",
+    "name": "ToMo Cafe (Neil Road)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_145_1758188369943",
+    "name": "周记串串香 Zhou Ji Chuan Chuan Xiang",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_147_1758188370074",
+    "name": "Samrang SG",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_150_1758188372758",
+    "name": "Caffe Pralet",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_152_1758188372770",
+    "name": "Piu M",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_151_1758188372895",
+    "name": "Beigelhaus",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_154_1758188372895",
+    "name": "Star Western 星星西餐",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_153_1758188373131",
+    "name": "BLACKGOAT",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_159_1758188375593",
+    "name": "Marcy's",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_155_1758188375985",
+    "name": "Super Thai by Soi Aroy @ Pasir Panjang",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_156_1758188376053",
+    "name": "Legacy Pork Noodles",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_158_1758188376163",
+    "name": "Good Bites",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_157_1758188377151",
+    "name": "Brothers Ramen",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_160_1758188379619",
+    "name": "Shanghai Fried Xiao Long Bao",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_163_1758188379630",
+    "name": "Kitchenman Nasi Lemak",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_164_1758188379649",
+    "name": "The Signature Patisserie",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_162_1758188379773",
+    "name": "MOD CAFE",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_161_1758188380235",
+    "name": "Wild Coco (Boat Quay)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_169_1758188382535",
+    "name": "Chicco Pasta Bar (Holland Village)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_168_1758188382643",
+    "name": "bad habits.",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_165_1758188382689",
+    "name": "Tanoshii",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_167_1758188382697",
+    "name": "Cafe Manna",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_166_1758188382989",
+    "name": "Home Dawn Cafe @ Clarke Quay",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_173_1758188385614",
+    "name": "Uggli Muffins",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_171_1758188385619",
+    "name": "The Better Scoop",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_172_1758188385696",
+    "name": "Straits Club - Nasi Lemak @ Timbre+ One North",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_170_1758188385834",
+    "name": "18 Seafood 食霸海鲜",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_174_1758188385943",
+    "name": "Zhang Ji Shanghai La Mian Xiao Long Bao",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_177_1758188388782",
+    "name": "YUAN 原",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_175_1758188388794",
+    "name": "Dickson Nasi Lemak",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_178_1758188388801",
+    "name": "Dirty Supper",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_176_1758188388870",
+    "name": "Hey Kee HK Seafood",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_179_1758188388897",
+    "name": "Waffl",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_181_1758188391631",
+    "name": "Garden Pastry & Cake 嘉頓",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_183_1758188391761",
+    "name": "Soon Hong Eating House",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_180_1758188391801",
+    "name": "Seng Kee Black Chicken Herbal Soup Pte Ltd",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_182_1758188391810",
+    "name": "Bai Wei Mini Bowl 百味小碗菜 @ SingPost Centre",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_184_1758188391816",
+    "name": "Aleeya",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_187_1758188394133",
+    "name": "212 Bidadari Park Dr",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_188_1758188394726",
+    "name": "Feng Xiang Bak Kut Teh Lau Pa Sat",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_189_1758188394765",
+    "name": "Sumo Bar Happy",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_185_1758188394932",
+    "name": "Habibi-san",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_186_1758188395074",
+    "name": "Apollo Coffee Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_193_1758188397532",
+    "name": "Enjoy Eating House and Bar",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_190_1758188397626",
+    "name": "AH JIE HOKKIEN MEE 阿杰福建炒虾面",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_191_1758188397826",
+    "name": "Swee Guan Hokkien Mee",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_194_1758188397959",
+    "name": "Folk Yard",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_192_1758188397985",
+    "name": "Clovelly",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_195_1758188400768",
+    "name": "Huevos",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_198_1758188400792",
+    "name": "Idaten Udon (Anchorvale Village)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_196_1758188400824",
+    "name": "Bruno’s Pizzeria & Grill",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_197_1758188400892",
+    "name": "RAMEN KIOU (&JOY JAPANESE FOOD STREET) - NEX",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_199_1758188400964",
+    "name": "The Dragon Chamber",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_200_1758188403779",
+    "name": "Brunches Cafe",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_203_1758188403789",
+    "name": "Sin Heng Kee Porridge",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_204_1758188403829",
+    "name": "GUI (South Bridge)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_201_1758188403855",
+    "name": "Suju Masayuki Takashimaya",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_202_1758188404081",
+    "name": "Bottega di Carna",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_206_1758188406507",
+    "name": "Cosford Container Park",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_209_1758188406644",
+    "name": "Wakey Wakey",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_207_1758188406697",
+    "name": "Yue Private Dining",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_205_1758188406817",
+    "name": "Yamato Izakaya",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_211_1758188470677",
+    "name": "SEAL",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_214_1758188470731",
+    "name": "September Coffee",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_212_1758188471967",
+    "name": "Fried Rice Story",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_213_1758188472049",
+    "name": "Xin Mei Xiang Lor Mee (Old Airport Road Lor Mee) - Holland",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_210_1758188472123",
+    "name": "PerghChicks",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_218_1758188474602",
+    "name": "House of Malaysia",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_217_1758188474842",
+    "name": "Gusta Sourdough Pizza Co.",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_219_1758188474899",
+    "name": "AMI Patisserie",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_216_1758188474928",
+    "name": "Lad & Co",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_215_1758188475135",
+    "name": "Lad & Dad",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_220_1758188477678",
+    "name": "Go Rogue | North Canal & Boat Quay",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_221_1758188477796",
+    "name": "Yu Cun | Voted Best Curry Fish Head in Singapore | Popular Zichar \nRestaurant (Taiseng)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_223_1758188477904",
+    "name": "PUNCH",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_224_1758188477984",
+    "name": "Five Star Hong Kong Style Handmade Dimsum",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_222_1758188478028",
+    "name": "Basilico",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_228_1758188480631",
+    "name": "Meet 4 Meat",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_227_1758188480666",
+    "name": "KŌBASHĪ",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_225_1758188480884",
+    "name": "Tonkatsu ENbiton (313@Somerset)",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  },
+  {
+    "id": "place_226_1758188481285",
+    "name": "Nanta BBQ",
+    "address": "Location from Google Maps",
+    "coords": {
+      "lat": 1024,
+      "lng": 768
+    },
+    "source": "google_maps_coordinates"
+  }
+]

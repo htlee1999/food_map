@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const fetch = require('node-fetch');
 
 const app = express();
 const port = 3001;
@@ -133,6 +134,48 @@ app.post('/api/preferences', (req, res) => {
     res.json({ message: 'Preferences saved successfully' });
   } else {
     res.status(500).json({ error: 'Failed to save preferences' });
+  }
+});
+
+// Proxy endpoint for Google Maps URLs (to bypass CORS)
+app.get('/api/proxy/google-maps', async (req, res) => {
+  const { url } = req.query;
+  
+  if (!url) {
+    return res.status(400).json({ error: 'URL parameter is required' });
+  }
+  
+  try {
+    console.log(`🌐 Proxying request to: ${url}`);
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      return res.status(response.status).json({ 
+        error: `Failed to fetch URL: ${response.status}` 
+      });
+    }
+    
+    const html = await response.text();
+    console.log(`📄 Fetched ${html.length} characters of HTML`);
+    
+    res.json({ 
+      success: true, 
+      html: html,
+      url: url,
+      length: html.length
+    });
+    
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch URL', 
+      details: error.message 
+    });
   }
 });
 
