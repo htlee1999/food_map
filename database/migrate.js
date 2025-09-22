@@ -38,6 +38,30 @@ async function migrate() {
 
     console.log('🔄 Running database migrations...')
     await client.query(schema)
+    
+    // Handle migration from rating to tier column
+    try {
+      // Check if rating column exists and tier doesn't
+      const columnCheck = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'places' 
+        AND column_name IN ('rating', 'tier')
+      `)
+      
+      const hasRating = columnCheck.rows.some(row => row.column_name === 'rating')
+      const hasTier = columnCheck.rows.some(row => row.column_name === 'tier')
+      
+      if (hasRating && !hasTier) {
+        console.log('🔄 Migrating rating column to tier...')
+        await client.query('ALTER TABLE places ADD COLUMN tier VARCHAR(10)')
+        await client.query('ALTER TABLE places DROP COLUMN rating')
+        console.log('✅ Successfully migrated rating to tier column')
+      }
+    } catch (migrationError) {
+      console.log('ℹ️  Column migration not needed or already completed')
+    }
+    
     console.log('✅ Database migrations completed successfully')
 
     // Check if we have existing data to migrate

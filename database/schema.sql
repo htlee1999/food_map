@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS places (
     description TEXT,
     cuisine_type VARCHAR(100),
     price_range VARCHAR(20),
-    rating DECIMAL(3,2),
+    tier VARCHAR(10),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS preferences (
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_places_name ON places(name);
 CREATE INDEX IF NOT EXISTS idx_places_cuisine ON places(cuisine_type);
-CREATE INDEX IF NOT EXISTS idx_places_rating ON places(rating);
+CREATE INDEX IF NOT EXISTS idx_places_tier ON places(tier);
 CREATE INDEX IF NOT EXISTS idx_preferences_user ON preferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_preferences_place ON preferences(place_id);
 

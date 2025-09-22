@@ -52,7 +52,7 @@ app.post('/api/places', async (req, res) => {
 
     // Insert new place
     const result = await db.query(
-      `INSERT INTO places (name, address, coords, description, cuisine_type, price_range, rating) 
+      `INSERT INTO places (name, address, coords, description, cuisine_type, price_range, tier) 
        VALUES ($1, $2, $3, $4, $5, $6, $7) 
        RETURNING *`,
       [
@@ -62,7 +62,7 @@ app.post('/api/places', async (req, res) => {
         newPlace.description || null,
         newPlace.cuisine_type || null,
         newPlace.price_range || null,
-        newPlace.rating || null,
+        newPlace.tier || null,
       ]
     )
 
