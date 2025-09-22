@@ -4,6 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
 
+// Load environment variables from .env.local first, then .env
+dotenv.config({ path: '.env.local' })
 dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)

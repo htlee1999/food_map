@@ -121,7 +121,6 @@ import { ref, reactive } from 'vue'
 
 export default {
   name: 'AddPlaceForm',
-  components: {},
   emits: ['place-added'],
   setup(_, { emit }) {
     const isLoading = ref(false)

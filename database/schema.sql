@@ -44,9 +44,11 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers to automatically update updated_at
+-- Create triggers to automatically update updated_at (drop first if exists)
+DROP TRIGGER IF EXISTS update_places_updated_at ON places;
 CREATE TRIGGER update_places_updated_at BEFORE UPDATE ON places
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_preferences_updated_at ON preferences;
 CREATE TRIGGER update_preferences_updated_at BEFORE UPDATE ON preferences
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

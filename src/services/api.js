@@ -35,16 +35,6 @@ export const placesApi = {
     }
   },
 
-  // Add multiple places (for CSV import)
-  async addBatch(places) {
-    try {
-      const response = await api.post('/places/batch', { places })
-      return response.data
-    } catch (error) {
-      console.error('Error adding places batch:', error)
-      throw error
-    }
-  },
 }
 
 // Health check
