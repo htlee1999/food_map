@@ -28,6 +28,7 @@ A Vue.js application for tracking food places in Singapore with interactive maps
 ## Development Setup
 
 ### Prerequisites
+
 - Node.js (^20.19.0 || >=22.12.0)
 - pnpm
 - Neon database (created via Vercel Marketplace)
@@ -36,17 +37,20 @@ A Vue.js application for tracking food places in Singapore with interactive maps
 
 1. Clone the repository
 2. Install dependencies:
+
 ```sh
 pnpm install
 ```
 
 3. Set up environment variables:
+
 ```sh
 cp .env.example .env
 # Edit .env with your DATABASE_URL from Neon
 ```
 
 4. Run database migrations:
+
 ```sh
 pnpm run migrate
 ```
@@ -54,11 +58,13 @@ pnpm run migrate
 ### Development
 
 Run both frontend and backend:
+
 ```sh
 pnpm dev:full
 ```
 
 Or run separately:
+
 ```sh
 # Frontend only
 pnpm dev
@@ -83,6 +89,19 @@ pnpm run db:migrate
 pnpm build
 ```
 
+### Code Quality
+
+```sh
+# Lint JavaScript and Vue files
+pnpm run lint
+
+# Auto-fix linting issues
+pnpm run lint:fix
+
+# Format code with Prettier
+pnpm run format
+```
+
 ## Deployment
 
 This application is configured for deployment on Vercel with automatic database migrations.
@@ -94,6 +113,7 @@ This application is configured for deployment on Vercel with automatic database 
    - Connect it to your Vercel project in the Storage tab
 
 2. **Deploy**:
+
    ```sh
    git add .
    git commit -m "Deploy Singapore Food Tracker"
@@ -107,6 +127,7 @@ This application is configured for deployment on Vercel with automatic database 
 ### Environment Variables
 
 The following environment variables are automatically set by Vercel when you connect your Neon database:
+
 - `DATABASE_URL`: PostgreSQL connection string
 
 ## Project Structure

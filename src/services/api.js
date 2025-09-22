@@ -7,8 +7,8 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 })
 
 // Places API
@@ -44,9 +44,8 @@ export const placesApi = {
       console.error('Error adding places batch:', error)
       throw error
     }
-  }
+  },
 }
-
 
 // Health check
 export const healthApi = {
@@ -58,7 +57,7 @@ export const healthApi = {
       console.error('Backend server not available:', error)
       return null
     }
-  }
+  },
 }
 
 export default api

@@ -1,19 +1,19 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
-const fetch = require('node-fetch');
-require('dotenv').config();
+const express = require('express')
+const cors = require('cors')
+const fs = require('fs')
+const path = require('path')
+const fetch = require('node-fetch')
+require('dotenv').config()
 
 // Import database utilities
-const db = require('../database/db');
+const db = require('../database/db')
 
-const app = express();
-const port = 3001;
+const app = express()
+const port = 3001
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors())
+app.use(express.json())
 
 // Database connection will be handled by the db module
 
@@ -22,32 +22,32 @@ app.use(express.json());
 // Get all places
 app.get('/api/places', async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM places ORDER BY created_at DESC');
-    res.json(result.rows);
+    const result = await db.query('SELECT * FROM places ORDER BY created_at DESC')
+    res.json(result.rows)
   } catch (error) {
-    console.error('Error fetching places:', error);
-    res.status(500).json({ error: 'Failed to fetch places' });
+    console.error('Error fetching places:', error)
+    res.status(500).json({ error: 'Failed to fetch places' })
   }
-});
+})
 
 // Add a new place
 app.post('/api/places', async (req, res) => {
   try {
-    const newPlace = req.body;
-    
+    const newPlace = req.body
+
     // Validate required fields
     if (!newPlace.name || !newPlace.address || !newPlace.coords) {
-      return res.status(400).json({ error: 'Missing required fields: name, address, coords' });
+      return res.status(400).json({ error: 'Missing required fields: name, address, coords' })
     }
 
     // Check if place already exists
     const existingPlace = await db.query(
       'SELECT id FROM places WHERE LOWER(name) = LOWER($1) AND LOWER(address) = LOWER($2)',
       [newPlace.name, newPlace.address]
-    );
+    )
 
     if (existingPlace.rows.length > 0) {
-      return res.status(409).json({ error: 'Place already exists' });
+      return res.status(409).json({ error: 'Place already exists' })
     }
 
     // Insert new place
@@ -62,28 +62,28 @@ app.post('/api/places', async (req, res) => {
         newPlace.description || null,
         newPlace.cuisine_type || null,
         newPlace.price_range || null,
-        newPlace.rating || null
+        newPlace.rating || null,
       ]
-    );
+    )
 
-    res.json({ message: 'Place added successfully', place: result.rows[0] });
+    res.json({ message: 'Place added successfully', place: result.rows[0] })
   } catch (error) {
-    console.error('Error adding place:', error);
-    res.status(500).json({ error: 'Failed to save place' });
+    console.error('Error adding place:', error)
+    res.status(500).json({ error: 'Failed to save place' })
   }
-});
+})
 
 // Save multiple places (for CSV import)
 app.post('/api/places/batch', async (req, res) => {
   try {
-    const { places } = req.body;
-    
+    const { places } = req.body
+
     if (!Array.isArray(places)) {
-      return res.status(400).json({ error: 'Places must be an array' });
+      return res.status(400).json({ error: 'Places must be an array' })
     }
 
-    let addedCount = 0;
-    let skippedCount = 0;
+    let addedCount = 0
+    let skippedCount = 0
 
     // Process each place
     for (const newPlace of places) {
@@ -92,7 +92,7 @@ app.post('/api/places/batch', async (req, res) => {
         const existingPlace = await db.query(
           'SELECT id FROM places WHERE LOWER(name) = LOWER($1) AND LOWER(address) = LOWER($2)',
           [newPlace.name, newPlace.address]
-        );
+        )
 
         if (existingPlace.rows.length === 0) {
           // Insert new place
@@ -106,50 +106,50 @@ app.post('/api/places/batch', async (req, res) => {
               newPlace.description || null,
               newPlace.cuisine_type || null,
               newPlace.price_range || null,
-              newPlace.rating || null
+              newPlace.rating || null,
             ]
-          );
-          addedCount++;
+          )
+          addedCount++
         } else {
-          skippedCount++;
+          skippedCount++
         }
       } catch (error) {
-        console.error(`Error processing place ${newPlace.name}:`, error);
-        skippedCount++;
+        console.error(`Error processing place ${newPlace.name}:`, error)
+        skippedCount++
       }
     }
 
-    res.json({ 
-      message: `Added ${addedCount} new places`, 
+    res.json({
+      message: `Added ${addedCount} new places`,
       added: addedCount,
-      skipped: skippedCount
-    });
+      skipped: skippedCount,
+    })
   } catch (error) {
-    console.error('Error in batch import:', error);
-    res.status(500).json({ error: 'Failed to save places' });
+    console.error('Error in batch import:', error)
+    res.status(500).json({ error: 'Failed to save places' })
   }
-});
+})
 
 // Get user preferences (visited/want to visit)
 app.get('/api/preferences', async (req, res) => {
   try {
     const result = await db.query(
       'SELECT p.*, pr.visited, pr.want_to_visit, pr.notes FROM places p LEFT JOIN preferences pr ON p.id = pr.place_id ORDER BY p.created_at DESC'
-    );
-    res.json(result.rows);
+    )
+    res.json(result.rows)
   } catch (error) {
-    console.error('Error fetching preferences:', error);
-    res.status(500).json({ error: 'Failed to fetch preferences' });
+    console.error('Error fetching preferences:', error)
+    res.status(500).json({ error: 'Failed to fetch preferences' })
   }
-});
+})
 
 // Save user preferences
 app.post('/api/preferences', async (req, res) => {
   try {
-    const { placeId, visited, wantToVisit, notes } = req.body;
-    
+    const { placeId, visited, wantToVisit, notes } = req.body
+
     if (!placeId) {
-      return res.status(400).json({ error: 'Place ID is required' });
+      return res.status(400).json({ error: 'Place ID is required' })
     }
 
     // Use UPSERT to insert or update preferences
@@ -164,82 +164,82 @@ app.post('/api/preferences', async (req, res) => {
          updated_at = CURRENT_TIMESTAMP
        RETURNING *`,
       [placeId, 'default_user', visited || false, wantToVisit || false, notes || null]
-    );
+    )
 
-    res.json({ message: 'Preferences saved successfully', preference: result.rows[0] });
+    res.json({ message: 'Preferences saved successfully', preference: result.rows[0] })
   } catch (error) {
-    console.error('Error saving preferences:', error);
-    res.status(500).json({ error: 'Failed to save preferences' });
+    console.error('Error saving preferences:', error)
+    res.status(500).json({ error: 'Failed to save preferences' })
   }
-});
+})
 
 // Proxy endpoint for Google Maps URLs (to bypass CORS)
 app.get('/api/proxy/google-maps', async (req, res) => {
-  const { url } = req.query;
-  
+  const { url } = req.query
+
   if (!url) {
-    return res.status(400).json({ error: 'URL parameter is required' });
+    return res.status(400).json({ error: 'URL parameter is required' })
   }
-  
+
   try {
-    console.log(`🌐 Proxying request to: ${url}`);
-    
+    console.log(`🌐 Proxying request to: ${url}`)
+
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
-    
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      },
+    })
+
     if (!response.ok) {
-      return res.status(response.status).json({ 
-        error: `Failed to fetch URL: ${response.status}` 
-      });
+      return res.status(response.status).json({
+        error: `Failed to fetch URL: ${response.status}`,
+      })
     }
-    
-    const html = await response.text();
-    console.log(`📄 Fetched ${html.length} characters of HTML`);
-    
-    res.json({ 
-      success: true, 
+
+    const html = await response.text()
+    console.log(`📄 Fetched ${html.length} characters of HTML`)
+
+    res.json({
+      success: true,
       html: html,
       url: url,
-      length: html.length
-    });
-    
+      length: html.length,
+    })
   } catch (error) {
-    console.error('Proxy error:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch URL', 
-      details: error.message 
-    });
+    console.error('Proxy error:', error)
+    res.status(500).json({
+      error: 'Failed to fetch URL',
+      details: error.message,
+    })
   }
-});
+})
 
 // Health check
 app.get('/api/health', async (req, res) => {
   try {
-    const dbHealth = await db.healthCheck();
-    res.json({ 
-      status: 'OK', 
+    const dbHealth = await db.healthCheck()
+    res.json({
+      status: 'OK',
       timestamp: new Date().toISOString(),
-      database: dbHealth
-    });
+      database: dbHealth,
+    })
   } catch (error) {
-    res.status(500).json({ 
-      status: 'ERROR', 
+    res.status(500).json({
+      status: 'ERROR',
       timestamp: new Date().toISOString(),
-      error: error.message 
-    });
+      error: error.message,
+    })
   }
-});
+})
 
 // Start server (only in development)
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
-    console.log(`🚀 Backend server running at http://localhost:${port}`);
-    console.log(`📁 Data directory: ${dataDir}`);
-  });
+    console.log(`🚀 Backend server running at http://localhost:${port}`)
+    console.log(`📁 Data directory: ${dataDir}`)
+  })
 }
 
 // Export the app for serverless deployment
-module.exports = app;
+module.exports = app

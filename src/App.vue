@@ -2,30 +2,30 @@
   <div class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600">
     <div class="flex h-screen">
       <!-- Mobile toggle button -->
-      <button 
+      <button
         @click="toggleSidebar"
         class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2 rounded-md shadow-lg hover:bg-gray-50"
       >
         ☰
       </button>
-      
+
       <!-- Mobile backdrop -->
-      <div 
+      <div
         v-if="showSidebar"
         @click="toggleSidebar"
         class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[80]"
       ></div>
-      
+
       <!-- Sidebar -->
-      <div 
+      <div
         :class="[
           'transition-transform duration-300 ease-in-out',
           showSidebar ? 'translate-x-0' : '-translate-x-full',
-          'lg:translate-x-0'
+          'lg:translate-x-0',
         ]"
         class="lg:relative fixed lg:static top-0 left-0 z-[90] flex-shrink-0"
       >
-        <Sidebar 
+        <Sidebar
           :places="places"
           :search-query="searchQuery"
           :selected-tier="selectedTier"
@@ -36,17 +36,14 @@
           @view-all="showViewAllModal = true"
         />
       </div>
-      
+
       <!-- Map Container -->
       <div class="flex-1 relative z-[1]">
-        <MapContainer 
-          :places="places"
-          :loading="loading"
-        />
+        <MapContainer :places="places" :loading="loading" />
       </div>
-      
+
       <!-- View All Modal -->
-      <ViewAllModal 
+      <ViewAllModal
         :is-open="showViewAllModal"
         :places="places"
         @close="showViewAllModal = false"
@@ -68,22 +65,15 @@ export default {
   components: {
     Sidebar,
     MapContainer,
-    ViewAllModal
+    ViewAllModal,
   },
   setup() {
     const showSidebar = ref(true)
     const showViewAllModal = ref(false)
-    
-    const {
-      places,
-      searchQuery,
-      selectedTier,
-      loading,
-      addPlace,
-      focusOnPlace,
-      loadSavedData
-    } = useFoodTracker()
-    
+
+    const { places, searchQuery, selectedTier, loading, addPlace, focusOnPlace, loadSavedData } =
+      useFoodTracker()
+
     const toggleSidebar = () => {
       showSidebar.value = !showSidebar.value
     }
@@ -114,8 +104,8 @@ export default {
       selectedTier,
       loading,
       handlePlaceAdded,
-      focusOnPlace
+      focusOnPlace,
     }
-  }
+  },
 }
 </script>

@@ -16,12 +16,12 @@ export default {
   props: {
     places: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     loading: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   setup(props, { emit }) {
     const mapElement = ref(null)
@@ -38,42 +38,43 @@ export default {
       const sw = L.latLng(1.144, 103.535)
       const ne = L.latLng(1.494, 104.502)
       const bounds = L.latLngBounds(sw, ne)
-      
+
       map.value = L.map('map', {
         center: L.latLng(1.3521, 103.8198),
-        zoom: 12
+        zoom: 12,
       })
-      
+
       map.value.setMaxBounds(bounds)
-      
+
       const basemap = L.tileLayer('https://www.onemap.gov.sg/maps/tiles/Default/{z}/{x}/{y}.png', {
         detectRetina: true,
         maxZoom: 19,
         minZoom: 11,
-        attribution: '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" style="height:20px;width:20px;"/>&nbsp;<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap</a>&nbsp;&copy;&nbsp;contributors&nbsp;&#124;&nbsp;<a href="https://www.sla.gov.sg/" target="_blank" rel="noopener noreferrer">Singapore Land Authority</a>'
+        attribution:
+          '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" style="height:20px;width:20px;"/>&nbsp;<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap</a>&nbsp;&copy;&nbsp;contributors&nbsp;&#124;&nbsp;<a href="https://www.sla.gov.sg/" target="_blank" rel="noopener noreferrer">Singapore Land Authority</a>',
       })
-      
+
       basemap.addTo(map.value)
     }
 
     // Get marker icon based on tier
     const getMarkerIcon = (tier) => {
       const tierColors = {
-        'S': '#60a5fa', // light blue
-        'A': '#3b82f6', // blue
-        'B': '#2563eb', // darker blue
-        'C': '#1d4ed8', // even darker blue
-        'D': '#1e40af', // dark blue
-        'F': '#1e3a8a'  // darkest blue
+        S: '#60a5fa', // light blue
+        A: '#3b82f6', // blue
+        B: '#2563eb', // darker blue
+        C: '#1d4ed8', // even darker blue
+        D: '#1e40af', // dark blue
+        F: '#1e3a8a', // darkest blue
       }
-      
+
       const color = tierColors[tier] || '#6b7280' // gray for unknown
 
       return L.divIcon({
         html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
         className: 'custom-marker',
         iconSize: [21, 21],
-        iconAnchor: [10, 10]
+        iconAnchor: [10, 10],
       })
     }
 
@@ -82,7 +83,7 @@ export default {
       if (!map.value || !place.coords) return
 
       const marker = L.marker([place.coords.lat, place.coords.lng], {
-        icon: getMarkerIcon(place.tier)
+        icon: getMarkerIcon(place.tier),
       }).addTo(map.value)
 
       const popupContent = `
@@ -103,7 +104,7 @@ export default {
 
     // Update marker icon
     const updateMarkerIcon = (place) => {
-      const markerData = markers.value.find(m => m.place.id === place.id)
+      const markerData = markers.value.find((m) => m.place.id === place.id)
       if (markerData) {
         const newIcon = getMarkerIcon(place.tier)
         markerData.marker.setIcon(newIcon)
@@ -121,7 +122,7 @@ export default {
     // Add all places as markers
     const addAllMarkers = () => {
       clearMarkers()
-      props.places.forEach(place => {
+      props.places.forEach((place) => {
         if (place.coords) {
           addMarker(place)
         }
@@ -129,15 +130,19 @@ export default {
     }
 
     // Watch for changes in places
-    watch(() => props.places, () => {
-      if (map.value) {
-        addAllMarkers()
-        // Update marker icons for existing markers
-        markers.value.forEach(({ place }) => {
-          updateMarkerIcon(place)
-        })
-      }
-    }, { deep: true })
+    watch(
+      () => props.places,
+      () => {
+        if (map.value) {
+          addAllMarkers()
+          // Update marker icons for existing markers
+          markers.value.forEach(({ place }) => {
+            updateMarkerIcon(place)
+          })
+        }
+      },
+      { deep: true }
+    )
 
     onMounted(() => {
       initMap()
@@ -147,9 +152,9 @@ export default {
     })
 
     return {
-      mapElement
+      mapElement,
     }
-  }
+  },
 }
 </script>
 
@@ -191,8 +196,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :global(.custom-popup .leaflet-popup-content) {

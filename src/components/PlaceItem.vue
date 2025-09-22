@@ -1,33 +1,30 @@
 <template>
-  <Card 
-    :class="[
-      'p-4 mb-3 cursor-pointer transition-all hover:shadow-lg',
-      placeClass
-    ]"
+  <Card
+    :class="['p-4 mb-3 cursor-pointer transition-all hover:shadow-lg', placeClass]"
     @click="$emit('focus-place', place)"
   >
     <div class="space-y-2">
       <div class="font-semibold text-foreground">{{ place.name }}</div>
       <div class="text-sm text-muted-foreground">{{ place.address }}</div>
       <div class="flex gap-2 flex-wrap">
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="default"
           @click.stop="$emit('mark-visited', place.id)"
           class="text-xs"
         >
           ✓ Visited
         </Button>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="secondary"
           @click.stop="$emit('mark-want-to-visit', place.id)"
           class="text-xs"
         >
           ⭐ Want to Visit
         </Button>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="outline"
           @click.stop="$emit('clear-status', place.id)"
           class="text-xs"
@@ -48,28 +45,23 @@ export default {
   name: 'PlaceItem',
   components: {
     Card,
-    Button
+    Button,
   },
   props: {
     place: {
       type: Object,
-      required: true
+      required: true,
     },
     isVisited: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isWantToVisit: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  emits: [
-    'mark-visited',
-    'mark-want-to-visit',
-    'clear-status',
-    'focus-place'
-  ],
+  emits: ['mark-visited', 'mark-want-to-visit', 'clear-status', 'focus-place'],
   setup(props) {
     const placeClass = computed(() => {
       if (props.isVisited) return 'border-l-4 border-l-green-500 bg-green-50'
@@ -78,9 +70,8 @@ export default {
     })
 
     return {
-      placeClass
+      placeClass,
     }
-  }
+  },
 }
 </script>
-
