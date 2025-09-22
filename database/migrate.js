@@ -1,15 +1,28 @@
-const { Client } = require('pg')
-const fs = require('fs')
-const path = require('path')
-require('dotenv').config()
+import { Client } from 'pg'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Database migration script
 async function migrate() {
+  // Check if DATABASE_URL is provided
+  if (!process.env.DATABASE_URL) {
+    console.log('⚠️  DATABASE_URL not found. Skipping database migration.')
+    console.log('💡 This is normal for local development without a database.')
+    return
+  }
+
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
+    ssl: process.env.NODE_ENV === 'production' ? {
       rejectUnauthorized: false,
-    },
+    } : false,
   })
 
   try {
@@ -44,7 +57,7 @@ async function migrate() {
 }
 
 // Run migration if this file is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   migrate()
     .then(() => {
       console.log('🎉 Migration completed successfully!')
@@ -56,4 +69,4 @@ if (require.main === module) {
     })
 }
 
-module.exports = migrate
+export default migrate

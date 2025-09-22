@@ -1,12 +1,14 @@
-const express = require('express')
-const cors = require('cors')
-const fs = require('fs')
-const path = require('path')
-const fetch = require('node-fetch')
-require('dotenv').config()
+import express from 'express'
+import cors from 'cors'
+import fs from 'fs'
+import path from 'path'
+import fetch from 'node-fetch'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 // Import database utilities
-const db = require('../database/db')
+import db from '../database/db.js'
 
 const app = express()
 
@@ -233,4 +235,4 @@ app.get('/api/health', async (req, res) => {
 })
 
 // Export the app for Vercel
-module.exports = app
+export default app

@@ -1,5 +1,7 @@
-const { Client, Pool } = require('pg')
-require('dotenv').config()
+import { Client, Pool } from 'pg'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 // Database connection configuration
 const dbConfig = {
@@ -73,4 +75,4 @@ process.on('SIGTERM', async () => {
   process.exit(0)
 })
 
-module.exports = db
+export default db

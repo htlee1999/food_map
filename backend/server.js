@@ -1,12 +1,14 @@
-const express = require('express')
-const cors = require('cors')
-const fs = require('fs')
-const path = require('path')
-const fetch = require('node-fetch')
-require('dotenv').config()
+import express from 'express'
+import cors from 'cors'
+import fs from 'fs'
+import path from 'path'
+import fetch from 'node-fetch'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 // Import database utilities
-const db = require('../database/db')
+import db from '../database/db.js'
 
 const app = express()
 const port = 3001
@@ -237,9 +239,8 @@ app.get('/api/health', async (req, res) => {
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`🚀 Backend server running at http://localhost:${port}`)
-    console.log(`📁 Data directory: ${dataDir}`)
   })
 }
 
 // Export the app for serverless deployment
-module.exports = app
+export default app
