@@ -44,11 +44,33 @@
           </div>
         </div>
         
+        <div class="space-y-2">
+          <label for="placeTier" class="text-sm font-semibold text-gray-700 flex items-center">
+            <span class="mr-1">⭐</span>
+            Tier Rating *
+          </label>
+          <select
+            id="placeTier"
+            v-model="formData.tier"
+            required
+            :disabled="isLoading"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            <option value="">Select a tier</option>
+            <option value="S">S - Would bring gf's parents</option>
+            <option value="A">A - Worth the Grab ride</option>
+            <option value="B">B - If nearby, why not</option>
+            <option value="C">C - Last resort makan</option>
+            <option value="D">D - Leftovers > this</option>
+            <option value="F">F - Avoid like GST hikes</option>
+          </select>
+        </div>
+        
         <div class="flex gap-3">
           <button 
             type="submit" 
             class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center justify-center"
-            :disabled="isLoading || !formData.name || !formData.address"
+            :disabled="isLoading || !formData.name || !formData.address || !formData.tier"
           >
             <span v-if="isLoading" class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
             <span v-if="!isLoading" class="mr-2">✅</span>
@@ -90,14 +112,15 @@ export default {
   name: 'AddPlaceForm',
   components: {},
   emits: ['place-added'],
-  setup(props, { emit }) {
+  setup(_, { emit }) {
     const isLoading = ref(false)
     const error = ref('')
     const success = ref(false)
     
     const formData = reactive({
       name: '',
-      address: ''
+      address: '',
+      tier: ''
     })
 
     // Geocode address using OneMap API with multiple fallback strategies
@@ -175,7 +198,7 @@ export default {
     }
 
     const handleSubmit = async () => {
-      if (!formData.name.trim() || !formData.address.trim()) {
+      if (!formData.name.trim() || !formData.address.trim() || !formData.tier) {
         error.value = 'Please fill in all required fields'
         return
       }
@@ -195,6 +218,7 @@ export default {
           id: `place_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: formData.name.trim(),
           address: formData.address.trim(),
+          tier: formData.tier,
           coords: {
             lat: coords.lat,
             lng: coords.lng
@@ -231,6 +255,7 @@ export default {
     const resetForm = () => {
       formData.name = ''
       formData.address = ''
+      formData.tier = ''
       error.value = ''
       success.value = false
     }

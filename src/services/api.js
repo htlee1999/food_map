@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:3001/api'
+// Use environment variable for API URL, fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -46,30 +47,6 @@ export const placesApi = {
   }
 }
 
-// Preferences API
-export const preferencesApi = {
-  // Get user preferences
-  async get() {
-    try {
-      const response = await api.get('/preferences')
-      return response.data
-    } catch (error) {
-      console.error('Error fetching preferences:', error)
-      return { visited: [], wantToVisit: [] }
-    }
-  },
-
-  // Save user preferences
-  async save(preferences) {
-    try {
-      const response = await api.post('/preferences', preferences)
-      return response.data
-    } catch (error) {
-      console.error('Error saving preferences:', error)
-      throw error
-    }
-  }
-}
 
 // Health check
 export const healthApi = {

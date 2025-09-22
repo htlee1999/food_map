@@ -27,16 +27,13 @@
       >
         <Sidebar 
           :places="places"
-          :visited-places="visitedPlaces"
-          :want-to-visit-places="wantToVisitPlaces"
           :search-query="searchQuery"
+          :selected-tier="selectedTier"
           @update-search="searchQuery = $event"
-          @upload-csv="handleFileUpload"
+          @update-tier="selectedTier = $event"
           @place-added="handlePlaceAdded"
-          @mark-visited="markAsVisited"
-          @mark-want-to-visit="markAsWantToVisit"
-          @clear-status="clearStatus"
           @focus-place="focusOnPlace"
+          @view-all="showViewAllModal = true"
         />
       </div>
       
@@ -44,13 +41,17 @@
       <div class="flex-1 relative z-[1]">
         <MapContainer 
           :places="places"
-          :visited-places="visitedPlaces"
-          :want-to-visit-places="wantToVisitPlaces"
           :loading="loading"
-          @mark-visited="markAsVisited"
-          @mark-want-to-visit="markAsWantToVisit"
         />
       </div>
+      
+      <!-- View All Modal -->
+      <ViewAllModal 
+        :is-open="showViewAllModal"
+        :places="places"
+        @close="showViewAllModal = false"
+        @select-place="focusOnPlace"
+      />
     </div>
   </div>
 </template>
@@ -59,28 +60,26 @@
 import { ref, onMounted } from 'vue'
 import Sidebar from './components/Sidebar.vue'
 import MapContainer from './components/MapContainer.vue'
+import ViewAllModal from './components/ViewAllModal.vue'
 import { useFoodTracker } from './composables/useFoodTracker'
 
 export default {
   name: 'App',
   components: {
     Sidebar,
-    MapContainer
+    MapContainer,
+    ViewAllModal
   },
   setup() {
     const showSidebar = ref(true)
+    const showViewAllModal = ref(false)
     
     const {
       places,
-      visitedPlaces,
-      wantToVisitPlaces,
       searchQuery,
+      selectedTier,
       loading,
-      handleFileUpload,
       addPlace,
-      markAsVisited,
-      markAsWantToVisit,
-      clearStatus,
       focusOnPlace,
       loadSavedData
     } = useFoodTracker()
@@ -108,17 +107,13 @@ export default {
 
     return {
       showSidebar,
+      showViewAllModal,
       toggleSidebar,
       places,
-      visitedPlaces,
-      wantToVisitPlaces,
       searchQuery,
+      selectedTier,
       loading,
-      handleFileUpload,
       handlePlaceAdded,
-      markAsVisited,
-      markAsWantToVisit,
-      clearStatus,
       focusOnPlace
     }
   }

@@ -5,21 +5,25 @@ const path = require('path');
 const fetch = require('node-fetch');
 
 const app = express();
-const port = 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Ensure data directory exists
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir);
-}
+// For Vercel, we'll use a temporary data storage approach
+// In production, you should use a proper database
+const getDataPath = (filename) => {
+  // In Vercel serverless, we'll use /tmp directory for temporary storage
+  const tmpDir = '/tmp';
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, { recursive: true });
+  }
+  return path.join(tmpDir, filename);
+};
 
 // Helper function to read JSON file
 const readJsonFile = (filename) => {
-  const filePath = path.join(dataDir, filename);
+  const filePath = getDataPath(filename);
   try {
     if (fs.existsSync(filePath)) {
       const data = fs.readFileSync(filePath, 'utf8');
@@ -34,7 +38,7 @@ const readJsonFile = (filename) => {
 
 // Helper function to write JSON file
 const writeJsonFile = (filename, data) => {
-  const filePath = path.join(dataDir, filename);
+  const filePath = getDataPath(filename);
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     return true;
@@ -184,13 +188,5 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Start server (only in development)
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => {
-    console.log(`🚀 Backend server running at http://localhost:${port}`);
-    console.log(`📁 Data directory: ${dataDir}`);
-  });
-}
-
-// Export the app for serverless deployment
+// Export the app for Vercel
 module.exports = app;

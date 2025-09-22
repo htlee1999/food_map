@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 export default {
   name: 'MapContainer',
@@ -18,23 +18,11 @@ export default {
       type: Array,
       default: () => []
     },
-    visitedPlaces: {
-      type: Set,
-      default: () => new Set()
-    },
-    wantToVisitPlaces: {
-      type: Set,
-      default: () => new Set()
-    },
     loading: {
       type: Boolean,
       default: false
     }
   },
-  emits: [
-    'mark-visited',
-    'mark-want-to-visit'
-  ],
   setup(props, { emit }) {
     const mapElement = ref(null)
     const map = ref(null)
@@ -68,14 +56,18 @@ export default {
       basemap.addTo(map.value)
     }
 
-    // Get marker icon based on status
-    const getMarkerIcon = (placeId) => {
-      let color = '#3388ff' // default blue
-      if (props.visitedPlaces.has(placeId)) {
-        color = '#4caf50' // green for visited
-      } else if (props.wantToVisitPlaces.has(placeId)) {
-        color = '#ff9800' // orange for want to visit
+    // Get marker icon based on tier
+    const getMarkerIcon = (tier) => {
+      const tierColors = {
+        'S': '#60a5fa', // light blue
+        'A': '#3b82f6', // blue
+        'B': '#2563eb', // darker blue
+        'C': '#1d4ed8', // even darker blue
+        'D': '#1e40af', // dark blue
+        'F': '#1e3a8a'  // darkest blue
       }
+      
+      const color = tierColors[tier] || '#6b7280' // gray for unknown
 
       return L.divIcon({
         html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
@@ -90,16 +82,15 @@ export default {
       if (!map.value || !place.coords) return
 
       const marker = L.marker([place.coords.lat, place.coords.lng], {
-        icon: getMarkerIcon(place.id)
+        icon: getMarkerIcon(place.tier)
       }).addTo(map.value)
 
       const popupContent = `
         <div class="custom-popup">
           <div class="popup-name">${place.name}</div>
           <div class="popup-address">${place.address}</div>
-          <div class="popup-actions">
-            <button class="btn btn-visited" onclick="window.markPlaceFromPopup('${place.id}', 'visited')">✓ Visited</button>
-            <button class="btn btn-want" onclick="window.markPlaceFromPopup('${place.id}', 'want')">⭐ Want</button>
+          <div class="popup-tier">
+            <span class="tier-badge tier-${place.tier}">${place.tier}</span>
           </div>
         </div>
       `
@@ -111,10 +102,10 @@ export default {
     }
 
     // Update marker icon
-    const updateMarkerIcon = (placeId) => {
-      const markerData = markers.value.find(m => m.place.id === placeId)
+    const updateMarkerIcon = (place) => {
+      const markerData = markers.value.find(m => m.place.id === place.id)
       if (markerData) {
-        const newIcon = getMarkerIcon(placeId)
+        const newIcon = getMarkerIcon(place.tier)
         markerData.marker.setIcon(newIcon)
       }
     }
@@ -141,30 +132,14 @@ export default {
     watch(() => props.places, () => {
       if (map.value) {
         addAllMarkers()
+        // Update marker icons for existing markers
+        markers.value.forEach(({ place }) => {
+          updateMarkerIcon(place)
+        })
       }
     }, { deep: true })
 
-    // Watch for changes in place status
-    watch(() => [props.visitedPlaces, props.wantToVisitPlaces], () => {
-      markers.value.forEach(({ place }) => {
-        updateMarkerIcon(place.id)
-      })
-    }, { deep: true })
-
-    // Global functions for popup buttons
-    const setupGlobalFunctions = () => {
-      window.markPlaceFromPopup = (placeId, type) => {
-        if (type === 'visited') {
-          emit('mark-visited', placeId)
-        } else if (type === 'want') {
-          emit('mark-want-to-visit', placeId)
-        }
-      }
-    }
-
-    onMounted(async () => {
-      await nextTick()
-      setupGlobalFunctions()
+    onMounted(() => {
       initMap()
       if (props.places.length > 0) {
         addAllMarkers()
@@ -237,31 +212,47 @@ export default {
   margin-bottom: 10px;
 }
 
-:global(.popup-actions) {
-  display: flex;
-  gap: 5px;
+:global(.popup-tier) {
+  margin-top: 8px;
 }
 
-:global(.popup-actions .btn) {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 20px;
+:global(.tier-badge) {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
   font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: bold;
+  text-align: center;
+  min-width: 20px;
 }
 
-:global(.popup-actions .btn-visited) {
-  background: #4caf50;
+:global(.tier-S) {
+  background: #60a5fa;
   color: white;
 }
 
-:global(.popup-actions .btn-want) {
-  background: #ff9800;
+:global(.tier-A) {
+  background: #3b82f6;
   color: white;
 }
 
-:global(.popup-actions .btn:hover) {
-  transform: scale(1.05);
+:global(.tier-B) {
+  background: #2563eb;
+  color: white;
+}
+
+:global(.tier-C) {
+  background: #1d4ed8;
+  color: white;
+}
+
+:global(.tier-D) {
+  background: #1e40af;
+  color: white;
+}
+
+:global(.tier-F) {
+  background: #1e3a8a;
+  color: white;
 }
 </style>
