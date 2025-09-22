@@ -3,6 +3,10 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
+require('dotenv').config();
+
+// Import database utilities
+const db = require('../database/db');
 
 const app = express();
 const port = 3001;
@@ -11,128 +15,160 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Ensure data directory exists
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir);
-}
-
-// Helper function to read JSON file
-const readJsonFile = (filename) => {
-  const filePath = path.join(dataDir, filename);
-  try {
-    if (fs.existsSync(filePath)) {
-      const data = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(data);
-    }
-    return [];
-  } catch (error) {
-    console.error(`Error reading ${filename}:`, error);
-    return [];
-  }
-};
-
-// Helper function to write JSON file
-const writeJsonFile = (filename, data) => {
-  const filePath = path.join(dataDir, filename);
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    return true;
-  } catch (error) {
-    console.error(`Error writing ${filename}:`, error);
-    return false;
-  }
-};
+// Database connection will be handled by the db module
 
 // Routes
 
 // Get all places
-app.get('/api/places', (req, res) => {
-  const places = readJsonFile('places.json');
-  res.json(places);
+app.get('/api/places', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM places ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching places:', error);
+    res.status(500).json({ error: 'Failed to fetch places' });
+  }
 });
 
 // Add a new place
-app.post('/api/places', (req, res) => {
-  const newPlace = req.body;
-  
-  // Validate required fields
-  if (!newPlace.name || !newPlace.address || !newPlace.coords) {
-    return res.status(400).json({ error: 'Missing required fields: name, address, coords' });
-  }
+app.post('/api/places', async (req, res) => {
+  try {
+    const newPlace = req.body;
+    
+    // Validate required fields
+    if (!newPlace.name || !newPlace.address || !newPlace.coords) {
+      return res.status(400).json({ error: 'Missing required fields: name, address, coords' });
+    }
 
-  // Read existing places
-  const places = readJsonFile('places.json');
-  
-  // Check if place already exists
-  const exists = places.some(place => 
-    place.name.toLowerCase() === newPlace.name.toLowerCase() && 
-    place.address.toLowerCase() === newPlace.address.toLowerCase()
-  );
+    // Check if place already exists
+    const existingPlace = await db.query(
+      'SELECT id FROM places WHERE LOWER(name) = LOWER($1) AND LOWER(address) = LOWER($2)',
+      [newPlace.name, newPlace.address]
+    );
 
-  if (exists) {
-    return res.status(409).json({ error: 'Place already exists' });
-  }
+    if (existingPlace.rows.length > 0) {
+      return res.status(409).json({ error: 'Place already exists' });
+    }
 
-  // Add new place
-  places.push(newPlace);
-  
-  // Save to file
-  if (writeJsonFile('places.json', places)) {
-    res.json({ message: 'Place added successfully', place: newPlace });
-  } else {
+    // Insert new place
+    const result = await db.query(
+      `INSERT INTO places (name, address, coords, description, cuisine_type, price_range, rating) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       RETURNING *`,
+      [
+        newPlace.name,
+        newPlace.address,
+        JSON.stringify(newPlace.coords),
+        newPlace.description || null,
+        newPlace.cuisine_type || null,
+        newPlace.price_range || null,
+        newPlace.rating || null
+      ]
+    );
+
+    res.json({ message: 'Place added successfully', place: result.rows[0] });
+  } catch (error) {
+    console.error('Error adding place:', error);
     res.status(500).json({ error: 'Failed to save place' });
   }
 });
 
 // Save multiple places (for CSV import)
-app.post('/api/places/batch', (req, res) => {
-  const { places } = req.body;
-  
-  if (!Array.isArray(places)) {
-    return res.status(400).json({ error: 'Places must be an array' });
-  }
+app.post('/api/places/batch', async (req, res) => {
+  try {
+    const { places } = req.body;
+    
+    if (!Array.isArray(places)) {
+      return res.status(400).json({ error: 'Places must be an array' });
+    }
 
-  // Read existing places
-  const existingPlaces = readJsonFile('places.json');
-  
-  // Filter out duplicates
-  const newPlaces = places.filter(newPlace => 
-    !existingPlaces.some(existing => 
-      existing.name.toLowerCase() === newPlace.name.toLowerCase() && 
-      existing.address.toLowerCase() === newPlace.address.toLowerCase()
-    )
-  );
+    let addedCount = 0;
+    let skippedCount = 0;
 
-  // Add new places
-  const allPlaces = [...existingPlaces, ...newPlaces];
-  
-  // Save to file
-  if (writeJsonFile('places.json', allPlaces)) {
+    // Process each place
+    for (const newPlace of places) {
+      try {
+        // Check if place already exists
+        const existingPlace = await db.query(
+          'SELECT id FROM places WHERE LOWER(name) = LOWER($1) AND LOWER(address) = LOWER($2)',
+          [newPlace.name, newPlace.address]
+        );
+
+        if (existingPlace.rows.length === 0) {
+          // Insert new place
+          await db.query(
+            `INSERT INTO places (name, address, coords, description, cuisine_type, price_range, rating) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [
+              newPlace.name,
+              newPlace.address,
+              JSON.stringify(newPlace.coords),
+              newPlace.description || null,
+              newPlace.cuisine_type || null,
+              newPlace.price_range || null,
+              newPlace.rating || null
+            ]
+          );
+          addedCount++;
+        } else {
+          skippedCount++;
+        }
+      } catch (error) {
+        console.error(`Error processing place ${newPlace.name}:`, error);
+        skippedCount++;
+      }
+    }
+
     res.json({ 
-      message: `Added ${newPlaces.length} new places`, 
-      total: allPlaces.length,
-      added: newPlaces.length,
-      skipped: places.length - newPlaces.length
+      message: `Added ${addedCount} new places`, 
+      added: addedCount,
+      skipped: skippedCount
     });
-  } else {
+  } catch (error) {
+    console.error('Error in batch import:', error);
     res.status(500).json({ error: 'Failed to save places' });
   }
 });
 
 // Get user preferences (visited/want to visit)
-app.get('/api/preferences', (req, res) => {
-  const preferences = readJsonFile('preferences.json');
-  res.json(preferences);
+app.get('/api/preferences', async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT p.*, pr.visited, pr.want_to_visit, pr.notes FROM places p LEFT JOIN preferences pr ON p.id = pr.place_id ORDER BY p.created_at DESC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching preferences:', error);
+    res.status(500).json({ error: 'Failed to fetch preferences' });
+  }
 });
 
 // Save user preferences
-app.post('/api/preferences', (req, res) => {
-  const preferences = req.body;
-  
-  if (writeJsonFile('preferences.json', preferences)) {
-    res.json({ message: 'Preferences saved successfully' });
-  } else {
+app.post('/api/preferences', async (req, res) => {
+  try {
+    const { placeId, visited, wantToVisit, notes } = req.body;
+    
+    if (!placeId) {
+      return res.status(400).json({ error: 'Place ID is required' });
+    }
+
+    // Use UPSERT to insert or update preferences
+    const result = await db.query(
+      `INSERT INTO preferences (place_id, user_id, visited, want_to_visit, notes) 
+       VALUES ($1, $2, $3, $4, $5) 
+       ON CONFLICT (place_id, user_id) 
+       DO UPDATE SET 
+         visited = EXCLUDED.visited,
+         want_to_visit = EXCLUDED.want_to_visit,
+         notes = EXCLUDED.notes,
+         updated_at = CURRENT_TIMESTAMP
+       RETURNING *`,
+      [placeId, 'default_user', visited || false, wantToVisit || false, notes || null]
+    );
+
+    res.json({ message: 'Preferences saved successfully', preference: result.rows[0] });
+  } catch (error) {
+    console.error('Error saving preferences:', error);
     res.status(500).json({ error: 'Failed to save preferences' });
   }
 });
@@ -180,8 +216,21 @@ app.get('/api/proxy/google-maps', async (req, res) => {
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbHealth = await db.healthCheck();
+    res.json({ 
+      status: 'OK', 
+      timestamp: new Date().toISOString(),
+      database: dbHealth
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'ERROR', 
+      timestamp: new Date().toISOString(),
+      error: error.message 
+    });
+  }
 });
 
 // Start server (only in development)
