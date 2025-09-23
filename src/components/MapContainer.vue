@@ -4,12 +4,31 @@
       <div class="spinner"></div>
       <div>Loading map and places...</div>
     </div>
+    <div v-if="!googleMapsLoaded && !googleMapsError" class="loading">
+      <div class="spinner"></div>
+      <div>Loading Google Maps...</div>
+    </div>
+    <div v-if="googleMapsError" class="error-message">
+      <div class="error-icon">⚠️</div>
+      <div class="error-text">
+        <h3>Google Maps API Error</h3>
+        <p>{{ googleMapsError }}</p>
+        <p class="error-instructions">
+          To fix this issue:
+          <br>1. Get your Google Maps API key from <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
+          <br>2. Create a <code>.env.local</code> file in your project root
+          <br>3. Add <code>VITE_GOOGLE_MAP_API=your_actual_api_key_here</code> to the file
+          <br>4. Enable Maps JavaScript API and Geocoding API
+          <br>5. Restart your development server
+        </p>
+      </div>
+    </div>
     <div ref="mapElement" id="map"></div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 
 export default {
   name: 'MapContainer',
@@ -27,34 +46,40 @@ export default {
     const mapElement = ref(null)
     const map = ref(null)
     const markers = ref([])
+    const googleMapsLoaded = ref(false)
+    const googleMapsError = ref(null)
 
-    // Initialize map
+    // Initialize Google Maps
     const initMap = () => {
-      if (!window.L) {
-        console.error('Leaflet not loaded')
+      if (!window.google || !window.google.maps) {
+        console.error('Google Maps not loaded')
         return
       }
 
-      const sw = L.latLng(1.144, 103.535)
-      const ne = L.latLng(1.494, 104.502)
-      const bounds = L.latLngBounds(sw, ne)
+      // Singapore bounds
+      const singaporeBounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(1.144, 103.535), // Southwest
+        new google.maps.LatLng(1.494, 104.502)  // Northeast
+      )
 
-      map.value = L.map('map', {
-        center: L.latLng(1.3521, 103.8198),
+      map.value = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 1.3521, lng: 103.8198 }, // Singapore center
         zoom: 12,
+        restriction: {
+          latLngBounds: singaporeBounds,
+          strictBounds: false,
+        },
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
       })
 
-      map.value.setMaxBounds(bounds)
-
-      const basemap = L.tileLayer('https://www.onemap.gov.sg/maps/tiles/Default/{z}/{x}/{y}.png', {
-        detectRetina: true,
-        maxZoom: 19,
-        minZoom: 11,
-        attribution:
-          '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" style="height:20px;width:20px;"/>&nbsp;<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap</a>&nbsp;&copy;&nbsp;contributors&nbsp;&#124;&nbsp;<a href="https://www.sla.gov.sg/" target="_blank" rel="noopener noreferrer">Singapore Land Authority</a>',
-      })
-
-      basemap.addTo(map.value)
+      googleMapsLoaded.value = true
     }
 
     // Get marker icon based on tier
@@ -70,34 +95,46 @@ export default {
 
       const color = tierColors[tier] || '#6b7280' // gray for unknown
 
-      return L.divIcon({
-        html: `<div style="background-color: ${color}; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
-        className: 'custom-marker',
-        iconSize: [21, 21],
-        iconAnchor: [10, 10],
-      })
+      return {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3,
+        anchor: new google.maps.Point(0, 0)
+      }
     }
 
     // Add marker to map
     const addMarker = (place) => {
       if (!map.value || !place.coords) return
 
-      const marker = L.marker([place.coords.lat, place.coords.lng], {
+      const marker = new google.maps.Marker({
+        position: { lat: place.coords.lat, lng: place.coords.lng },
+        map: map.value,
         icon: getMarkerIcon(place.tier),
-      }).addTo(map.value)
+        title: place.name,
+        animation: google.maps.Animation.DROP
+      })
 
-      const popupContent = `
-        <div class="custom-popup">
-          <div class="popup-name">${place.name}</div>
-          <div class="popup-address">${place.address}</div>
-          <div class="popup-tier">
-            <span class="tier-badge tier-${place.tier}">${place.tier}</span>
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <div class="custom-popup">
+            <div class="popup-name">${place.name}</div>
+            <div class="popup-address">${place.address}</div>
+            <div class="popup-tier">
+              <span class="tier-badge tier-${place.tier}">${place.tier}</span>
+            </div>
           </div>
-        </div>
-      `
+        `
+      })
 
-      marker.bindPopup(popupContent)
-      markers.value.push({ marker, place })
+      marker.addListener('click', () => {
+        infoWindow.open(map.value, marker)
+      })
+
+      markers.value.push({ marker, place, infoWindow })
 
       return marker
     }
@@ -113,8 +150,9 @@ export default {
 
     // Clear all markers
     const clearMarkers = () => {
-      markers.value.forEach(({ marker }) => {
-        map.value.removeLayer(marker)
+      markers.value.forEach(({ marker, infoWindow }) => {
+        marker.setMap(null)
+        infoWindow.close()
       })
       markers.value = []
     }
@@ -127,6 +165,35 @@ export default {
           addMarker(place)
         }
       })
+    }
+
+    // Focus on a specific place
+    const focusOnPlace = (place) => {
+      if (!map.value || !place.coords) return
+
+      const position = { lat: place.coords.lat, lng: place.coords.lng }
+      
+      map.value.setCenter(position)
+      map.value.setZoom(16)
+
+      // Find and open the info window for this place
+      const markerData = markers.value.find((m) => m.place.id === place.id)
+      if (markerData) {
+        markerData.infoWindow.open(map.value, markerData.marker)
+      }
+    }
+
+    // Listen for Google Maps loaded event
+    const handleGoogleMapsLoaded = (event) => {
+      if (event.detail && event.detail.error) {
+        googleMapsError.value = event.detail.error
+        return
+      }
+      
+      initMap()
+      if (props.places.length > 0) {
+        addAllMarkers()
+      }
     }
 
     // Watch for changes in places
@@ -145,14 +212,29 @@ export default {
     )
 
     onMounted(() => {
-      initMap()
-      if (props.places.length > 0) {
-        addAllMarkers()
+      // Listen for Google Maps loaded event
+      window.addEventListener('googleMapsLoaded', handleGoogleMapsLoaded)
+      
+      // If Google Maps is already loaded, initialize immediately
+      if (window.google && window.google.maps) {
+        handleGoogleMapsLoaded()
       }
     })
 
+    onUnmounted(() => {
+      window.removeEventListener('googleMapsLoaded', handleGoogleMapsLoaded)
+    })
+
+    // Expose focusOnPlace method to parent component
+    const focusOnPlaceHandler = (place) => {
+      focusOnPlace(place)
+    }
+
     return {
       mapElement,
+      googleMapsLoaded,
+      googleMapsError,
+      focusOnPlace: focusOnPlaceHandler,
     }
   },
 }
@@ -263,5 +345,59 @@ export default {
 :global(.tier-F) {
   background: #1e3a8a;
   color: white;
+}
+
+.error-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.error-text h3 {
+  color: #dc2626;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.error-text p {
+  color: #374151;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.error-instructions {
+  background: #fef3c7;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.error-instructions a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.error-instructions code {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #1f2937;
 }
 </style>

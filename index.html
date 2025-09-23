@@ -5,8 +5,45 @@
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Singapore Food Places Tracker</title>
-    <link rel="stylesheet" href="https://www.onemap.gov.sg/web-assets/libs/leaflet/leaflet.css" />
-    <script src="https://www.onemap.gov.sg/web-assets/libs/leaflet/onemap-leaflet.js"></script>
+    <!-- Google Maps JavaScript API -->
+    <script type="module">
+      // Load Google Maps API with your API key from environment variable
+      const GOOGLE_MAP_API_KEY = import.meta.env.VITE_GOOGLE_MAP_API;
+      
+      function loadGoogleMaps() {
+        if (!GOOGLE_MAP_API_KEY) {
+          console.warn('⚠️ Google Maps API key not configured. Please set VITE_GOOGLE_MAP_API in your .env.local file');
+          // Still dispatch the event so the app doesn't hang
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('googleMapsLoaded', { detail: { error: 'API key not configured. Please set VITE_GOOGLE_MAP_API in your .env.local file' } }));
+          }, 1000);
+          return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAP_API_KEY}&libraries=places&callback=initGoogleMaps`;
+        script.async = true;
+        script.defer = true;
+        
+        // Add error handling for script loading
+        script.onerror = function() {
+          console.error('❌ Failed to load Google Maps API script');
+          window.dispatchEvent(new CustomEvent('googleMapsLoaded', { detail: { error: 'Failed to load Google Maps API. Please check your API key and network connection.' } }));
+        };
+        
+        document.head.appendChild(script);
+      }
+      
+      // Initialize Google Maps when loaded
+      window.initGoogleMaps = function() {
+        console.log('✅ Google Maps API loaded successfully');
+        // Dispatch custom event to notify Vue components
+        window.dispatchEvent(new CustomEvent('googleMapsLoaded'));
+      };
+      
+      // Load Google Maps API
+      loadGoogleMaps();
+    </script>
   </head>
   <body>
     <div id="app"></div>

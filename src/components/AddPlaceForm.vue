@@ -1,15 +1,15 @@
 <template>
-  <div class="bg-white border-2 border-gray-200 rounded-xl p-5 shadow-md">
-    <div class="pb-4">
-      <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+  <div class="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-md">
+    <div class="pb-3">
+      <h3 class="text-base font-semibold text-gray-800 flex items-center">
         <span class="mr-2">📍</span>
         Add New Place
       </h3>
     </div>
     <div>
-      <form @submit.prevent="handleSubmit" class="space-y-5">
-        <div class="space-y-2">
-          <label for="placeName" class="text-sm font-semibold text-gray-700 flex items-center">
+      <form @submit.prevent="handleSubmit" class="space-y-3">
+        <div class="space-y-1">
+          <label for="placeName" class="text-xs font-semibold text-gray-700 flex items-center">
             <span class="mr-1">🏪</span>
             Shop/Restaurant Name *
           </label>
@@ -20,12 +20,12 @@
             placeholder="Enter shop or restaurant name"
             required
             :disabled="isLoading"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 text-sm"
           />
         </div>
 
-        <div class="space-y-2">
-          <label for="placeAddress" class="text-sm font-semibold text-gray-700 flex items-center">
+        <div class="space-y-1">
+          <label for="placeAddress" class="text-xs font-semibold text-gray-700 flex items-center">
             <span class="mr-1">📍</span>
             Address *
           </label>
@@ -36,18 +36,18 @@
             placeholder="Enter full address (e.g., 10 Anson Rd, International Plaza, Singapore 079903)"
             required
             :disabled="isLoading"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 text-sm"
           />
           <div
-            class="flex items-start text-xs text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-100"
+            class="flex items-start text-xs text-gray-500 bg-blue-50 p-2 rounded-md border border-blue-100"
           >
-            <span class="mr-2 mt-0.5">💡</span>
+            <span class="mr-1 mt-0.5">💡</span>
             <span>Tips: Include street number, street name, building name, and postal code</span>
           </div>
         </div>
 
-        <div class="space-y-2">
-          <label for="placeTier" class="text-sm font-semibold text-gray-700 flex items-center">
+        <div class="space-y-1">
+          <label for="placeTier" class="text-xs font-semibold text-gray-700 flex items-center">
             <span class="mr-1">⭐</span>
             Tier Rating *
           </label>
@@ -56,7 +56,7 @@
             v-model="formData.tier"
             required
             :disabled="isLoading"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 text-sm"
           >
             <option value="">Select a tier</option>
             <option value="S">S - Would bring gf's parents</option>
@@ -68,17 +68,17 @@
           </select>
         </div>
 
-        <div class="flex gap-3">
+        <div class="flex gap-2">
           <button
             type="submit"
-            class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center justify-center"
+            class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm"
             :disabled="isLoading || !formData.name || !formData.address || !formData.tier"
           >
             <span
               v-if="isLoading"
-              class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+              class="mr-1 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"
             ></span>
-            <span v-if="!isLoading" class="mr-2">✅</span>
+            <span v-if="!isLoading" class="mr-1">✅</span>
             {{ isLoading ? 'Geocoding...' : 'Add Place' }}
           </button>
 
@@ -86,7 +86,7 @@
             type="button"
             @click="resetForm"
             :disabled="isLoading"
-            class="px-4 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm"
+            class="px-3 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm text-sm"
           >
             Clear
           </button>
@@ -95,20 +95,20 @@
 
       <div
         v-if="error"
-        class="mt-4 p-4 bg-red-50 text-red-700 text-sm rounded-xl border-2 border-red-200"
+        class="mt-3 p-3 bg-red-50 text-red-700 text-xs rounded-lg border border-red-200"
       >
         <div class="flex items-start">
-          <span class="mr-2 mt-0.5">⚠️</span>
+          <span class="mr-1 mt-0.5">⚠️</span>
           <div v-html="error.replace(/\n/g, '<br>')"></div>
         </div>
       </div>
 
       <div
         v-if="success"
-        class="mt-4 p-4 bg-green-50 text-green-700 text-sm rounded-xl border-2 border-green-200"
+        class="mt-3 p-3 bg-green-50 text-green-700 text-xs rounded-lg border border-green-200"
       >
         <div class="flex items-center">
-          <span class="mr-2">✅</span>
+          <span class="mr-1">✅</span>
           {{ success }}
         </div>
       </div>
@@ -133,21 +133,28 @@ export default {
       tier: '',
     })
 
-    // Geocode address using OneMap API with multiple fallback strategies
+    // Geocode address using Google Geocoding API with multiple fallback strategies
     const geocodeAddress = async (address) => {
       try {
+        const apiKey = import.meta.env.VITE_GOOGLE_MAP_API || 'your_google_maps_api_key_here'
+        
+        if (apiKey === 'your_google_maps_api_key_here') {
+          throw new Error('Google Maps API key not configured. Please set VITE_GOOGLE_MAP_API in your environment variables.')
+        }
+
         // Strategy 1: Try the full address as provided
         let response = await fetch(
-          `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(address)}&returnGeom=Y&getAddrDetails=Y`
+          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}&region=sg`
         )
         let data = await response.json()
 
-        if (data.found > 0) {
+        if (data.status === 'OK' && data.results.length > 0) {
           const result = data.results[0]
           return {
-            lat: parseFloat(result.LATITUDE),
-            lng: parseFloat(result.LONGITUDE),
+            lat: result.geometry.location.lat,
+            lng: result.geometry.location.lng,
             confidence: 'high',
+            formatted_address: result.formatted_address
           }
         }
 
@@ -158,16 +165,17 @@ export default {
           .trim()
         if (addressWithoutUnit !== address) {
           response = await fetch(
-            `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(addressWithoutUnit)}&returnGeom=Y&getAddrDetails=Y`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addressWithoutUnit)}&key=${apiKey}&region=sg`
           )
           data = await response.json()
 
-          if (data.found > 0) {
+          if (data.status === 'OK' && data.results.length > 0) {
             const result = data.results[0]
             return {
-              lat: parseFloat(result.LATITUDE),
-              lng: parseFloat(result.LONGITUDE),
+              lat: result.geometry.location.lat,
+              lng: result.geometry.location.lng,
               confidence: 'medium',
+              formatted_address: result.formatted_address
             }
           }
         }
@@ -181,16 +189,17 @@ export default {
         if (streetMatch && buildingMatch) {
           const simplifiedAddress = `${streetMatch[1]}, ${buildingMatch[1]}, Singapore`
           response = await fetch(
-            `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(simplifiedAddress)}&returnGeom=Y&getAddrDetails=Y`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(simplifiedAddress)}&key=${apiKey}&region=sg`
           )
           data = await response.json()
 
-          if (data.found > 0) {
+          if (data.status === 'OK' && data.results.length > 0) {
             const result = data.results[0]
             return {
-              lat: parseFloat(result.LATITUDE),
-              lng: parseFloat(result.LONGITUDE),
+              lat: result.geometry.location.lat,
+              lng: result.geometry.location.lng,
               confidence: 'low',
+              formatted_address: result.formatted_address
             }
           }
         }
@@ -199,23 +208,36 @@ export default {
         if (streetMatch) {
           const streetOnly = `${streetMatch[1]}, Singapore`
           response = await fetch(
-            `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(streetOnly)}&returnGeom=Y&getAddrDetails=Y`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(streetOnly)}&key=${apiKey}&region=sg`
           )
           data = await response.json()
 
-          if (data.found > 0) {
+          if (data.status === 'OK' && data.results.length > 0) {
             const result = data.results[0]
             return {
-              lat: parseFloat(result.LATITUDE),
-              lng: parseFloat(result.LONGITUDE),
+              lat: result.geometry.location.lat,
+              lng: result.geometry.location.lng,
               confidence: 'very-low',
+              formatted_address: result.formatted_address
             }
           }
+        }
+
+        // Handle specific Google Maps API errors
+        if (data.status === 'ZERO_RESULTS') {
+          throw new Error('Address not found. Please check the spelling and try again.')
+        } else if (data.status === 'OVER_QUERY_LIMIT') {
+          throw new Error('Geocoding service temporarily unavailable. Please try again later.')
+        } else if (data.status === 'REQUEST_DENIED') {
+          throw new Error('Geocoding service access denied. Please check your API key configuration.')
         }
 
         return null
       } catch (err) {
         console.error('Geocoding error:', err)
+        if (err.message.includes('API key')) {
+          throw err
+        }
         throw new Error(
           'Failed to geocode address. Please check your internet connection and try again.'
         )

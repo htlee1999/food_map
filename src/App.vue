@@ -39,7 +39,7 @@
 
       <!-- Map Container -->
       <div class="flex-1 relative z-[1]">
-        <MapContainer :places="places" :loading="loading" />
+        <MapContainer ref="mapContainer" :places="places" :loading="loading" />
       </div>
 
       <!-- View All Modal -->
@@ -72,8 +72,9 @@ export default {
   setup() {
     const showSidebar = ref(true)
     const showViewAllModal = ref(false)
+    const mapContainer = ref(null)
 
-    const { places, searchQuery, selectedTier, loading, addPlace, updatePlace, deletePlace, focusOnPlace, loadSavedData } =
+    const { places, searchQuery, selectedTier, loading, addPlace, updatePlace, deletePlace, loadSavedData } =
       useFoodTracker()
 
     const toggleSidebar = () => {
@@ -119,6 +120,12 @@ export default {
       }
     }
 
+    const focusOnPlace = (place) => {
+      if (mapContainer.value && mapContainer.value.focusOnPlace) {
+        mapContainer.value.focusOnPlace(place)
+      }
+    }
+
     onMounted(() => {
       loadSavedData()
     })
@@ -126,6 +133,7 @@ export default {
     return {
       showSidebar,
       showViewAllModal,
+      mapContainer,
       toggleSidebar,
       places,
       searchQuery,

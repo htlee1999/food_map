@@ -1,17 +1,17 @@
 <template>
   <div
-    class="w-96 min-w-96 h-screen bg-white border-r border-gray-200 flex flex-col flex-shrink-0 relative z-[90] shadow-lg animate-fade-in"
+    class="w-80 min-w-80 h-screen bg-white border-r border-gray-200 flex flex-col flex-shrink-0 relative z-[90] shadow-lg animate-fade-in"
   >
     <!-- Header Section -->
     <div class="relative overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600"></div>
       <div class="absolute inset-0 bg-black/10"></div>
-      <div class="relative p-6 text-white text-center">
-        <div class="mb-3">
-          <div class="text-4xl mb-2">🍽️</div>
-          <h1 class="text-2xl font-bold tracking-tight">Zi Char Tier List</h1>
+      <div class="relative p-4 text-white text-center">
+        <div class="mb-2">
+          <div class="text-2xl mb-1">🍽️</div>
+          <h1 class="text-lg font-bold tracking-tight">Zi Char Tier List</h1>
         </div>
-        <p class="text-sm opacity-90 font-medium">Rate and discover zi char restaurants</p>
+        <p class="text-xs opacity-90 font-medium">Rate and discover zi char restaurants</p>
       </div>
     </div>
 
