@@ -66,6 +66,43 @@ export function useFoodTracker() {
     }
   }
 
+  // Update a place
+  const updatePlace = async (id, updatedPlace) => {
+    try {
+      // Update in backend API
+      const result = await placesApi.update(id, updatedPlace)
+      
+      // Update the place in local state
+      const index = places.value.findIndex(place => place.id === id)
+      if (index !== -1) {
+        places.value[index] = result.place
+      }
+
+      console.log('✅ Place updated in backend:', result)
+      return true
+    } catch (error) {
+      console.error('Failed to update place in backend:', error)
+      return false
+    }
+  }
+
+  // Delete a place
+  const deletePlace = async (id) => {
+    try {
+      // Delete from backend API
+      await placesApi.delete(id)
+      
+      // Remove from local state
+      places.value = places.value.filter(place => place.id !== id)
+
+      console.log('✅ Place deleted from backend')
+      return true
+    } catch (error) {
+      console.error('Failed to delete place from backend:', error)
+      return false
+    }
+  }
+
   // Focus on place (to be implemented in MapContainer)
   const focusOnPlace = (place) => {
     console.log('Focus on place:', place)
@@ -77,6 +114,8 @@ export function useFoodTracker() {
     selectedTier,
     loading,
     addPlace,
+    updatePlace,
+    deletePlace,
     focusOnPlace,
     loadSavedData,
   }

@@ -71,29 +71,109 @@
           <div
             v-for="place in filteredPlaces"
             :key="place.id"
-            class="p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer group"
-            @click="selectPlace(place)"
+            class="p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-blue-300 hover:shadow-lg transition-all duration-200 group"
           >
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <h3
-                  class="font-bold text-gray-800 text-2xl mb-3 group-hover:text-blue-600 transition-colors"
-                >
-                  {{ place.name }}
-                </h3>
-                <p class="text-gray-600 text-lg mb-4 leading-relaxed">{{ place.address }}</p>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-medium text-gray-500">Tier Rating:</span>
-                  <span
-                    :class="getTierBadgeClass(place.tier)"
-                    class="inline-block px-4 py-2 text-lg font-bold rounded-full"
+            <!-- Edit Form (shown when editing) -->
+            <div v-if="editingPlace && editingPlace.id === place.id" class="space-y-4">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">✏️ Edit Restaurant</h3>
+                <div class="flex gap-2">
+                  <button
+                    @click="saveEdit"
+                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                   >
-                    {{ place.tier }}
-                  </span>
+                    Save
+                  </button>
+                  <button
+                    @click="cancelEdit"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
-              <div class="ml-6 flex items-center">
-                <div class="text-4xl opacity-20 group-hover:opacity-40 transition-opacity">📍</div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Restaurant Name</label>
+                  <input
+                    v-model="editForm.name"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter restaurant name"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Tier Rating</label>
+                  <select
+                    v-model="editForm.tier"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Tier</option>
+                    <option value="S">S - Would bring gf's parents</option>
+                    <option value="A">A - Worth the Grab ride</option>
+                    <option value="B">B - If nearby, why not</option>
+                    <option value="C">C - Last resort makan</option>
+                    <option value="D">D - Leftovers > this</option>
+                    <option value="F">F - Avoid like GST hikes</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+                <input
+                  v-model="editForm.address"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter address"
+                />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                <textarea
+                  v-model="editForm.description"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                  placeholder="Enter description"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Normal View (shown when not editing) -->
+            <div v-else>
+              <div class="flex justify-between items-start">
+                <div class="flex-1 cursor-pointer" @click="selectPlace(place)">
+                  <h3
+                    class="font-bold text-gray-800 text-2xl mb-3 group-hover:text-blue-600 transition-colors"
+                  >
+                    {{ place.name }}
+                  </h3>
+                  <p class="text-gray-600 text-lg mb-4 leading-relaxed">{{ place.address }}</p>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-gray-500">Tier Rating:</span>
+                    <span
+                      :class="getTierBadgeClass(place.tier)"
+                      class="inline-block px-4 py-2 text-lg font-bold rounded-full"
+                    >
+                      {{ place.tier }}
+                    </span>
+                  </div>
+                </div>
+                <div class="ml-6 flex items-center gap-3">
+                  <button
+                    @click="startEdit(place)"
+                    class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    @click="confirmDelete(place)"
+                    class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
+                  >
+                    🗑️ Delete
+                  </button>
+                  <div class="text-4xl opacity-20 group-hover:opacity-40 transition-opacity">📍</div>
+                </div>
               </div>
             </div>
           </div>
@@ -118,10 +198,18 @@ export default {
       default: () => [],
     },
   },
-  emits: ['close', 'select-place'],
+  emits: ['close', 'select-place', 'update-place', 'delete-place'],
   setup(props, { emit }) {
     const searchQuery = ref('')
     const selectedTier = ref('')
+    const editingPlace = ref(null)
+    const editForm = ref({
+      name: '',
+      address: '',
+      description: '',
+      tier: '',
+      coords: null
+    })
 
     const filteredPlaces = computed(() => {
       let filtered = props.places
@@ -157,11 +245,55 @@ export default {
 
     const closeModal = () => {
       emit('close')
+      cancelEdit()
     }
 
     const selectPlace = (place) => {
       emit('select-place', place)
       closeModal()
+    }
+
+    const startEdit = (place) => {
+      editingPlace.value = place
+      editForm.value = {
+        name: place.name,
+        address: place.address,
+        description: place.description || '',
+        tier: place.tier || '',
+        coords: place.coords
+      }
+    }
+
+    const cancelEdit = () => {
+      editingPlace.value = null
+      editForm.value = {
+        name: '',
+        address: '',
+        description: '',
+        tier: '',
+        coords: null
+      }
+    }
+
+    const saveEdit = async () => {
+      if (!editForm.value.name || !editForm.value.address) {
+        alert('Please fill in the required fields (name and address)')
+        return
+      }
+
+      const updatedPlace = {
+        ...editForm.value,
+        coords: editForm.value.coords || editingPlace.value.coords
+      }
+
+      emit('update-place', editingPlace.value.id, updatedPlace)
+      cancelEdit()
+    }
+
+    const confirmDelete = (place) => {
+      if (confirm(`Are you sure you want to delete "${place.name}"? This action cannot be undone.`)) {
+        emit('delete-place', place.id)
+      }
     }
 
     // Reset filters when modal opens
@@ -171,6 +303,7 @@ export default {
         if (isOpen) {
           searchQuery.value = ''
           selectedTier.value = ''
+          cancelEdit()
         }
       }
     )
@@ -179,9 +312,15 @@ export default {
       searchQuery,
       selectedTier,
       filteredPlaces,
+      editingPlace,
+      editForm,
       getTierBadgeClass,
       closeModal,
       selectPlace,
+      startEdit,
+      cancelEdit,
+      saveEdit,
+      confirmDelete,
     }
   },
 }

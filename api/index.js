@@ -73,6 +73,70 @@ app.post('/api/places', async (req, res) => {
   }
 })
 
+// Update a place
+app.put('/api/places/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const updatedPlace = req.body
+
+    // Validate required fields
+    if (!updatedPlace.name || !updatedPlace.address || !updatedPlace.coords) {
+      return res.status(400).json({ error: 'Missing required fields: name, address, coords' })
+    }
+
+    // Check if place exists
+    const existingPlace = await db.query('SELECT id FROM places WHERE id = $1', [id])
+    if (existingPlace.rows.length === 0) {
+      return res.status(404).json({ error: 'Place not found' })
+    }
+
+    // Update the place
+    const result = await db.query(
+      `UPDATE places 
+       SET name = $1, address = $2, coords = $3, description = $4, 
+           cuisine_type = $5, price_range = $6, tier = $7, updated_at = NOW()
+       WHERE id = $8 
+       RETURNING *`,
+      [
+        updatedPlace.name,
+        updatedPlace.address,
+        JSON.stringify(updatedPlace.coords),
+        updatedPlace.description || null,
+        updatedPlace.cuisine_type || null,
+        updatedPlace.price_range || null,
+        updatedPlace.tier || null,
+        id,
+      ]
+    )
+
+    res.json({ message: 'Place updated successfully', place: result.rows[0] })
+  } catch (error) {
+    console.error('Error updating place:', error)
+    res.status(500).json({ error: 'Failed to update place' })
+  }
+})
+
+// Delete a place
+app.delete('/api/places/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+
+    // Check if place exists
+    const existingPlace = await db.query('SELECT id FROM places WHERE id = $1', [id])
+    if (existingPlace.rows.length === 0) {
+      return res.status(404).json({ error: 'Place not found' })
+    }
+
+    // Delete the place
+    await db.query('DELETE FROM places WHERE id = $1', [id])
+
+    res.json({ message: 'Place deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting place:', error)
+    res.status(500).json({ error: 'Failed to delete place' })
+  }
+})
+
 
 
 

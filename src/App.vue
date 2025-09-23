@@ -48,6 +48,8 @@
         :places="places"
         @close="showViewAllModal = false"
         @select-place="focusOnPlace"
+        @update-place="handlePlaceUpdate"
+        @delete-place="handlePlaceDelete"
       />
     </div>
   </div>
@@ -71,7 +73,7 @@ export default {
     const showSidebar = ref(true)
     const showViewAllModal = ref(false)
 
-    const { places, searchQuery, selectedTier, loading, addPlace, focusOnPlace, loadSavedData } =
+    const { places, searchQuery, selectedTier, loading, addPlace, updatePlace, deletePlace, focusOnPlace, loadSavedData } =
       useFoodTracker()
 
     const toggleSidebar = () => {
@@ -91,6 +93,32 @@ export default {
       }
     }
 
+    const handlePlaceUpdate = async (id, updatedPlace) => {
+      try {
+        const success = await updatePlace(id, updatedPlace)
+        if (success) {
+          console.log('Place updated successfully:', updatedPlace)
+        } else {
+          console.log('Failed to update place:', updatedPlace)
+        }
+      } catch (error) {
+        console.error('Error updating place:', error)
+      }
+    }
+
+    const handlePlaceDelete = async (id) => {
+      try {
+        const success = await deletePlace(id)
+        if (success) {
+          console.log('Place deleted successfully')
+        } else {
+          console.log('Failed to delete place')
+        }
+      } catch (error) {
+        console.error('Error deleting place:', error)
+      }
+    }
+
     onMounted(() => {
       loadSavedData()
     })
@@ -104,6 +132,8 @@ export default {
       selectedTier,
       loading,
       handlePlaceAdded,
+      handlePlaceUpdate,
+      handlePlaceDelete,
       focusOnPlace,
     }
   },

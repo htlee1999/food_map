@@ -35,6 +35,28 @@ export const placesApi = {
     }
   },
 
+  // Update a place
+  async update(id, place) {
+    try {
+      const response = await api.put(`/places/${id}`, place)
+      return response.data
+    } catch (error) {
+      console.error('Error updating place:', error)
+      throw error
+    }
+  },
+
+  // Delete a place
+  async delete(id) {
+    try {
+      const response = await api.delete(`/places/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting place:', error)
+      throw error
+    }
+  },
+
 }
 
 // Health check
