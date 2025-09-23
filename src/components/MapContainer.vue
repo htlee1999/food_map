@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
 
 export default {
   name: 'MapContainer',
@@ -199,8 +199,10 @@ export default {
     // Watch for changes in places
     watch(
       () => props.places,
-      () => {
+      async (newPlaces, oldPlaces) => {
         if (map.value) {
+          // Use nextTick to ensure DOM updates are complete
+          await nextTick()
           addAllMarkers()
           // Update marker icons for existing markers
           markers.value.forEach(({ place }) => {
