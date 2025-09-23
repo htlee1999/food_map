@@ -166,12 +166,12 @@ export default {
 
     const getTierBadgeClass = (tier) => {
       const tierClasses = {
-        S: 'bg-blue-100 text-blue-800',
-        A: 'bg-blue-200 text-blue-800',
-        B: 'bg-blue-300 text-blue-800',
-        C: 'bg-blue-400 text-white',
-        D: 'bg-blue-500 text-white',
-        F: 'bg-blue-600 text-white',
+        S: 'bg-pink-200 text-gray-800',
+        A: 'bg-green-200 text-gray-800',
+        B: 'bg-yellow-200 text-gray-800',
+        C: 'bg-orange-200 text-gray-800',
+        D: 'bg-red-200 text-gray-800',
+        F: 'bg-gray-200 text-gray-800',
       }
       return tierClasses[tier] || 'bg-gray-100 text-gray-700'
     }

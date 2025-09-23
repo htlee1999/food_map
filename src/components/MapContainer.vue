@@ -85,12 +85,12 @@ export default {
     // Get marker icon based on tier
     const getMarkerIcon = (tier) => {
       const tierColors = {
-        S: '#60a5fa', // light blue
-        A: '#3b82f6', // blue
-        B: '#2563eb', // darker blue
-        C: '#1d4ed8', // even darker blue
-        D: '#1e40af', // dark blue
-        F: '#1e3a8a', // darkest blue
+        S: '#f9a8d4', // pink
+        A: '#86efac', // light green
+        B: '#fde047', // light yellow
+        C: '#fdba74', // light orange
+        D: '#fca5a5', // light red
+        F: '#d1d5db', // light gray
       }
 
       const color = tierColors[tier] || '#6b7280' // gray for unknown
@@ -320,33 +320,33 @@ export default {
 }
 
 :global(.tier-S) {
-  background: #60a5fa;
-  color: white;
+  background: #f9a8d4;
+  color: #374151;
 }
 
 :global(.tier-A) {
-  background: #3b82f6;
-  color: white;
+  background: #86efac;
+  color: #374151;
 }
 
 :global(.tier-B) {
-  background: #2563eb;
-  color: white;
+  background: #fde047;
+  color: #374151;
 }
 
 :global(.tier-C) {
-  background: #1d4ed8;
-  color: white;
+  background: #fdba74;
+  color: #374151;
 }
 
 :global(.tier-D) {
-  background: #1e40af;
-  color: white;
+  background: #fca5a5;
+  color: #374151;
 }
 
 :global(.tier-F) {
-  background: #1e3a8a;
-  color: white;
+  background: #d1d5db;
+  color: #374151;
 }
 
 .error-message {
