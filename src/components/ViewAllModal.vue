@@ -10,103 +10,99 @@
     >
       <!-- Header -->
       <div
-        class="flex justify-between items-center p-8 border-b border-gray-200 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white"
+        class="flex justify-between items-center p-3 border-b border-gray-200 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white"
       >
         <div>
-          <h2 class="text-3xl font-bold mb-2">🍽️ All Zi Char Restaurants</h2>
-          <p class="text-lg opacity-90">Browse and filter your restaurant collection</p>
+          <h2 class="text-base font-bold mb-1">🍽️ All Zi Char Restaurants</h2>
+          <p class="text-sm opacity-90">Browse and filter your restaurant collection</p>
         </div>
         <button
           @click="closeModal"
-          class="text-white hover:text-gray-200 text-3xl font-bold bg-black bg-opacity-20 rounded-full w-12 h-12 flex items-center justify-center transition-colors"
+          class="text-white hover:text-gray-200 text-lg font-bold bg-black bg-opacity-20 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
         >
           ×
         </button>
       </div>
 
       <!-- Search and Filter -->
-      <div class="p-8 border-b border-gray-200 bg-gray-50">
-        <div class="flex gap-6 mb-6">
+      <div class="p-3 border-b border-gray-200 bg-gray-50">
+        <div class="flex gap-3 mb-2">
           <div class="flex-1">
-            <label class="block text-sm font-semibold text-gray-700 mb-2"
-              >🔍 Search Restaurants</label
-            >
             <input
               v-model="searchQuery"
-              placeholder="Type restaurant name or address..."
-              class="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+              placeholder="Search restaurants..."
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          <div class="w-64">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">⭐ Filter by Tier</label>
+          <div class="w-28">
             <select
               v-model="selectedTier"
-              class="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Tiers</option>
-              <option value="S">S - Would bring gf's parents</option>
-              <option value="A">A - Worth the Grab ride</option>
-              <option value="B">B - If nearby, why not</option>
-              <option value="C">C - Last resort makan</option>
-              <option value="D">D - Leftovers > this</option>
-              <option value="F">F - Avoid like GST hikes</option>
+              <option value="S">S</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="F">F</option>
             </select>
           </div>
         </div>
         <div
-          class="text-lg font-medium text-gray-700 bg-white px-4 py-3 rounded-lg border-2 border-gray-200"
+          class="text-sm font-medium text-gray-700 bg-white px-2 py-1 rounded border border-gray-200"
         >
-          📊 Showing {{ filteredPlaces.length }} of {{ places.length }} restaurants
+          {{ filteredPlaces.length }} of {{ places.length }} restaurants
         </div>
       </div>
 
       <!-- Content -->
-      <div class="flex-1 overflow-y-auto p-8">
-        <div v-if="filteredPlaces.length === 0" class="text-center text-gray-500 py-16">
-          <div class="text-6xl mb-4">🔍</div>
-          <h3 class="text-2xl font-semibold mb-2">No restaurants found</h3>
-          <p class="text-lg">Try adjusting your search or filter criteria</p>
+      <div class="flex-1 overflow-y-auto p-3">
+        <div v-if="filteredPlaces.length === 0" class="text-center text-gray-500 py-8">
+          <div class="text-3xl mb-2">🔍</div>
+          <h3 class="text-lg font-semibold mb-1">No restaurants found</h3>
+          <p class="text-sm">Try adjusting your search or filter criteria</p>
         </div>
-        <div v-else class="grid gap-6">
+        <div v-else class="grid gap-2">
           <div
             v-for="place in filteredPlaces"
             :key="place.id"
-            class="p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-blue-300 hover:shadow-lg transition-all duration-200 group"
+            class="p-2 bg-white border border-gray-200 rounded hover:border-blue-300 hover:shadow-sm transition-all duration-200 group"
           >
             <!-- Edit Form (shown when editing) -->
-            <div v-if="editingPlace && editingPlace.id === place.id" class="space-y-4">
-              <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">✏️ Edit Restaurant</h3>
-                <div class="flex gap-2">
+            <div v-if="editingPlace && editingPlace.id === place.id" class="space-y-1">
+              <div class="flex justify-between items-center mb-1">
+                <h3 class="text-xs font-bold text-gray-800">✏️ Edit Restaurant</h3>
+                <div class="flex gap-1">
                   <button
                     @click="saveEdit"
-                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    class="px-1 py-0.5 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
                   >
                     Save
                   </button>
                   <button
                     @click="cancelEdit"
-                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    class="px-1 py-0.5 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 transition-colors"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Restaurant Name</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-0.5">Restaurant Name</label>
                   <input
                     v-model="editForm.name"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="Enter restaurant name"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Tier Rating</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-0.5">Tier Rating</label>
                   <select
                     v-model="editForm.tier"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="">Select Tier</option>
                     <option value="S">S - Would bring gf's parents</option>
@@ -120,20 +116,20 @@
               </div>
               
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+                <label class="block text-xs font-semibold text-gray-700 mb-0.5">Address</label>
                 <input
                   v-model="editForm.address"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder="Enter address"
                 />
               </div>
               
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                <label class="block text-xs font-semibold text-gray-700 mb-0.5">Description</label>
                 <textarea
                   v-model="editForm.description"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows="3"
+                  class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  rows="1"
                   placeholder="Enter description"
                 ></textarea>
               </div>
@@ -143,36 +139,34 @@
             <div v-else>
               <div class="flex justify-between items-start">
                 <div class="flex-1 cursor-pointer" @click="selectPlace(place)">
-                  <h3
-                    class="font-bold text-gray-800 text-2xl mb-3 group-hover:text-blue-600 transition-colors"
-                  >
-                    {{ place.name }}
-                  </h3>
-                  <p class="text-gray-600 text-lg mb-4 leading-relaxed">{{ place.address }}</p>
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-medium text-gray-500">Tier Rating:</span>
+                  <div class="flex items-center gap-2 mb-1">
+                    <h3
+                      class="font-bold text-gray-800 text-sm group-hover:text-blue-600 transition-colors"
+                    >
+                      {{ place.name }}
+                    </h3>
                     <span
                       :class="getTierBadgeClass(place.tier)"
-                      class="inline-block px-4 py-2 text-lg font-bold rounded-full"
+                      class="inline-block px-2 py-1 text-xs font-bold rounded-full flex-shrink-0"
                     >
                       {{ place.tier }}
                     </span>
                   </div>
+                  <p class="text-gray-600 text-sm">{{ place.address }}</p>
                 </div>
-                <div class="ml-6 flex items-center gap-3">
+                <div class="ml-2 flex items-center gap-1">
                   <button
                     @click="startEdit(place)"
-                    class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
                   >
                     ✏️ Edit
                   </button>
                   <button
                     @click="confirmDelete(place)"
-                    class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
+                    class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
                   >
                     🗑️ Delete
                   </button>
-                  <div class="text-4xl opacity-20 group-hover:opacity-40 transition-opacity">📍</div>
                 </div>
               </div>
             </div>
