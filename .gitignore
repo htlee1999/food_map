@@ -93,3 +93,4 @@ Thumbs.db
 # Local development
 backend/data/places_backup.json
 backend/data/preferences.json
+.env*.local

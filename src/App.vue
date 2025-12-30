@@ -4,16 +4,18 @@
       <!-- Mobile toggle button -->
       <button
         @click="toggleSidebar"
-        class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2 rounded-md shadow-lg hover:bg-gray-50"
+        class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2.5 rounded-lg shadow-lg hover:bg-slate-50 transition-colors"
       >
-        ☰
+        <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
       </button>
 
       <!-- Mobile backdrop -->
       <div
         v-if="showSidebar"
         @click="toggleSidebar"
-        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[80]"
+        class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[80]"
       ></div>
 
       <!-- Sidebar -->
@@ -34,6 +36,7 @@
           @place-added="handlePlaceAdded"
           @focus-place="focusOnPlace"
           @view-all="showViewAllModal = true"
+          @close-sidebar="toggleSidebar"
         />
       </div>
 
@@ -70,7 +73,8 @@ export default {
     ViewAllModal,
   },
   setup() {
-    const showSidebar = ref(true)
+    // Start with sidebar closed on mobile, open on desktop
+    const showSidebar = ref(window.innerWidth >= 1024)
     const showViewAllModal = ref(false)
     const mapContainer = ref(null)
 
@@ -123,6 +127,10 @@ export default {
     const focusOnPlace = (place) => {
       if (mapContainer.value && mapContainer.value.focusOnPlace) {
         mapContainer.value.focusOnPlace(place)
+        // Close sidebar on mobile when focusing on a place
+        if (window.innerWidth < 1024) {
+          showSidebar.value = false
+        }
       }
     }
 

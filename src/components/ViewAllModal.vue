@@ -1,43 +1,48 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
     @click="closeModal"
   >
     <div
-      class="bg-white rounded-2xl shadow-2xl w-[90%] max-w-5xl h-[76vh] flex flex-col"
+      class="bg-white rounded-xl shadow-xl w-[90%] max-w-5xl h-[80vh] flex flex-col"
       @click.stop
     >
       <!-- Header -->
-      <div
-        class="flex justify-between items-center p-3 border-b border-gray-200 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white"
-      >
+      <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200">
         <div>
-          <h2 class="text-base font-bold mb-1">🍽️ All Zi Char Restaurants</h2>
-          <p class="text-sm opacity-90">Browse and filter your restaurant collection</p>
+          <h2 class="text-lg font-semibold text-slate-900">All Restaurants</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Browse and manage your collection</p>
         </div>
         <button
           @click="closeModal"
-          class="text-white hover:text-gray-200 text-lg font-bold bg-black bg-opacity-20 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+          class="text-slate-400 hover:text-slate-600 transition-colors"
         >
-          ×
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
         </button>
       </div>
 
       <!-- Search and Filter -->
-      <div class="p-3 border-b border-gray-200 bg-gray-50">
-        <div class="flex gap-3 mb-2">
-          <div class="flex-1">
+      <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <div class="flex gap-3 mb-3">
+          <div class="flex-1 relative">
             <input
               v-model="searchQuery"
               placeholder="Search restaurants..."
-              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 text-sm placeholder:text-slate-400"
             />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
           </div>
-          <div class="w-28">
+          <div class="w-32 relative">
             <select
               v-model="selectedTier"
-              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 text-sm appearance-none cursor-pointer text-slate-700"
             >
               <option value="">All Tiers</option>
               <option value="S">S</option>
@@ -47,125 +52,141 @@
               <option value="D">D</option>
               <option value="F">F</option>
             </select>
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
           </div>
         </div>
-        <div
-          class="text-sm font-medium text-gray-700 bg-white px-2 py-1 rounded border border-gray-200"
-        >
+        <div class="text-xs text-slate-600">
           {{ filteredPlaces.length }} of {{ places.length }} restaurants
         </div>
       </div>
 
       <!-- Content -->
-      <div class="flex-1 overflow-y-auto p-3">
-        <div v-if="filteredPlaces.length === 0" class="text-center text-gray-500 py-8">
-          <div class="text-3xl mb-2">🔍</div>
-          <h3 class="text-lg font-semibold mb-1">No restaurants found</h3>
-          <p class="text-sm">Try adjusting your search or filter criteria</p>
+      <div class="flex-1 overflow-y-auto p-6">
+        <div v-if="filteredPlaces.length === 0" class="text-center text-slate-400 py-16">
+          <svg class="w-16 h-16 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <h3 class="text-base font-medium text-slate-600 mb-1">No restaurants found</h3>
+          <p class="text-sm text-slate-500">Try adjusting your search or filter</p>
         </div>
-        <div v-else class="grid gap-2">
+        <div v-else class="grid gap-3">
           <div
             v-for="place in filteredPlaces"
             :key="place.id"
-            class="p-2 bg-white border border-gray-200 rounded hover:border-blue-300 hover:shadow-sm transition-all duration-200 group"
+            class="p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 hover:shadow-sm transition-all duration-200 group"
           >
             <!-- Edit Form (shown when editing) -->
-            <div v-if="editingPlace && editingPlace.id === place.id" class="space-y-1">
-              <div class="flex justify-between items-center mb-1">
-                <h3 class="text-xs font-bold text-gray-800">✏️ Edit Restaurant</h3>
-                <div class="flex gap-1">
+            <div v-if="editingPlace && editingPlace.id === place.id" class="space-y-3">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-medium text-slate-900">Edit Restaurant</h3>
+                <div class="flex gap-2">
                   <button
                     @click="saveEdit"
-                    class="px-1 py-0.5 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+                    class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs hover:bg-slate-800 transition-colors font-medium"
                   >
                     Save
                   </button>
                   <button
                     @click="cancelEdit"
-                    class="px-1 py-0.5 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 transition-colors"
+                    class="px-3 py-1.5 border border-slate-200 text-slate-700 rounded-lg text-xs hover:bg-slate-50 transition-colors font-medium"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
-                <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-0.5">Restaurant Name</label>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-medium text-slate-700">Restaurant Name</label>
                   <input
                     v-model="editForm.name"
-                    class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Enter restaurant name"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                    placeholder="Enter name"
                   />
                 </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-0.5">Tier Rating</label>
-                  <select
-                    v-model="editForm.tier"
-                    class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="">Select Tier</option>
-                    <option value="S">S - Would bring gf's parents</option>
-                    <option value="A">A - Worth the Grab ride</option>
-                    <option value="B">B - If nearby, why not</option>
-                    <option value="C">C - Last resort makan</option>
-                    <option value="D">D - Leftovers > this</option>
-                    <option value="F">F - Avoid like GST hikes</option>
-                  </select>
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-medium text-slate-700">Tier Rating</label>
+                  <div class="relative">
+                    <select
+                      v-model="editForm.tier"
+                      class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 appearance-none cursor-pointer"
+                    >
+                      <option value="">Select Tier</option>
+                      <option value="S">S - Would bring gf's parents</option>
+                      <option value="A">A - Worth the Grab ride</option>
+                      <option value="B">B - If nearby, why not</option>
+                      <option value="C">C - Last resort makan</option>
+                      <option value="D">D - Leftovers > this</option>
+                      <option value="F">F - Avoid like GST hikes</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-0.5">Address</label>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-slate-700">Address</label>
                 <input
                   v-model="editForm.address"
-                  class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
                   placeholder="Enter address"
                 />
               </div>
-              
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-0.5">Description</label>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-slate-700">Description</label>
                 <textarea
                   v-model="editForm.description"
-                  class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  rows="1"
-                  placeholder="Enter description"
+                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                  rows="2"
+                  placeholder="Enter description (optional)"
                 ></textarea>
               </div>
             </div>
 
             <!-- Normal View (shown when not editing) -->
             <div v-else>
-              <div class="flex justify-between items-start">
+              <div class="flex justify-between items-start gap-4">
                 <div class="flex-1 cursor-pointer" @click="selectPlace(place)">
-                  <div class="flex items-center gap-2 mb-1">
-                    <h3
-                      class="font-bold text-gray-800 text-sm group-hover:text-blue-600 transition-colors"
-                    >
+                  <div class="flex items-start gap-3 mb-1.5">
+                    <h3 class="font-medium text-slate-900 text-sm group-hover:text-slate-700 transition-colors flex-1">
                       {{ place.name }}
                     </h3>
                     <span
                       :class="getTierBadgeClass(place.tier)"
-                      class="inline-block px-2 py-1 text-xs font-bold rounded-full flex-shrink-0"
+                      class="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-xs font-semibold"
                     >
                       {{ place.tier }}
                     </span>
                   </div>
-                  <p class="text-gray-600 text-sm">{{ place.address }}</p>
+                  <p class="text-slate-600 text-xs">{{ place.address }}</p>
                 </div>
-                <div class="ml-2 flex items-center gap-1">
+                <div class="flex items-center gap-2 flex-shrink-0">
                   <button
                     @click="startEdit(place)"
-                    class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
+                    class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                    title="Edit"
                   >
-                    ✏️ Edit
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                    </svg>
                   </button>
                   <button
                     @click="confirmDelete(place)"
-                    class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
+                    class="p-2 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                    title="Delete"
                   >
-                    🗑️ Delete
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -227,14 +248,14 @@ export default {
 
     const getTierBadgeClass = (tier) => {
       const tierClasses = {
-        S: 'bg-pink-200 text-gray-800',
-        A: 'bg-green-200 text-gray-800',
-        B: 'bg-yellow-200 text-gray-800',
-        C: 'bg-orange-200 text-gray-800',
-        D: 'bg-red-200 text-gray-800',
-        F: 'bg-gray-200 text-gray-800',
+        S: 'bg-pink-100 text-pink-700 border border-pink-200',
+        A: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+        B: 'bg-amber-100 text-amber-700 border border-amber-200',
+        C: 'bg-orange-100 text-orange-700 border border-orange-200',
+        D: 'bg-rose-100 text-rose-700 border border-rose-200',
+        F: 'bg-slate-100 text-slate-700 border border-slate-200',
       }
-      return tierClasses[tier] || 'bg-gray-100 text-gray-700'
+      return tierClasses[tier] || 'bg-slate-100 text-slate-700 border border-slate-200'
     }
 
     const closeModal = () => {

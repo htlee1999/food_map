@@ -1,64 +1,55 @@
 <template>
-  <div class="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-md">
-    <div class="pb-3">
-      <h3 class="text-base font-semibold text-gray-800 flex items-center">
-        <span class="mr-2">📍</span>
-        Add New Place
-      </h3>
-    </div>
-    <div>
-      <form @submit.prevent="handleSubmit" class="space-y-3">
-        <div class="space-y-1">
-          <label for="placeName" class="text-xs font-semibold text-gray-700 flex items-center">
-            <span class="mr-1">🏪</span>
-            Shop/Restaurant Name *
-          </label>
-          <input
-            id="placeName"
-            v-model="formData.name"
-            type="text"
-            placeholder="Enter shop or restaurant name"
-            required
-            :disabled="isLoading"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 text-sm"
-          />
-        </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <form @submit.prevent="handleSubmit" class="space-y-3">
+      <div class="space-y-1.5">
+        <label for="placeName" class="text-xs font-medium text-slate-700">
+          Restaurant Name
+        </label>
+        <input
+          id="placeName"
+          v-model="formData.name"
+          type="text"
+          placeholder="Enter name"
+          required
+          :disabled="isLoading"
+          class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed transition-all text-sm placeholder:text-slate-400"
+        />
+      </div>
 
-        <div class="space-y-1">
-          <label for="placeAddress" class="text-xs font-semibold text-gray-700 flex items-center">
-            <span class="mr-1">📍</span>
-            Address *
-          </label>
-          <input
-            id="placeAddress"
-            v-model="formData.address"
-            type="text"
-            placeholder="Enter full address (e.g., 10 Anson Rd, International Plaza, Singapore 079903)"
-            required
-            :disabled="isLoading"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 text-sm"
-          />
-          <div
-            class="flex items-start text-xs text-gray-500 bg-blue-50 p-2 rounded-md border border-blue-100"
-          >
-            <span class="mr-1 mt-0.5">💡</span>
-            <span>Tips: Include street number, street name, building name, and postal code</span>
-          </div>
-        </div>
+      <div class="space-y-1.5">
+        <label for="placeAddress" class="text-xs font-medium text-slate-700">
+          Address
+        </label>
+        <input
+          id="placeAddress"
+          v-model="formData.address"
+          type="text"
+          placeholder="Full address with postal code"
+          required
+          :disabled="isLoading"
+          class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed transition-all text-sm placeholder:text-slate-400"
+        />
+        <p class="text-xs text-slate-500 flex items-start gap-1.5">
+          <svg class="w-3 h-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+          <span>Include street, building name & postal code</span>
+        </p>
+      </div>
 
-        <div class="space-y-1">
-          <label for="placeTier" class="text-xs font-semibold text-gray-700 flex items-center">
-            <span class="mr-1">⭐</span>
-            Tier Rating *
-          </label>
+      <div class="space-y-1.5">
+        <label for="placeTier" class="text-xs font-medium text-slate-700">
+          Tier Rating
+        </label>
+        <div class="relative">
           <select
             id="placeTier"
             v-model="formData.tier"
             required
             :disabled="isLoading"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 text-sm"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed transition-all text-sm appearance-none cursor-pointer text-slate-700"
           >
-            <option value="">Select a tier</option>
+            <option value="">Select tier</option>
             <option value="S">S - Would bring gf's parents</option>
             <option value="A">A - Worth the Grab ride</option>
             <option value="B">B - If nearby, why not</option>
@@ -66,51 +57,59 @@
             <option value="D">D - Leftovers > this</option>
             <option value="F">F - Avoid like GST hikes</option>
           </select>
-        </div>
-
-        <div class="flex gap-2">
-          <button
-            type="submit"
-            class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm"
-            :disabled="isLoading || !formData.name || !formData.address || !formData.tier"
-          >
-            <span
-              v-if="isLoading"
-              class="mr-1 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"
-            ></span>
-            <span v-if="!isLoading" class="mr-1">✅</span>
-            {{ isLoading ? 'Geocoding...' : 'Add Place' }}
-          </button>
-
-          <button
-            type="button"
-            @click="resetForm"
-            :disabled="isLoading"
-            class="px-3 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm text-sm"
-          >
-            Clear
-          </button>
-        </div>
-      </form>
-
-      <div
-        v-if="error"
-        class="mt-3 p-3 bg-red-50 text-red-700 text-xs rounded-lg border border-red-200"
-      >
-        <div class="flex items-start">
-          <span class="mr-1 mt-0.5">⚠️</span>
-          <div v-html="error.replace(/\n/g, '<br>')"></div>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
         </div>
       </div>
 
-      <div
-        v-if="success"
-        class="mt-3 p-3 bg-green-50 text-green-700 text-xs rounded-lg border border-green-200"
-      >
-        <div class="flex items-center">
-          <span class="mr-1">✅</span>
-          {{ success }}
-        </div>
+      <div class="flex gap-2 pt-1">
+        <button
+          type="submit"
+          class="flex-1 bg-slate-900 text-white px-3 py-2 rounded-lg hover:bg-slate-800 focus:outline-none disabled:bg-slate-300 disabled:cursor-not-allowed transition-all font-medium flex items-center justify-center text-sm"
+          :disabled="isLoading || !formData.name || !formData.address || !formData.tier"
+        >
+          <span
+            v-if="isLoading"
+            class="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"
+          ></span>
+          {{ isLoading ? 'Adding...' : 'Add' }}
+        </button>
+
+        <button
+          type="button"
+          @click="resetForm"
+          :disabled="isLoading"
+          class="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 hover:border-slate-300 focus:outline-none disabled:bg-slate-50 disabled:cursor-not-allowed transition-all font-medium text-sm"
+        >
+          Clear
+        </button>
+      </div>
+    </form>
+
+    <div
+      v-if="error"
+      class="mt-3 p-2.5 bg-rose-50 text-rose-700 text-xs rounded-lg border border-rose-200"
+    >
+      <div class="flex items-start gap-2">
+        <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+        </svg>
+        <div v-html="error.replace(/\n/g, '<br>')"></div>
+      </div>
+    </div>
+
+    <div
+      v-if="success"
+      class="mt-3 p-2.5 bg-emerald-50 text-emerald-700 text-xs rounded-lg border border-emerald-200"
+    >
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        <span>{{ success }}</span>
       </div>
     </div>
   </div>
