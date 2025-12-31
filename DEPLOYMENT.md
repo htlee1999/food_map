@@ -1,71 +1,110 @@
 # Deployment Guide
 
-## Setting up Production Database
+## Prerequisites
 
-### Option 1: Neon (Recommended - Free Tier Available)
+1. **PostgreSQL Database** (Neon recommended)
+2. **Google Maps API Key** with the following APIs enabled:
+   - Maps JavaScript API
+   - Geocoding API
+
+## Setting up the Database
+
+### Option 1: Neon (Recommended)
 
 1. Go to [neon.tech](https://neon.tech) and create a free account
 2. Create a new project
-3. Copy the connection string (it will look like: `postgresql://username:password@hostname/database?sslmode=require`)
+3. Copy the connection string (format: `postgresql://username:password@hostname/database?sslmode=require`)
 
-### Option 2: Supabase (Alternative - Free Tier Available)
+### Option 2: Vercel Marketplace
 
-1. Go to [supabase.com](https://supabase.com) and create a free account
-2. Create a new project
-3. Go to Settings > Database
-4. Copy the connection string
+1. Go to your Vercel project dashboard
+2. Navigate to Storage tab
+3. Add Neon database from the marketplace
+4. Connection string will be automatically added as `DATABASE_URL`
 
-## Environment Variables Setup
+## Setting up Google Maps API
 
-In your Vercel dashboard:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Enable the following APIs:
+   - Maps JavaScript API
+   - Geocoding API
+4. Create credentials (API Key)
+5. Restrict the API key to your domain for security
 
-1. Go to your project settings
-2. Navigate to "Environment Variables"
-3. Add the following variables:
+## Environment Variables
 
-```
-DATABASE_URL=postgresql://username:password@hostname/database?sslmode=require
-NODE_ENV=production
-```
+Add these environment variables in your Vercel dashboard:
 
-## Database Migration
-
-The database will be automatically migrated when you deploy to Vercel thanks to the `vercel-build` script in package.json.
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `VITE_GOOGLE_MAP_API` | Google Maps API key |
 
 ## Deployment Steps
 
-1. **Set up your cloud database** (Neon or Supabase)
-2. **Add environment variables** in Vercel dashboard
-3. **Deploy to Vercel**:
+1. **Push to GitHub**:
    ```bash
-   vercel --prod
+   git add .
+   git commit -m "Deploy"
+   git push origin main
    ```
+
+2. **Connect to Vercel**:
+   - Import your repository at [vercel.com](https://vercel.com)
+   - Add environment variables
+   - Deploy
+
+3. **Database Migration**:
+   - Migrations run automatically during build via `vercel-build` script
 
 ## Testing Your Deployment
 
-After deployment, test these endpoints:
-- `https://your-app.vercel.app/api/health` - Should return database health status
-- `https://your-app.vercel.app/api/places` - Should return empty array initially
+After deployment, verify these endpoints:
+
+- `https://your-app.vercel.app/api/health` - Should return database status
+- `https://your-app.vercel.app/api/places` - Should return restaurants array
+
+## Local Development
+
+Create a `.env.local` file in the project root:
+
+```
+DATABASE_URL=your_database_connection_string
+VITE_GOOGLE_MAP_API=your_google_maps_api_key
+```
+
+Then run:
+```bash
+pnpm dev
+```
 
 ## Troubleshooting
 
-### Common Issues:
+### Database Connection Errors
+- Verify `DATABASE_URL` is correctly set
+- Check if database is accessible (not paused on free tier)
 
-1. **Database connection errors**: Check your DATABASE_URL environment variable
-2. **CORS errors**: The API is configured to allow all origins in production
-3. **Build failures**: Ensure all dependencies are in package.json
+### Google Maps Not Loading
+- Verify `VITE_GOOGLE_MAP_API` is set
+- Check API key restrictions in Google Cloud Console
+- Ensure Maps JavaScript API and Geocoding API are enabled
 
-### Local Development:
-
-For local development, create a `.env.local` file:
-```
-DATABASE_URL=your_local_or_cloud_database_url
-VITE_API_URL=http://localhost:3001/api
-```
+### Build Failures
+- Check Vercel build logs for specific errors
+- Ensure all dependencies are in `package.json`
 
 ## Architecture
 
-- **Frontend**: Static files served by Vercel
-- **Backend**: Serverless functions on Vercel
-- **Database**: Cloud PostgreSQL (Neon/Supabase)
-- **API Routes**: `/api/*` handled by Express.js in serverless functions
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Vue.js App    │────▶│  Vercel Edge    │────▶│  Neon Postgres  │
+│  (Static Files) │     │  (Serverless)   │     │   (Database)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Google Maps    │
+│      API        │
+└─────────────────┘
+```

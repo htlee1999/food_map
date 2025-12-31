@@ -11,7 +11,7 @@
       <!-- Header -->
       <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200">
         <div>
-          <h2 class="text-lg font-semibold text-slate-900">All Restaurants</h2>
+          <h2 class="text-lg font-semibold text-slate-900">{{ selectedCategory || 'All Restaurants' }}</h2>
           <p class="text-xs text-slate-500 mt-0.5">Browse and manage your collection</p>
         </div>
         <button
@@ -57,6 +57,24 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </div>
+          </div>
+          <div class="w-40 relative" v-if="!selectedCategory">
+            <select
+              v-model="localCategory"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 text-sm appearance-none cursor-pointer text-slate-700"
+            >
+              <option value="">All Categories</option>
+              <option value="Zi Char">Zi Char</option>
+              <option value="Ramen">Ramen</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+          <div v-else class="w-40 px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 font-medium">
+            {{ selectedCategory }}
           </div>
         </div>
         <div class="text-xs text-slate-600">
@@ -212,11 +230,16 @@ export default {
       type: Array,
       default: () => [],
     },
+    selectedCategory: {
+      type: String,
+      default: '',
+    },
   },
   emits: ['close', 'select-place', 'update-place', 'delete-place'],
   setup(props, { emit }) {
     const searchQuery = ref('')
     const selectedTier = ref('')
+    const localCategory = ref('')
     const editingPlace = ref(null)
     const editForm = ref({
       name: '',
@@ -228,6 +251,15 @@ export default {
 
     const filteredPlaces = computed(() => {
       let filtered = props.places
+
+      // Filter by parent's selected category first (from sidebar)
+      if (props.selectedCategory) {
+        filtered = filtered.filter((place) => place.cuisine_type === props.selectedCategory)
+      }
+      // Then filter by local category selection (from modal dropdown) if different from parent
+      else if (localCategory.value) {
+        filtered = filtered.filter((place) => place.cuisine_type === localCategory.value)
+      }
 
       // Filter by search query
       if (searchQuery.value) {
@@ -318,6 +350,7 @@ export default {
         if (isOpen) {
           searchQuery.value = ''
           selectedTier.value = ''
+          localCategory.value = ''
           cancelEdit()
         }
       }
@@ -326,6 +359,7 @@ export default {
     return {
       searchQuery,
       selectedTier,
+      localCategory,
       filteredPlaces,
       editingPlace,
       editForm,

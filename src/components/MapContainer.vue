@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 
 export default {
   name: 'MapContainer',
@@ -36,6 +36,10 @@ export default {
     places: {
       type: Array,
       default: () => [],
+    },
+    selectedCategory: {
+      type: String,
+      default: '',
     },
     loading: {
       type: Boolean,
@@ -52,7 +56,11 @@ export default {
     // Initialize Google Maps
     const initMap = () => {
       if (!window.google || !window.google.maps) {
-        console.error('Google Maps not loaded')
+        return
+      }
+
+      // Prevent multiple map initializations
+      if (map.value) {
         return
       }
 
@@ -73,7 +81,6 @@ export default {
         styles: [
           {
             featureType: 'poi',
-            elementType: 'labels',
             stylers: [{ visibility: 'off' }]
           }
         ]
@@ -139,21 +146,14 @@ export default {
       return marker
     }
 
-    // Update marker icon
-    const updateMarkerIcon = (place) => {
-      const markerData = markers.value.find((m) => m.place.id === place.id)
-      if (markerData) {
-        const newIcon = getMarkerIcon(place.tier)
-        markerData.marker.setIcon(newIcon)
-      }
-    }
-
     // Clear all markers
     const clearMarkers = () => {
-      markers.value.forEach(({ marker, infoWindow }) => {
-        marker.setMap(null)
+      for (let i = 0; i < markers.value.length; i++) {
+        const { marker, infoWindow } = markers.value[i]
         infoWindow.close()
-      })
+        marker.setVisible(false)
+        marker.setMap(null)
+      }
       markers.value = []
     }
 
@@ -161,7 +161,7 @@ export default {
     const addAllMarkers = () => {
       clearMarkers()
       props.places.forEach((place) => {
-        if (place.coords) {
+        if (place.cuisine_type === props.selectedCategory && place.coords) {
           addMarker(place)
         }
       })
@@ -185,11 +185,11 @@ export default {
 
     // Listen for Google Maps loaded event
     const handleGoogleMapsLoaded = (event) => {
-      if (event.detail && event.detail.error) {
+      if (event && event.detail && event.detail.error) {
         googleMapsError.value = event.detail.error
         return
       }
-      
+
       initMap()
       if (props.places.length > 0) {
         addAllMarkers()
@@ -199,18 +199,22 @@ export default {
     // Watch for changes in places
     watch(
       () => props.places,
-      async (newPlaces, oldPlaces) => {
+      () => {
         if (map.value) {
-          // Use nextTick to ensure DOM updates are complete
-          await nextTick()
           addAllMarkers()
-          // Update marker icons for existing markers
-          markers.value.forEach(({ place }) => {
-            updateMarkerIcon(place)
-          })
         }
       },
       { deep: true }
+    )
+
+    // Watch for changes in selectedCategory
+    watch(
+      () => props.selectedCategory,
+      () => {
+        if (map.value) {
+          addAllMarkers()
+        }
+      }
     )
 
     onMounted(() => {
@@ -227,16 +231,11 @@ export default {
       window.removeEventListener('googleMapsLoaded', handleGoogleMapsLoaded)
     })
 
-    // Expose focusOnPlace method to parent component
-    const focusOnPlaceHandler = (place) => {
-      focusOnPlace(place)
-    }
-
     return {
       mapElement,
       googleMapsLoaded,
       googleMapsError,
-      focusOnPlace: focusOnPlaceHandler,
+      focusOnPlace,
     }
   },
 }
@@ -286,11 +285,6 @@ export default {
   100% {
     transform: rotate(360deg);
   }
-}
-
-:global(.custom-popup .leaflet-popup-content) {
-  margin: 15px;
-  font-family: inherit;
 }
 
 :global(.popup-name) {

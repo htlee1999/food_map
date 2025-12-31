@@ -1,28 +1,25 @@
 # Singapore Food Tracker
 
-A Vue.js application for tracking food places in Singapore with interactive maps, place management, and user preferences. Built with a modern tech stack and deployed on Vercel with PostgreSQL database integration.
+A Vue.js application for tracking and rating food places in Singapore with an interactive Google Maps integration. Organize restaurants by cuisine type (Zi Char, Ramen) and rate them using a tier system.
 
 ## Features
 
-- 🗺️ Interactive map with Leaflet showing food places in Singapore
-- 📍 Add and manage food places with detailed information
-- ⭐ Mark places as visited or want-to-visit
-- 📝 Add personal notes to places
-- 📊 View place statistics and ratings
-- 📱 Responsive design with Tailwind CSS
-- 🔄 Real-time data synchronization with PostgreSQL
-- 📁 Batch import functionality for multiple places
-- 🏪 Filter places by cuisine type, price range, and ratings
-- 🔍 Search and filter capabilities
+- Interactive Google Maps showing restaurant locations in Singapore
+- Category filtering (Zi Char / Ramen)
+- Tier-based rating system (S, A, B, C, D, F)
+- Add, edit, and delete restaurants
+- Search and filter by name, address, or tier
+- Address geocoding with Google Maps API
+- Responsive mobile-first design
+- Real-time data synchronization with PostgreSQL
 
 ## Tech Stack
 
 - **Frontend**: Vue 3 + Vite + Tailwind CSS
-- **Backend**: Node.js + Express
+- **Backend**: Node.js + Express (Vercel Serverless)
 - **Database**: PostgreSQL (Neon)
-- **Maps**: Leaflet
-- **UI Components**: Custom components with Tailwind CSS
-- **Deployment**: Vercel (serverless functions)
+- **Maps**: Google Maps JavaScript API
+- **Deployment**: Vercel
 - **Package Manager**: pnpm
 
 ## Development Setup
@@ -31,56 +28,34 @@ A Vue.js application for tracking food places in Singapore with interactive maps
 
 - Node.js (^20.19.0 || >=22.12.0)
 - pnpm
-- Neon database (created via Vercel Marketplace)
+- Google Maps API key
+- PostgreSQL database (Neon recommended)
 
 ### Installation
 
 1. Clone the repository
-2. Install dependencies:
 
+2. Install dependencies:
 ```sh
 pnpm install
 ```
 
 3. Set up environment variables:
-
 ```sh
-cp .env.example .env
-# Edit .env with your DATABASE_URL from Neon
+# Create .env.local file with:
+DATABASE_URL=postgresql://username:password@hostname/database?sslmode=require
+VITE_GOOGLE_MAP_API=your_google_maps_api_key
 ```
 
 4. Run database migrations:
-
 ```sh
 pnpm run migrate
 ```
 
 ### Development
 
-Run both frontend and backend:
-
 ```sh
-pnpm dev:full
-```
-
-Or run separately:
-
-```sh
-# Frontend only
 pnpm dev
-
-# Backend only
-pnpm dev:backend
-```
-
-### Database Management
-
-```sh
-# Run migrations
-pnpm run migrate
-
-# Alternative command
-pnpm run db:migrate
 ```
 
 ### Build for Production
@@ -97,87 +72,67 @@ pnpm run lint
 
 # Auto-fix linting issues
 pnpm run lint:fix
-
-# Format code with Prettier
-pnpm run format
 ```
 
 ## Deployment
 
 This application is configured for deployment on Vercel with automatic database migrations.
 
-### Deploy to Vercel
+1. **Set up Neon Database** via [Vercel Marketplace](https://vercel.com/marketplace) or [neon.tech](https://neon.tech)
 
-1. **Set up Neon Database**:
-   - Create a Neon database via [Vercel Marketplace](https://vercel.com/marketplace)
-   - Connect it to your Vercel project in the Storage tab
+2. **Add Environment Variables** in Vercel:
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `VITE_GOOGLE_MAP_API` - Google Maps API key
 
-2. **Deploy**:
+3. **Deploy**:
+```sh
+git push origin main
+```
 
-   ```sh
-   git add .
-   git commit -m "Deploy Singapore Food Tracker"
-   git push origin main
-   ```
-
-3. **Automatic Setup**:
-   - Vercel will automatically run database migrations during build
-   - Your app will be available at your Vercel domain
-
-### Environment Variables
-
-The following environment variables are automatically set by Vercel when you connect your Neon database:
-
-- `DATABASE_URL`: PostgreSQL connection string
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 
 ## Project Structure
 
 ```
 src/
-├── components/          # Vue components
-│   ├── ui/             # Reusable UI components
-│   ├── MapContainer.vue # Main map component
-│   ├── PlaceItem.vue   # Individual place component
-│   ├── AddPlaceForm.vue # Add new place form
-│   ├── Sidebar.vue     # Sidebar navigation
-│   └── ViewAllModal.vue # Modal for viewing all places
-├── composables/         # Vue composables
-│   └── useFoodTracker.js # Main app logic
-├── services/           # API services
-│   └── api.js          # API client
-└── lib/               # Utilities
-    └── utils.js       # Helper functions
+├── components/
+│   ├── ui/              # Reusable UI components
+│   ├── MapContainer.vue # Google Maps component
+│   ├── AddPlaceForm.vue # Add new restaurant form
+│   ├── Sidebar.vue      # Sidebar with filters and list
+│   └── ViewAllModal.vue # Modal for viewing/editing all places
+├── composables/
+│   └── useFoodTracker.js # Main app state management
+├── services/
+│   └── api.js           # API client
+└── lib/
+    └── utils.js         # Helper functions
 
-api/                    # Vercel serverless API functions
-backend/               # Express server (development)
-database/              # Database utilities
-├── db.js              # Database connection
-├── migrate.js         # Migration script
-└── schema.sql         # Database schema
+api/                     # Vercel serverless API
+database/                # Database utilities
+├── db.js               # Database connection
+├── migrate.js          # Migration script
+└── schema.sql          # Database schema
 ```
 
 ## API Endpoints
 
-- `GET /api/places` - Get all food places
-- `POST /api/places` - Add a new place
-- `POST /api/places/batch` - Import multiple places
-- `GET /api/preferences` - Get user preferences
-- `POST /api/preferences` - Save user preferences
+- `GET /api/places` - Get all restaurants
+- `POST /api/places` - Add a new restaurant
+- `PUT /api/places/:id` - Update a restaurant
+- `DELETE /api/places/:id` - Delete a restaurant
 - `GET /api/health` - Health check with database status
 
-## Database Features
+## Tier Rating System
 
-- **PostgreSQL Integration**: Robust database with ACID compliance
-- **Automatic Migrations**: Database schema is created automatically on deployment
-- **Connection Pooling**: Efficient database connections for better performance
-- **Data Validation**: Input validation and sanitization
-- **User Preferences**: Track visited/want-to-visit status with personal notes
-- **Batch Operations**: Import multiple places at once
-- **Health Monitoring**: Database health checks included in API endpoints
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+| Tier | Description |
+|------|-------------|
+| S | Would bring gf's parents |
+| A | Worth the Grab ride |
+| B | If nearby, why not |
+| C | Last resort makan |
+| D | Leftovers > this |
+| F | Avoid like GST hikes |
 
 ## License
 

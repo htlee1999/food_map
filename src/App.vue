@@ -31,8 +31,10 @@
           :places="places"
           :search-query="searchQuery"
           :selected-tier="selectedTier"
+          :selected-category="selectedCategory"
           @update-search="searchQuery = $event"
           @update-tier="selectedTier = $event"
+          @update-category="selectedCategory = $event"
           @place-added="handlePlaceAdded"
           @focus-place="focusOnPlace"
           @view-all="showViewAllModal = true"
@@ -42,13 +44,14 @@
 
       <!-- Map Container -->
       <div class="flex-1 relative z-[1]">
-        <MapContainer ref="mapContainer" :places="places" :loading="loading" />
+        <MapContainer ref="mapContainer" :places="places" :selected-category="selectedCategory" :loading="loading" />
       </div>
 
       <!-- View All Modal -->
       <ViewAllModal
         :is-open="showViewAllModal"
         :places="places"
+        :selected-category="selectedCategory"
         @close="showViewAllModal = false"
         @select-place="focusOnPlace"
         @update-place="handlePlaceUpdate"
@@ -78,7 +81,7 @@ export default {
     const showViewAllModal = ref(false)
     const mapContainer = ref(null)
 
-    const { places, searchQuery, selectedTier, loading, addPlace, updatePlace, deletePlace, loadSavedData } =
+    const { places, searchQuery, selectedTier, selectedCategory, loading, addPlace, updatePlace, deletePlace, loadSavedData } =
       useFoodTracker()
 
     const toggleSidebar = () => {
@@ -86,42 +89,15 @@ export default {
     }
 
     const handlePlaceAdded = async (place) => {
-      try {
-        const added = await addPlace(place)
-        if (added) {
-          console.log('Place added successfully:', place)
-        } else {
-          console.log('Place already exists:', place)
-        }
-      } catch (error) {
-        console.error('Error adding place:', error)
-      }
+      await addPlace(place)
     }
 
     const handlePlaceUpdate = async (id, updatedPlace) => {
-      try {
-        const success = await updatePlace(id, updatedPlace)
-        if (success) {
-          console.log('Place updated successfully:', updatedPlace)
-        } else {
-          console.log('Failed to update place:', updatedPlace)
-        }
-      } catch (error) {
-        console.error('Error updating place:', error)
-      }
+      await updatePlace(id, updatedPlace)
     }
 
     const handlePlaceDelete = async (id) => {
-      try {
-        const success = await deletePlace(id)
-        if (success) {
-          console.log('Place deleted successfully')
-        } else {
-          console.log('Failed to delete place')
-        }
-      } catch (error) {
-        console.error('Error deleting place:', error)
-      }
+      await deletePlace(id)
     }
 
     const focusOnPlace = (place) => {
@@ -146,6 +122,7 @@ export default {
       places,
       searchQuery,
       selectedTier,
+      selectedCategory,
       loading,
       handlePlaceAdded,
       handlePlaceUpdate,

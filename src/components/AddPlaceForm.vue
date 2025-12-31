@@ -64,12 +64,35 @@
           </div>
         </div>
       </div>
+n      <div class="space-y-1.5">
+        <label for="placeCuisine" class="text-xs font-medium text-slate-700">
+          Cuisine Type
+        </label>
+        <div class="relative">
+          <select
+            id="placeCuisine"
+            v-model="formData.cuisine_type"
+            required
+            :disabled="isLoading"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed transition-all text-sm appearance-none cursor-pointer text-slate-700"
+          >
+            <option value="">Select cuisine type</option>
+            <option value="Zi Char">Zi Char</option>
+            <option value="Ramen">Ramen</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
 
       <div class="flex gap-2 pt-1">
         <button
           type="submit"
           class="flex-1 bg-slate-900 text-white px-3 py-2 rounded-lg hover:bg-slate-800 focus:outline-none disabled:bg-slate-300 disabled:cursor-not-allowed transition-all font-medium flex items-center justify-center text-sm"
-          :disabled="isLoading || !formData.name || !formData.address || !formData.tier"
+          :disabled="isLoading || !formData.name || !formData.address || !formData.tier || !formData.cuisine_type"
         >
           <span
             v-if="isLoading"
@@ -130,6 +153,7 @@ export default {
       name: '',
       address: '',
       tier: '',
+      cuisine_type: '',
     })
 
     // Geocode address using Google Geocoding API with multiple fallback strategies
@@ -233,7 +257,6 @@ export default {
 
         return null
       } catch (err) {
-        console.error('Geocoding error:', err)
         if (err.message.includes('API key')) {
           throw err
         }
@@ -267,6 +290,7 @@ export default {
           name: formData.name.trim(),
           address: formData.address.trim(),
           tier: formData.tier,
+          cuisine_type: formData.cuisine_type,
           coords: {
             lat: coords.lat,
             lng: coords.lng,
@@ -303,6 +327,7 @@ export default {
       formData.name = ''
       formData.address = ''
       formData.tier = ''
+      formData.cuisine_type = ''
       error.value = ''
       success.value = false
     }

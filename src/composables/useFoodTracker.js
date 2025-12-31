@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { placesApi, healthApi } from '../services/api'
 
 export function useFoodTracker() {
@@ -6,6 +6,7 @@ export function useFoodTracker() {
   const searchQuery = ref('')
   const selectedTier = ref('')
   const loading = ref(false)
+  const selectedCategory = ref('Zi Char')
 
   // Load saved data from API and localStorage fallback
   const loadSavedData = async () => {
@@ -17,15 +18,11 @@ export function useFoodTracker() {
         // Load from API
         const placesData = await placesApi.getAll()
         places.value = placesData
-
-        console.log('✅ Data loaded from backend API')
       } else {
         // Fallback to localStorage
         loadFromLocalStorage()
-        console.log('⚠️ Backend unavailable, using localStorage')
       }
     } catch (error) {
-      console.error('Error loading data from API:', error)
       // Fallback to localStorage
       loadFromLocalStorage()
     }
@@ -49,17 +46,13 @@ export function useFoodTracker() {
 
       // Add the place returned from the API to local state (with correct database ID)
       places.value.push(result.place)
-
-      console.log('✅ Place added to backend:', result)
       return true
     } catch (error) {
       if (error.response?.status === 409) {
         // Place already exists
-        console.log('Place already exists in backend')
         return false
       } else {
         // Other error - still add to local state as fallback
-        console.error('Failed to save place to backend:', error)
         places.value.push(place)
         return true
       }
@@ -77,11 +70,8 @@ export function useFoodTracker() {
       if (index !== -1) {
         places.value[index] = result.place
       }
-
-      console.log('✅ Place updated in backend:', result)
       return true
     } catch (error) {
-      console.error('Failed to update place in backend:', error)
       return false
     }
   }
@@ -94,29 +84,21 @@ export function useFoodTracker() {
       
       // Remove from local state
       places.value = places.value.filter(place => place.id !== id)
-
-      console.log('✅ Place deleted from backend')
       return true
     } catch (error) {
-      console.error('Failed to delete place from backend:', error)
       return false
     }
-  }
-
-  // Focus on place (to be implemented in MapContainer)
-  const focusOnPlace = (place) => {
-    console.log('Focus on place:', place)
   }
 
   return {
     places,
     searchQuery,
     selectedTier,
+    selectedCategory,
     loading,
     addPlace,
     updatePlace,
     deletePlace,
-    focusOnPlace,
     loadSavedData,
   }
 }

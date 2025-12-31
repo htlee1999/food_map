@@ -10,7 +10,7 @@
             🍽️
           </div>
           <div>
-            <h1 class="text-xl font-semibold text-slate-900 tracking-tight">Zi Char</h1>
+            <h1 class="text-xl font-semibold text-slate-900 tracking-tight">{{ selectedCategory }}</h1>
             <p class="text-xs text-slate-500">Tier List</p>
           </div>
         </div>
@@ -29,6 +29,24 @@
     <!-- Main Content Section -->
     <div class="flex-1 overflow-y-auto px-6 pb-6">
       <div class="space-y-4">
+        <!-- Category Toggle Section -->
+        <div class="flex gap-2">
+          <button
+            @click="$emit('update-category', 'Zi Char')"
+            :class="selectedCategory === 'Zi Char' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
+            class="flex-1 px-3 py-2 rounded-lg focus:outline-none transition-all text-xs font-medium"
+          >
+            Zi Char
+          </button>
+          <button
+            @click="$emit('update-category', 'Ramen')"
+            :class="selectedCategory === 'Ramen' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
+            class="flex-1 px-3 py-2 rounded-lg focus:outline-none transition-all text-xs font-medium"
+          >
+            Ramen
+          </button>
+        </div>
+
         <!-- Add New Place Section -->
         <div>
           <button
@@ -154,13 +172,22 @@ export default {
       type: String,
       default: '',
     },
+    selectedCategory: {
+      type: String,
+      default: '',
+    },
   },
-  emits: ['update-search', 'update-tier', 'place-added', 'focus-place', 'view-all', 'close-sidebar'],
+  emits: ['update-search', 'update-tier', 'update-category', 'place-added', 'focus-place', 'view-all', 'close-sidebar'],
   setup(props, { emit }) {
     const showAddPlaceForm = ref(false)
 
     const filteredPlaces = computed(() => {
       let filtered = props.places
+
+      // Filter by category
+      if (props.selectedCategory) {
+        filtered = filtered.filter((place) => place.cuisine_type === props.selectedCategory)
+      }
 
       // Filter by search query
       if (props.searchQuery) {
