@@ -64,7 +64,7 @@
           </div>
         </div>
       </div>
-n      <div class="space-y-1.5">
+      <div class="space-y-1.5">
         <label for="placeCuisine" class="text-xs font-medium text-slate-700">
           Cuisine Type
         </label>
