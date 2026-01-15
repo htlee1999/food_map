@@ -45,6 +45,30 @@ export default {
       type: Boolean,
       default: false,
     },
+    getComments: {
+      type: Function,
+      required: true,
+    },
+    addComment: {
+      type: Function,
+      required: true,
+    },
+    deleteComment: {
+      type: Function,
+      required: true,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    getVotes: {
+      type: Function,
+      required: true,
+    },
+    vote: {
+      type: Function,
+      required: true,
+    },
   },
   setup(props, { emit }) {
     const mapElement = ref(null)
@@ -113,6 +137,117 @@ export default {
       }
     }
 
+    // Generate info window content with comments and votes
+    const generateInfoWindowContent = (place, comments = [], votes = { up: 0, down: 0, userVote: null }) => {
+      const commentsHtml = comments.length > 0
+        ? comments.map(c => `
+            <div class="comment-item" data-comment-id="${c.id}">
+              <div class="comment-content">${c.content}</div>
+              <div class="comment-meta">
+                <span class="comment-date">${new Date(c.created_at).toLocaleDateString()}</span>
+                ${props.isAdmin ? `<button class="comment-delete-btn" data-delete-comment="${c.id}">Delete</button>` : ''}
+              </div>
+            </div>
+          `).join('')
+        : '<div class="no-comments">No reviews yet</div>'
+
+      const commentFormHtml = props.isAdmin ? `
+        <div class="comment-form">
+          <textarea class="comment-input" data-place-id="${place.id}" placeholder="Write a review..."></textarea>
+          <button class="comment-submit-btn" data-submit-place="${place.id}">Add Review</button>
+        </div>
+      ` : ''
+
+      return `
+        <div class="custom-popup" data-place-id="${place.id}">
+          <div class="popup-name">${place.name}</div>
+          <div class="popup-address">${place.address}</div>
+          <div class="popup-tier">
+            <span class="tier-badge tier-${place.tier}">${place.tier}</span>
+          </div>
+          <div class="popup-votes">
+            <span class="votes-label">Do you agree?</span>
+            <div class="votes-buttons">
+              <button class="vote-btn vote-up ${votes.userVote === 'up' ? 'active' : ''}" data-vote-place="${place.id}" data-vote-type="up">
+                <span class="vote-icon">👍</span>
+                <span class="vote-count">${votes.up}</span>
+              </button>
+              <button class="vote-btn vote-down ${votes.userVote === 'down' ? 'active' : ''}" data-vote-place="${place.id}" data-vote-type="down">
+                <span class="vote-icon">👎</span>
+                <span class="vote-count">${votes.down}</span>
+              </button>
+            </div>
+          </div>
+          <div class="popup-comments">
+            <div class="comments-header">Reviews</div>
+            <div class="comments-list">${commentsHtml}</div>
+            ${commentFormHtml}
+          </div>
+        </div>
+      `
+    }
+
+    // Handle info window interactions
+    const handleInfoWindowClick = async (event) => {
+      const target = event.target
+
+      // Handle vote buttons (check both button and child elements)
+      const voteBtn = target.closest('.vote-btn')
+      if (voteBtn) {
+        const placeId = voteBtn.dataset.votePlace
+        const voteType = voteBtn.dataset.voteType
+        if (placeId && voteType) {
+          const newVotes = await props.vote(parseInt(placeId), voteType)
+          if (newVotes) {
+            // Refresh the info window
+            const markerData = markers.value.find(m => m.place.id === parseInt(placeId))
+            if (markerData) {
+              const comments = await props.getComments(parseInt(placeId))
+              markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, newVotes))
+            }
+          }
+        }
+        return
+      }
+
+      // Handle comment submission
+      if (target.classList.contains('comment-submit-btn')) {
+        const placeId = target.dataset.submitPlace
+        const textarea = document.querySelector(`.comment-input[data-place-id="${placeId}"]`)
+        if (textarea && textarea.value.trim()) {
+          const newComment = await props.addComment(parseInt(placeId), textarea.value.trim())
+          if (newComment) {
+            // Refresh the info window
+            const markerData = markers.value.find(m => m.place.id === parseInt(placeId))
+            if (markerData) {
+              const comments = await props.getComments(parseInt(placeId))
+              const votes = await props.getVotes(parseInt(placeId))
+              markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, votes))
+            }
+          }
+        }
+      }
+
+      // Handle comment deletion
+      if (target.classList.contains('comment-delete-btn')) {
+        const commentId = target.dataset.deleteComment
+        const popup = target.closest('.custom-popup')
+        const placeId = popup?.dataset.placeId
+        if (commentId && placeId) {
+          const success = await props.deleteComment(parseInt(commentId))
+          if (success) {
+            // Refresh the info window
+            const markerData = markers.value.find(m => m.place.id === parseInt(placeId))
+            if (markerData) {
+              const comments = await props.getComments(parseInt(placeId))
+              const votes = await props.getVotes(parseInt(placeId))
+              markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, votes))
+            }
+          }
+        }
+      }
+    }
+
     // Add marker to map
     const addMarker = (place) => {
       if (!map.value || !place.coords) return
@@ -126,18 +261,16 @@ export default {
       })
 
       const infoWindow = new google.maps.InfoWindow({
-        content: `
-          <div class="custom-popup">
-            <div class="popup-name">${place.name}</div>
-            <div class="popup-address">${place.address}</div>
-            <div class="popup-tier">
-              <span class="tier-badge tier-${place.tier}">${place.tier}</span>
-            </div>
-          </div>
-        `
+        content: generateInfoWindowContent(place, [])
       })
 
-      marker.addListener('click', () => {
+      marker.addListener('click', async () => {
+        // Load comments and votes when marker is clicked
+        const [comments, votes] = await Promise.all([
+          props.getComments(place.id),
+          props.getVotes(place.id)
+        ])
+        infoWindow.setContent(generateInfoWindowContent(place, comments, votes))
         infoWindow.open(map.value, marker)
       })
 
@@ -220,7 +353,10 @@ export default {
     onMounted(() => {
       // Listen for Google Maps loaded event
       window.addEventListener('googleMapsLoaded', handleGoogleMapsLoaded)
-      
+
+      // Listen for info window interactions (using event delegation)
+      document.addEventListener('click', handleInfoWindowClick)
+
       // If Google Maps is already loaded, initialize immediately
       if (window.google && window.google.maps) {
         handleGoogleMapsLoaded()
@@ -229,6 +365,7 @@ export default {
 
     onUnmounted(() => {
       window.removeEventListener('googleMapsLoaded', handleGoogleMapsLoaded)
+      document.removeEventListener('click', handleInfoWindowClick)
     })
 
     return {
@@ -341,6 +478,166 @@ export default {
 :global(.tier-F) {
   background: #d1d5db;
   color: #374151;
+}
+
+:global(.popup-comments) {
+  margin-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+}
+
+:global(.comments-header) {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+:global(.comments-list) {
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+:global(.comment-item) {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+
+:global(.comment-content) {
+  font-size: 0.85rem;
+  color: #374151;
+  line-height: 1.4;
+}
+
+:global(.comment-meta) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+:global(.comment-date) {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+:global(.comment-delete-btn) {
+  font-size: 0.7rem;
+  color: #ef4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+:global(.comment-delete-btn:hover) {
+  text-decoration: underline;
+}
+
+:global(.no-comments) {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+:global(.comment-form) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+:global(.comment-input) {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+:global(.comment-input:focus) {
+  outline: none;
+  border-color: #4facfe;
+}
+
+:global(.comment-submit-btn) {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+:global(.comment-submit-btn:hover) {
+  opacity: 0.9;
+}
+
+:global(.popup-votes) {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+  text-align: center;
+}
+
+:global(.votes-label) {
+  font-size: 0.8rem;
+  color: #64748b;
+  display: block;
+  margin-bottom: 8px;
+}
+
+:global(.votes-buttons) {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+:global(.vote-btn) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+:global(.vote-btn:hover) {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+:global(.vote-btn.vote-up.active) {
+  border-color: #22c55e;
+  background: #dcfce7;
+}
+
+:global(.vote-btn.vote-down.active) {
+  border-color: #ef4444;
+  background: #fee2e2;
+}
+
+:global(.vote-icon) {
+  font-size: 1rem;
+}
+
+:global(.vote-count) {
+  font-weight: 600;
+  color: #374151;
+  min-width: 16px;
 }
 
 .error-message {

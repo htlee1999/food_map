@@ -32,6 +32,7 @@
           :search-query="searchQuery"
           :selected-tier="selectedTier"
           :selected-category="selectedCategory"
+          :is-admin="isAdmin"
           @update-search="searchQuery = $event"
           @update-tier="selectedTier = $event"
           @update-category="selectedCategory = $event"
@@ -44,7 +45,18 @@
 
       <!-- Map Container -->
       <div class="flex-1 relative z-[1]">
-        <MapContainer ref="mapContainer" :places="places" :selected-category="selectedCategory" :loading="loading" />
+        <MapContainer
+          ref="mapContainer"
+          :places="places"
+          :selected-category="selectedCategory"
+          :loading="loading"
+          :get-comments="getComments"
+          :add-comment="addComment"
+          :delete-comment="deleteComment"
+          :is-admin="isAdmin"
+          :get-votes="getVotes"
+          :vote="vote"
+        />
       </div>
 
       <!-- View All Modal -->
@@ -52,6 +64,7 @@
         :is-open="showViewAllModal"
         :places="places"
         :selected-category="selectedCategory"
+        :is-admin="isAdmin"
         @close="showViewAllModal = false"
         @select-place="focusOnPlace"
         @update-place="handlePlaceUpdate"
@@ -67,6 +80,8 @@ import Sidebar from './components/Sidebar.vue'
 import MapContainer from './components/MapContainer.vue'
 import ViewAllModal from './components/ViewAllModal.vue'
 import { useFoodTracker } from './composables/useFoodTracker'
+import { useAdmin } from './composables/useAdmin'
+import { useVoting } from './composables/useVoting'
 
 export default {
   name: 'App',
@@ -81,8 +96,14 @@ export default {
     const showViewAllModal = ref(false)
     const mapContainer = ref(null)
 
-    const { places, searchQuery, selectedTier, selectedCategory, loading, addPlace, updatePlace, deletePlace, loadSavedData } =
+    const { places, searchQuery, selectedTier, selectedCategory, loading, addPlace, updatePlace, deletePlace, loadSavedData, getComments, addComment, deleteComment } =
       useFoodTracker()
+
+    // Admin state
+    const { isAdmin, initAdmin } = useAdmin()
+
+    // Voting functionality
+    const { getVotes, vote } = useVoting()
 
     const toggleSidebar = () => {
       showSidebar.value = !showSidebar.value
@@ -111,6 +132,7 @@ export default {
     }
 
     onMounted(() => {
+      initAdmin()
       loadSavedData()
     })
 
@@ -128,6 +150,12 @@ export default {
       handlePlaceUpdate,
       handlePlaceDelete,
       focusOnPlace,
+      getComments,
+      addComment,
+      deleteComment,
+      isAdmin,
+      getVotes,
+      vote,
     }
   },
 }

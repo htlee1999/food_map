@@ -81,9 +81,39 @@ export function useFoodTracker() {
     try {
       // Delete from backend API
       await placesApi.delete(id)
-      
+
       // Remove from local state
       places.value = places.value.filter(place => place.id !== id)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  // Get comments for a place
+  const getComments = async (placeId) => {
+    try {
+      const comments = await placesApi.getComments(placeId)
+      return comments
+    } catch (error) {
+      return []
+    }
+  }
+
+  // Add a comment to a place
+  const addComment = async (placeId, content) => {
+    try {
+      const result = await placesApi.addComment(placeId, content)
+      return result.comment
+    } catch (error) {
+      return null
+    }
+  }
+
+  // Delete a comment
+  const deleteComment = async (commentId) => {
+    try {
+      await placesApi.deleteComment(commentId)
       return true
     } catch (error) {
       return false
@@ -100,5 +130,8 @@ export function useFoodTracker() {
     updatePlace,
     deletePlace,
     loadSavedData,
+    getComments,
+    addComment,
+    deleteComment,
   }
 }

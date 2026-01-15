@@ -28,12 +28,33 @@ CREATE TABLE IF NOT EXISTS preferences (
     UNIQUE(place_id, user_id)
 );
 
+-- Create comments table to store reviews for each place
+CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY,
+    place_id INTEGER REFERENCES places(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create votes table for public thumbs up/down
+CREATE TABLE IF NOT EXISTS votes (
+    id SERIAL PRIMARY KEY,
+    place_id INTEGER NOT NULL REFERENCES places(id) ON DELETE CASCADE,
+    vote_type VARCHAR(10) NOT NULL CHECK (vote_type IN ('up', 'down')),
+    voter_id VARCHAR(100) NOT NULL,  -- Browser identifier from localStorage
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(place_id, voter_id)  -- One vote per browser per place
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_places_name ON places(name);
 CREATE INDEX IF NOT EXISTS idx_places_cuisine ON places(cuisine_type);
 CREATE INDEX IF NOT EXISTS idx_places_tier ON places(tier);
 CREATE INDEX IF NOT EXISTS idx_preferences_user ON preferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_preferences_place ON preferences(place_id);
+CREATE INDEX IF NOT EXISTS idx_comments_place ON comments(place_id);
+CREATE INDEX IF NOT EXISTS idx_votes_place ON votes(place_id);
 
 -- Create a function to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -51,4 +72,8 @@ CREATE TRIGGER update_places_updated_at BEFORE UPDATE ON places
 
 DROP TRIGGER IF EXISTS update_preferences_updated_at ON preferences;
 CREATE TRIGGER update_preferences_updated_at BEFORE UPDATE ON preferences
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_comments_updated_at ON comments;
+CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON comments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

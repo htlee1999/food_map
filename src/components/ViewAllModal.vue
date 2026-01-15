@@ -187,7 +187,7 @@
                   </div>
                   <p class="text-slate-600 text-xs">{{ place.address }}</p>
                 </div>
-                <div class="flex items-center gap-2 flex-shrink-0">
+                <div v-if="isAdmin" class="flex items-center gap-2 flex-shrink-0">
                   <button
                     @click="startEdit(place)"
                     class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
@@ -233,6 +233,10 @@ export default {
     selectedCategory: {
       type: String,
       default: '',
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ['close', 'select-place', 'update-place', 'delete-place'],

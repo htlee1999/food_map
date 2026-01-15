@@ -11,6 +11,12 @@ const api = axios.create({
   },
 })
 
+// Helper to get admin headers
+const getAdminHeaders = () => {
+  const adminKey = sessionStorage.getItem('adminKey')
+  return adminKey ? { 'x-admin-key': adminKey } : {}
+}
+
 // Places API
 export const placesApi = {
   // Get all places
@@ -24,10 +30,10 @@ export const placesApi = {
     }
   },
 
-  // Add a single place
+  // Add a single place (admin only)
   async add(place) {
     try {
-      const response = await api.post('/places', place)
+      const response = await api.post('/places', place, { headers: getAdminHeaders() })
       return response.data
     } catch (error) {
       console.error('Error adding place:', error)
@@ -35,10 +41,10 @@ export const placesApi = {
     }
   },
 
-  // Update a place
+  // Update a place (admin only)
   async update(id, place) {
     try {
-      const response = await api.put(`/places/${id}`, place)
+      const response = await api.put(`/places/${id}`, place, { headers: getAdminHeaders() })
       return response.data
     } catch (error) {
       console.error('Error updating place:', error)
@@ -46,10 +52,10 @@ export const placesApi = {
     }
   },
 
-  // Delete a place
+  // Delete a place (admin only)
   async delete(id) {
     try {
-      const response = await api.delete(`/places/${id}`)
+      const response = await api.delete(`/places/${id}`, { headers: getAdminHeaders() })
       return response.data
     } catch (error) {
       console.error('Error deleting place:', error)
@@ -57,6 +63,81 @@ export const placesApi = {
     }
   },
 
+  // Get comments for a place
+  async getComments(placeId) {
+    try {
+      const response = await api.get(`/places/${placeId}/comments`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching comments:', error)
+      throw error
+    }
+  },
+
+  // Add a comment to a place
+  async addComment(placeId, content) {
+    try {
+      const response = await api.post(`/places/${placeId}/comments`, { content })
+      return response.data
+    } catch (error) {
+      console.error('Error adding comment:', error)
+      throw error
+    }
+  },
+
+  // Delete a comment (admin only)
+  async deleteComment(commentId) {
+    try {
+      const response = await api.delete(`/comments/${commentId}`, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting comment:', error)
+      throw error
+    }
+  },
+}
+
+// Votes API
+export const votesApi = {
+  // Get votes for a place
+  async get(placeId, voterId) {
+    try {
+      const response = await api.get(`/places/${placeId}/votes`, {
+        params: { voter_id: voterId },
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching votes:', error)
+      throw error
+    }
+  },
+
+  // Submit a vote
+  async submit(placeId, voteType, voterId) {
+    try {
+      const response = await api.post(`/places/${placeId}/votes`, {
+        vote_type: voteType,
+        voter_id: voterId,
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error submitting vote:', error)
+      throw error
+    }
+  },
+
+  // Remove a vote
+  async remove(placeId, voterId) {
+    try {
+      const response = await api.delete(`/places/${placeId}/votes`, {
+        data: { voter_id: voterId },
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error removing vote:', error)
+      throw error
+    }
+  },
 }
 
 // Health check

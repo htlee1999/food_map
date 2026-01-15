@@ -47,8 +47,8 @@
           </button>
         </div>
 
-        <!-- Add New Place Section -->
-        <div>
+        <!-- Add New Place Section (Admin Only) -->
+        <div v-if="isAdmin">
           <button
             @click="toggleAddPlaceForm"
             :class="
@@ -175,6 +175,10 @@ export default {
     selectedCategory: {
       type: String,
       default: '',
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ['update-search', 'update-tier', 'update-category', 'place-added', 'focus-place', 'view-all', 'close-sidebar'],
