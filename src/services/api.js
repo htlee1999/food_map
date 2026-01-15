@@ -153,4 +153,106 @@ export const healthApi = {
   },
 }
 
+// Config API (cuisines, tags, tiers)
+export const configApi = {
+  // Get all config
+  async getAll() {
+    try {
+      const response = await api.get('/config')
+      return response.data
+    } catch (error) {
+      console.error('Error fetching config:', error)
+      throw error
+    }
+  },
+
+  // Add cuisine
+  async addCuisine(name, sortOrder = 0) {
+    try {
+      const response = await api.post('/cuisines', { name, sort_order: sortOrder }, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error adding cuisine:', error)
+      throw error
+    }
+  },
+
+  // Update cuisine
+  async updateCuisine(id, data) {
+    try {
+      const response = await api.put(`/cuisines/${id}`, data, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error updating cuisine:', error)
+      throw error
+    }
+  },
+
+  // Delete cuisine
+  async deleteCuisine(id) {
+    try {
+      const response = await api.delete(`/cuisines/${id}`, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting cuisine:', error)
+      throw error
+    }
+  },
+
+  // Add tag to cuisine
+  async addTag(cuisineId, name) {
+    try {
+      const response = await api.post(`/cuisines/${cuisineId}/tags`, { name }, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error adding tag:', error)
+      throw error
+    }
+  },
+
+  // Delete tag
+  async deleteTag(id) {
+    try {
+      const response = await api.delete(`/tags/${id}`, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting tag:', error)
+      throw error
+    }
+  },
+
+  // Add tier
+  async addTier(tierData) {
+    try {
+      const response = await api.post('/tiers', tierData, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error adding tier:', error)
+      throw error
+    }
+  },
+
+  // Update tier
+  async updateTier(id, data) {
+    try {
+      const response = await api.put(`/tiers/${id}`, data, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error updating tier:', error)
+      throw error
+    }
+  },
+
+  // Delete tier
+  async deleteTier(id) {
+    try {
+      const response = await api.delete(`/tiers/${id}`, { headers: getAdminHeaders() })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting tier:', error)
+      throw error
+    }
+  },
+}
+
 export default api

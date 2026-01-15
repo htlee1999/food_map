@@ -29,6 +29,7 @@
 
 <script>
 import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { useConfig } from '../composables/useConfig'
 
 export default {
   name: 'MapContainer',
@@ -71,6 +72,8 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const { getTierColorHex, tiers } = useConfig()
+
     const mapElement = ref(null)
     const map = ref(null)
     const markers = ref([])
@@ -115,16 +118,7 @@ export default {
 
     // Get marker icon based on tier
     const getMarkerIcon = (tier) => {
-      const tierColors = {
-        S: '#f9a8d4', // pink
-        A: '#86efac', // light green
-        B: '#fde047', // light yellow
-        C: '#fdba74', // light orange
-        D: '#fca5a5', // light red
-        F: '#d1d5db', // light gray
-      }
-
-      const color = tierColors[tier] || '#6b7280' // gray for unknown
+      const color = getTierColorHex(tier)
 
       return {
         path: google.maps.SymbolPath.CIRCLE,
@@ -139,32 +133,46 @@ export default {
 
     // Generate info window content with comments and votes
     const generateInfoWindowContent = (place, comments = [], votes = { up: 0, down: 0, userVote: null }) => {
-      const commentsHtml = comments.length > 0
-        ? comments.map(c => `
-            <div class="comment-item" data-comment-id="${c.id}">
-              <div class="comment-content">${c.content}</div>
-              <div class="comment-meta">
-                <span class="comment-date">${new Date(c.created_at).toLocaleDateString()}</span>
-                ${props.isAdmin ? `<button class="comment-delete-btn" data-delete-comment="${c.id}">Delete</button>` : ''}
+      const tagsHtml = place.tags && place.tags.length > 0
+        ? `<div class="popup-tags">${place.tags.map(tag => `<span class="popup-tag">${tag}</span>`).join('')}</div>`
+        : ''
+
+      // Comments section only for admin
+      let commentsSection = ''
+      if (props.isAdmin) {
+        const commentsHtml = comments.length > 0
+          ? comments.map(c => `
+              <div class="comment-item" data-comment-id="${c.id}">
+                <div class="comment-content">${c.content}</div>
+                <div class="comment-meta">
+                  <span class="comment-date">${new Date(c.created_at).toLocaleDateString()}</span>
+                  <button class="comment-delete-btn" data-delete-comment="${c.id}">Delete</button>
+                </div>
               </div>
+            `).join('')
+          : '<div class="no-comments">No reviews yet</div>'
+
+        commentsSection = `
+          <div class="popup-comments">
+            <div class="comments-header">Reviews</div>
+            <div class="comments-list">${commentsHtml}</div>
+            <div class="comment-form">
+              <textarea class="comment-input" data-place-id="${place.id}" placeholder="Write a review..."></textarea>
+              <button class="comment-submit-btn" data-submit-place="${place.id}">Add Review</button>
             </div>
-          `).join('')
-        : '<div class="no-comments">No reviews yet</div>'
+          </div>
+        `
+      }
 
-      const commentFormHtml = props.isAdmin ? `
-        <div class="comment-form">
-          <textarea class="comment-input" data-place-id="${place.id}" placeholder="Write a review..."></textarea>
-          <button class="comment-submit-btn" data-submit-place="${place.id}">Add Review</button>
-        </div>
-      ` : ''
-
+      const tierColor = getTierColorHex(place.tier)
       return `
         <div class="custom-popup" data-place-id="${place.id}">
           <div class="popup-name">${place.name}</div>
           <div class="popup-address">${place.address}</div>
           <div class="popup-tier">
-            <span class="tier-badge tier-${place.tier}">${place.tier}</span>
+            <span class="tier-badge" style="background: ${tierColor}; color: #374151;">${place.tier}</span>
           </div>
+          ${tagsHtml}
           <div class="popup-votes">
             <span class="votes-label">Do you agree?</span>
             <div class="votes-buttons">
@@ -178,11 +186,7 @@ export default {
               </button>
             </div>
           </div>
-          <div class="popup-comments">
-            <div class="comments-header">Reviews</div>
-            <div class="comments-list">${commentsHtml}</div>
-            ${commentFormHtml}
-          </div>
+          ${commentsSection}
         </div>
       `
     }
@@ -479,34 +483,21 @@ export default {
   min-width: 20px;
 }
 
-:global(.tier-S) {
-  background: #f9a8d4;
-  color: #374151;
+:global(.popup-tags) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
 }
 
-:global(.tier-A) {
-  background: #86efac;
-  color: #374151;
-}
-
-:global(.tier-B) {
-  background: #fde047;
-  color: #374151;
-}
-
-:global(.tier-C) {
-  background: #fdba74;
-  color: #374151;
-}
-
-:global(.tier-D) {
-  background: #fca5a5;
-  color: #374151;
-}
-
-:global(.tier-F) {
-  background: #d1d5db;
-  color: #374151;
+:global(.popup-tag) {
+  display: inline-block;
+  padding: 2px 6px;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
 }
 
 :global(.popup-comments) {

@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS places (
     coords JSONB NOT NULL, -- Store latitude and longitude as JSON
     description TEXT,
     cuisine_type VARCHAR(100),
+    tags JSONB DEFAULT '[]', -- Store tags as JSON array e.g., ["thai", "spicy"]
     price_range VARCHAR(20),
     tier VARCHAR(10),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -45,6 +46,34 @@ CREATE TABLE IF NOT EXISTS votes (
     voter_id VARCHAR(100) NOT NULL,  -- Browser identifier from localStorage
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(place_id, voter_id)  -- One vote per browser per place
+);
+
+-- Cuisine types (dynamic configuration)
+CREATE TABLE IF NOT EXISTS cuisines (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tags linked to cuisines (dynamic configuration)
+CREATE TABLE IF NOT EXISTS cuisine_tags (
+    id SERIAL PRIMARY KEY,
+    cuisine_id INTEGER REFERENCES cuisines(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(cuisine_id, name)
+);
+
+-- Tier ratings (dynamic configuration)
+CREATE TABLE IF NOT EXISTS tiers (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(10) NOT NULL UNIQUE,
+    description VARCHAR(255) NOT NULL,
+    color_class VARCHAR(100),
+    color_hex VARCHAR(20),
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes for better performance

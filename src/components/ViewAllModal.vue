@@ -45,12 +45,9 @@
               class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 text-sm appearance-none cursor-pointer text-slate-700"
             >
               <option value="">All Tiers</option>
-              <option value="S">S</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-              <option value="F">F</option>
+              <option v-for="tier in tierOptions" :key="tier.code" :value="tier.code">
+                {{ tier.code }}
+              </option>
             </select>
             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,8 +61,9 @@
               class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 text-sm appearance-none cursor-pointer text-slate-700"
             >
               <option value="">All Categories</option>
-              <option value="Zi Char">Zi Char</option>
-              <option value="Ramen">Ramen</option>
+              <option v-for="cuisine in cuisineNames" :key="cuisine" :value="cuisine">
+                {{ cuisine }}
+              </option>
             </select>
             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,12 +132,9 @@
                       class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 appearance-none cursor-pointer"
                     >
                       <option value="">Select Tier</option>
-                      <option value="S">S - Would bring gf's parents</option>
-                      <option value="A">A - Worth the Grab ride</option>
-                      <option value="B">B - If nearby, why not</option>
-                      <option value="C">C - Last resort makan</option>
-                      <option value="D">D - Leftovers > this</option>
-                      <option value="F">F - Avoid like GST hikes</option>
+                      <option v-for="tier in tierOptions" :key="tier.code" :value="tier.code">
+                        {{ tier.label }}
+                      </option>
                     </select>
                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                       <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,6 +163,48 @@
                   placeholder="Enter description (optional)"
                 ></textarea>
               </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-medium text-slate-700">Cuisine Type</label>
+                  <div class="relative">
+                    <select
+                      v-model="editForm.cuisine_type"
+                      @change="editForm.tags = []"
+                      class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 appearance-none cursor-pointer"
+                    >
+                      <option value="">Select Cuisine</option>
+                      <option v-for="cuisine in cuisineNames" :key="cuisine" :value="cuisine">
+                        {{ cuisine }}
+                      </option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="editAvailableTags.length > 0" class="space-y-1.5">
+                <label class="block text-xs font-medium text-slate-700">Tags</label>
+                <div class="flex flex-wrap gap-2">
+                  <label
+                    v-for="tag in editAvailableTags"
+                    :key="tag"
+                    class="inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="tag"
+                      v-model="editForm.tags"
+                      class="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
+                    />
+                    <span class="text-xs text-slate-600">{{ tag }}</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <!-- Normal View (shown when not editing) -->
@@ -186,6 +223,15 @@
                     </span>
                   </div>
                   <p class="text-slate-600 text-xs">{{ place.address }}</p>
+                  <div v-if="place.tags && place.tags.length > 0" class="flex flex-wrap gap-1 mt-2">
+                    <span
+                      v-for="tag in place.tags"
+                      :key="tag"
+                      class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
                 </div>
                 <div v-if="isAdmin" class="flex items-center gap-2 flex-shrink-0">
                   <button
@@ -218,6 +264,7 @@
 
 <script>
 import { computed, ref, watch } from 'vue'
+import { useConfig } from '../composables/useConfig'
 
 export default {
   name: 'ViewAllModal',
@@ -241,6 +288,8 @@ export default {
   },
   emits: ['close', 'select-place', 'update-place', 'delete-place'],
   setup(props, { emit }) {
+    const { cuisineNames, tierOptions, getTierBadgeClass, getTagsForCuisine } = useConfig()
+
     const searchQuery = ref('')
     const selectedTier = ref('')
     const localCategory = ref('')
@@ -250,7 +299,13 @@ export default {
       address: '',
       description: '',
       tier: '',
+      cuisine_type: '',
+      tags: [],
       coords: null
+    })
+
+    const editAvailableTags = computed(() => {
+      return getTagsForCuisine(editForm.value.cuisine_type)
     })
 
     const filteredPlaces = computed(() => {
@@ -282,18 +337,6 @@ export default {
       return filtered
     })
 
-    const getTierBadgeClass = (tier) => {
-      const tierClasses = {
-        S: 'bg-pink-100 text-pink-700 border border-pink-200',
-        A: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-        B: 'bg-amber-100 text-amber-700 border border-amber-200',
-        C: 'bg-orange-100 text-orange-700 border border-orange-200',
-        D: 'bg-rose-100 text-rose-700 border border-rose-200',
-        F: 'bg-slate-100 text-slate-700 border border-slate-200',
-      }
-      return tierClasses[tier] || 'bg-slate-100 text-slate-700 border border-slate-200'
-    }
-
     const closeModal = () => {
       emit('close')
       cancelEdit()
@@ -311,6 +354,8 @@ export default {
         address: place.address,
         description: place.description || '',
         tier: place.tier || '',
+        cuisine_type: place.cuisine_type || '',
+        tags: place.tags ? [...place.tags] : [],
         coords: place.coords
       }
     }
@@ -322,6 +367,8 @@ export default {
         address: '',
         description: '',
         tier: '',
+        cuisine_type: '',
+        tags: [],
         coords: null
       }
     }
@@ -367,6 +414,9 @@ export default {
       filteredPlaces,
       editingPlace,
       editForm,
+      editAvailableTags,
+      cuisineNames,
+      tierOptions,
       getTierBadgeClass,
       closeModal,
       selectPlace,

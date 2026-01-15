@@ -46,7 +46,6 @@ pnpm install
 # Create .env.local file with:
 DATABASE_URL=postgresql://username:password@hostname/database?sslmode=require
 VITE_GOOGLE_MAP_API=your_google_maps_api_key
-ADMIN_SECRET=your_secret_key_for_admin_access
 ```
 
 4. Run database migrations:
@@ -85,7 +84,6 @@ This application is configured for deployment on Vercel with automatic database 
 2. **Add Environment Variables** in Vercel:
    - `DATABASE_URL` - PostgreSQL connection string
    - `VITE_GOOGLE_MAP_API` - Google Maps API key
-   - `ADMIN_SECRET` - Secret key for admin access
 
 3. **Deploy**:
 ```sh

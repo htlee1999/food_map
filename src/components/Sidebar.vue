@@ -30,21 +30,18 @@
     <div class="flex-1 overflow-y-auto px-6 pb-6">
       <div class="space-y-4">
         <!-- Category Toggle Section -->
-        <div class="flex gap-2">
-          <button
-            @click="$emit('update-category', 'Zi Char')"
-            :class="selectedCategory === 'Zi Char' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
-            class="flex-1 px-3 py-2 rounded-lg focus:outline-none transition-all text-xs font-medium"
-          >
-            Zi Char
-          </button>
-          <button
-            @click="$emit('update-category', 'Ramen')"
-            :class="selectedCategory === 'Ramen' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
-            class="flex-1 px-3 py-2 rounded-lg focus:outline-none transition-all text-xs font-medium"
-          >
-            Ramen
-          </button>
+        <div class="relative">
+          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              v-for="category in categories"
+              :key="category"
+              @click="$emit('update-category', category)"
+              :class="selectedCategory === category ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
+              class="px-3 py-2 rounded-lg focus:outline-none transition-all text-xs font-medium whitespace-nowrap flex-shrink-0"
+            >
+              {{ category }}
+            </button>
+          </div>
         </div>
 
         <!-- Add New Place Section (Admin Only) -->
@@ -90,12 +87,9 @@
             class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all text-sm text-slate-700 appearance-none cursor-pointer"
           >
             <option value="">All Tiers</option>
-            <option value="S">S - Would bring gf's parents</option>
-            <option value="A">A - Worth the Grab ride</option>
-            <option value="B">B - If nearby, why not</option>
-            <option value="C">C - Last resort makan</option>
-            <option value="D">D - Leftovers > this</option>
-            <option value="F">F - Avoid like GST hikes</option>
+            <option v-for="tier in tierOptions" :key="tier.code" :value="tier.code">
+              {{ tier.label }}
+            </option>
           </select>
           <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,6 +125,15 @@
                     {{ place.name }}
                   </div>
                   <div class="text-xs text-slate-500 mt-0.5 truncate">{{ place.address }}</div>
+                  <div v-if="place.tags && place.tags.length > 0" class="flex flex-wrap gap-1 mt-1.5">
+                    <span
+                      v-for="tag in place.tags"
+                      :key="tag"
+                      class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
                 </div>
                 <span
                   :class="getTierBadgeClass(place.tier)"
@@ -153,6 +156,7 @@
 <script>
 import { computed, ref } from 'vue'
 import AddPlaceForm from './AddPlaceForm.vue'
+import { useConfig } from '../composables/useConfig'
 
 export default {
   name: 'Sidebar',
@@ -184,6 +188,7 @@ export default {
   emits: ['update-search', 'update-tier', 'update-category', 'place-added', 'focus-place', 'view-all', 'close-sidebar'],
   setup(props, { emit }) {
     const showAddPlaceForm = ref(false)
+    const { cuisineNames: categories, tierOptions, getTierBadgeClass } = useConfig()
 
     const filteredPlaces = computed(() => {
       let filtered = props.places
@@ -210,18 +215,6 @@ export default {
       return filtered
     })
 
-    const getTierBadgeClass = (tier) => {
-      const tierClasses = {
-        S: 'bg-pink-100 text-pink-700 border border-pink-200',
-        A: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-        B: 'bg-amber-100 text-amber-700 border border-amber-200',
-        C: 'bg-orange-100 text-orange-700 border border-orange-200',
-        D: 'bg-rose-100 text-rose-700 border border-rose-200',
-        F: 'bg-slate-100 text-slate-700 border border-slate-200',
-      }
-      return tierClasses[tier] || 'bg-slate-100 text-slate-700 border border-slate-200'
-    }
-
     const handlePlaceAdded = (place) => {
       emit('place-added', place)
       // Hide the form after successfully adding a place
@@ -238,7 +231,19 @@ export default {
       getTierBadgeClass,
       handlePlaceAdded,
       toggleAddPlaceForm,
+      categories,
+      tierOptions,
     }
   },
 }
 </script>
+
+<style scoped>
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+</style>

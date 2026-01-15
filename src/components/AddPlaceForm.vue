@@ -50,12 +50,9 @@
             class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed transition-all text-sm appearance-none cursor-pointer text-slate-700"
           >
             <option value="">Select tier</option>
-            <option value="S">S - Would bring gf's parents</option>
-            <option value="A">A - Worth the Grab ride</option>
-            <option value="B">B - If nearby, why not</option>
-            <option value="C">C - Last resort makan</option>
-            <option value="D">D - Leftovers > this</option>
-            <option value="F">F - Avoid like GST hikes</option>
+            <option v-for="tier in tierOptions" :key="tier.code" :value="tier.code">
+              {{ tier.label }}
+            </option>
           </select>
           <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,14 +74,36 @@
             class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed transition-all text-sm appearance-none cursor-pointer text-slate-700"
           >
             <option value="">Select cuisine type</option>
-            <option value="Zi Char">Zi Char</option>
-            <option value="Ramen">Ramen</option>
+            <option v-for="cuisine in cuisineNames" :key="cuisine" :value="cuisine">
+              {{ cuisine }}
+            </option>
           </select>
           <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </div>
+        </div>
+      </div>
+
+      <!-- Tags Section (shown only for cuisines with tags) -->
+      <div v-if="availableTags.length > 0" class="space-y-1.5">
+        <label class="text-xs font-medium text-slate-700">Tags (optional)</label>
+        <div class="flex flex-wrap gap-2">
+          <label
+            v-for="tag in availableTags"
+            :key="tag"
+            class="inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              :value="tag"
+              v-model="formData.tags"
+              :disabled="isLoading"
+              class="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-slate-500 disabled:cursor-not-allowed"
+            />
+            <span class="text-xs text-slate-600">{{ tag }}</span>
+          </label>
         </div>
       </div>
 
@@ -139,7 +158,8 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
+import { useConfig } from '../composables/useConfig'
 
 export default {
   name: 'AddPlaceForm',
@@ -149,11 +169,23 @@ export default {
     const error = ref('')
     const success = ref(false)
 
+    const { cuisineNames, tierOptions, getTagsForCuisine } = useConfig()
+
     const formData = reactive({
       name: '',
       address: '',
       tier: '',
       cuisine_type: '',
+      tags: [],
+    })
+
+    const availableTags = computed(() => {
+      return getTagsForCuisine(formData.cuisine_type)
+    })
+
+    // Clear tags when cuisine type changes
+    watch(() => formData.cuisine_type, () => {
+      formData.tags = []
     })
 
     // Geocode address using Google Geocoding API with multiple fallback strategies
@@ -291,6 +323,7 @@ export default {
           address: formData.address.trim(),
           tier: formData.tier,
           cuisine_type: formData.cuisine_type,
+          tags: [...formData.tags],
           coords: {
             lat: coords.lat,
             lng: coords.lng,
@@ -328,6 +361,7 @@ export default {
       formData.address = ''
       formData.tier = ''
       formData.cuisine_type = ''
+      formData.tags = []
       error.value = ''
       success.value = false
     }
@@ -337,6 +371,9 @@ export default {
       isLoading,
       error,
       success,
+      availableTags,
+      cuisineNames,
+      tierOptions,
       handleSubmit,
       resetForm,
     }
