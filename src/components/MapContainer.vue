@@ -197,7 +197,16 @@ export default {
         const placeId = voteBtn.dataset.votePlace
         const voteType = voteBtn.dataset.voteType
         if (placeId && voteType) {
+          // Optimistic UI: immediately show loading state on button
+          const allVoteBtns = document.querySelectorAll(`.vote-btn[data-vote-place="${placeId}"]`)
+          allVoteBtns.forEach(btn => btn.classList.add('loading'))
+          voteBtn.classList.add('voting')
+
           const newVotes = await props.vote(parseInt(placeId), voteType)
+
+          // Remove loading state
+          allVoteBtns.forEach(btn => btn.classList.remove('loading', 'voting'))
+
           if (newVotes) {
             // Refresh the info window
             const markerData = markers.value.find(m => m.place.id === parseInt(placeId))
@@ -215,6 +224,12 @@ export default {
         const placeId = target.dataset.submitPlace
         const textarea = document.querySelector(`.comment-input[data-place-id="${placeId}"]`)
         if (textarea && textarea.value.trim()) {
+          // Show loading state
+          target.classList.add('loading')
+          target.disabled = true
+          target.innerHTML = '<span class="btn-spinner"></span> Adding...'
+          textarea.disabled = true
+
           const newComment = await props.addComment(parseInt(placeId), textarea.value.trim())
           if (newComment) {
             // Refresh the info window
@@ -224,6 +239,12 @@ export default {
               const votes = await props.getVotes(parseInt(placeId))
               markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, votes))
             }
+          } else {
+            // Reset button on error
+            target.classList.remove('loading')
+            target.disabled = false
+            target.innerHTML = 'Add Review'
+            textarea.disabled = false
           }
         }
       }
@@ -234,6 +255,10 @@ export default {
         const popup = target.closest('.custom-popup')
         const placeId = popup?.dataset.placeId
         if (commentId && placeId) {
+          // Show loading state
+          target.innerHTML = '...'
+          target.disabled = true
+
           const success = await props.deleteComment(parseInt(commentId))
           if (success) {
             // Refresh the info window
@@ -243,6 +268,10 @@ export default {
               const votes = await props.getVotes(parseInt(placeId))
               markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, votes))
             }
+          } else {
+            // Reset on error
+            target.innerHTML = 'Delete'
+            target.disabled = false
           }
         }
       }
@@ -638,6 +667,58 @@ export default {
   font-weight: 600;
   color: #374151;
   min-width: 16px;
+}
+
+/* Loading states for vote buttons */
+:global(.vote-btn.loading) {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+:global(.vote-btn.voting) {
+  animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Loading spinner for buttons */
+:global(.btn-spinner) {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+:global(.comment-submit-btn.loading) {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+:global(.comment-submit-btn:disabled) {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+:global(.comment-input:disabled) {
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+:global(.comment-delete-btn:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .error-message {
