@@ -105,6 +105,18 @@ export default {
           strictBounds: false,
         },
         mapTypeId: google.maps.MapTypeId.ROADMAP,
+        // Reposition controls to avoid hamburger menu on mobile
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+          position: google.maps.ControlPosition.TOP_RIGHT,
+          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+        },
+        zoomControl: true,
+        zoomControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_BOTTOM
+        },
+        streetViewControl: false,
+        fullscreenControl: false,
         styles: [
           {
             featureType: 'poi',
