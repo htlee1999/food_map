@@ -314,7 +314,7 @@ export default {
     }
 
     // Add marker to map
-    const addMarker = (place) => {
+    const addMarker = async (place) => {
       if (!map.value || !place.coords) return
 
       const marker = new google.maps.Marker({
@@ -325,17 +325,23 @@ export default {
         animation: google.maps.Animation.DROP
       })
 
+      // Fetch comments and votes when marker is created
+      const [comments, votes] = await Promise.all([
+        props.getComments(place.id),
+        props.getVotes(place.id)
+      ])
+
       const infoWindow = new google.maps.InfoWindow({
-        content: generateInfoWindowContent(place, [])
+        content: generateInfoWindowContent(place, comments, votes)
       })
 
       marker.addListener('click', async () => {
-        // Load comments and votes when marker is clicked
-        const [comments, votes] = await Promise.all([
+        // Refresh comments and votes when marker is clicked to get latest data
+        const [freshComments, freshVotes] = await Promise.all([
           props.getComments(place.id),
           props.getVotes(place.id)
         ])
-        infoWindow.setContent(generateInfoWindowContent(place, comments, votes))
+        infoWindow.setContent(generateInfoWindowContent(place, freshComments, freshVotes))
         infoWindow.open(map.value, marker)
       })
 
@@ -356,13 +362,13 @@ export default {
     }
 
     // Add all places as markers
-    const addAllMarkers = () => {
+    const addAllMarkers = async () => {
       clearMarkers()
-      props.places.forEach((place) => {
-        if (place.cuisine_type === props.selectedCategory && place.coords) {
-          addMarker(place)
-        }
-      })
+      const placesToAdd = props.places.filter(
+        (place) => place.cuisine_type === props.selectedCategory && place.coords
+      )
+      // Fetch comments for all markers in parallel
+      await Promise.all(placesToAdd.map((place) => addMarker(place)))
     }
 
     // Focus on a specific place
