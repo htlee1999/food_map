@@ -44,7 +44,7 @@
       <div class="space-y-4">
         <!-- Category Toggle Section -->
         <div class="relative">
-          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div ref="categoryScroller" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <button
               v-for="category in categories"
               :key="category"
@@ -167,7 +167,7 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import AddPlaceForm from './AddPlaceForm.vue'
 import { useConfig } from '../composables/useConfig'
 
@@ -201,7 +201,28 @@ export default {
   emits: ['update-search', 'update-tier', 'update-category', 'place-added', 'focus-place', 'view-all', 'close-sidebar', 'show-methodology'],
   setup(props, { emit }) {
     const showAddPlaceForm = ref(false)
+    const categoryScroller = ref(null)
     const { cuisineNames: categories, tierOptions, getTierBadgeClass } = useConfig()
+
+    // Convert vertical wheel scroll to horizontal scroll for category buttons
+    const handleWheelScroll = (event) => {
+      if (categoryScroller.value) {
+        event.preventDefault()
+        categoryScroller.value.scrollLeft += event.deltaY
+      }
+    }
+
+    onMounted(() => {
+      if (categoryScroller.value) {
+        categoryScroller.value.addEventListener('wheel', handleWheelScroll, { passive: false })
+      }
+    })
+
+    onUnmounted(() => {
+      if (categoryScroller.value) {
+        categoryScroller.value.removeEventListener('wheel', handleWheelScroll)
+      }
+    })
 
     const filteredPlaces = computed(() => {
       let filtered = props.places
@@ -240,6 +261,7 @@ export default {
 
     return {
       showAddPlaceForm,
+      categoryScroller,
       filteredPlaces,
       getTierBadgeClass,
       handlePlaceAdded,
