@@ -34,7 +34,7 @@ export const placesApi = {
   update: (id, place) => adminRequest('put', `/places/${id}`, place),
   delete: (id) => adminRequest('delete', `/places/${id}`),
   getComments: (placeId) => request('get', `/places/${placeId}/comments`),
-  addComment: (placeId, content) => request('post', `/places/${placeId}/comments`, { data: { content } }),
+  addComment: (placeId, content) => adminRequest('post', `/places/${placeId}/comments`, { content }),
   deleteComment: (commentId) => adminRequest('delete', `/comments/${commentId}`),
 }
 
@@ -67,6 +67,12 @@ export const configApi = {
   addTier: (tierData) => adminRequest('post', '/tiers', tierData),
   updateTier: (id, data) => adminRequest('put', `/tiers/${id}`, data),
   deleteTier: (id) => adminRequest('delete', `/tiers/${id}`),
+}
+
+// Settings API
+export const settingsApi = {
+  get: (key) => request('get', `/settings/${key}`),
+  update: (key, value) => adminRequest('put', `/settings/${key}`, { value }),
 }
 
 export default api

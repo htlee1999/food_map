@@ -297,6 +297,113 @@
             </div>
           </div>
         </div>
+
+        <!-- Methodology Tab -->
+        <div v-if="activeTab === 'methodology'" class="space-y-4">
+          <div v-if="methodologyLoading" class="text-center text-slate-400 py-8">
+            Loading...
+          </div>
+          <template v-else>
+            <p class="text-xs text-slate-500">
+              Add headers and body sections to create your methodology/disclaimer content.
+              Use arrows to reorder sections.
+            </p>
+
+            <!-- Add Section Buttons -->
+            <div class="flex gap-2">
+              <button
+                @click="addSection('header')"
+                class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
+              >
+                + Add Header
+              </button>
+              <button
+                @click="addSection('body')"
+                class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
+              >
+                + Add Body
+              </button>
+            </div>
+
+            <!-- Sections List -->
+            <div v-if="methodology.sections.length === 0" class="text-center text-slate-400 py-8">
+              No sections yet. Add a header or body section above.
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="(section, index) in methodology.sections"
+                :key="index"
+                class="p-4 border border-slate-200 rounded-lg"
+              >
+                <div class="flex items-start gap-3">
+                  <!-- Reorder buttons -->
+                  <div class="flex flex-col gap-0.5 pt-1">
+                    <button
+                      @click="moveSection(index, 'up')"
+                      :disabled="index === 0"
+                      class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      title="Move up"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                      </svg>
+                    </button>
+                    <button
+                      @click="moveSection(index, 'down')"
+                      :disabled="index === methodology.sections.length - 1"
+                      class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      title="Move down"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Type badge -->
+                  <div class="flex-shrink-0">
+                    <span
+                      :class="section.type === 'header' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'"
+                      class="px-2 py-1 rounded text-xs font-medium"
+                    >
+                      {{ section.type === 'header' ? 'Header' : 'Body' }}
+                    </span>
+                  </div>
+
+                  <!-- Content textarea -->
+                  <div class="flex-1">
+                    <textarea
+                      v-model="section.content"
+                      :placeholder="section.type === 'header' ? 'Section heading...' : 'Body text...'"
+                      :rows="section.type === 'header' ? 1 : 3"
+                      class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 resize-none"
+                    ></textarea>
+                  </div>
+
+                  <!-- Delete button -->
+                  <button
+                    @click="removeSection(index)"
+                    class="p-2 text-slate-400 hover:text-rose-500 transition-colors flex-shrink-0"
+                    title="Delete section"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <button
+              @click="handleSaveMethodology"
+              :disabled="methodologySaving"
+              class="w-full px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {{ methodologySaving ? 'Saving...' : 'Save Methodology' }}
+            </button>
+          </template>
+        </div>
       </div>
 
       <!-- Footer -->
@@ -310,8 +417,9 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useConfig } from '../composables/useConfig'
+import { useMethodology } from '../composables/useMethodology'
 import { configApi } from '../services/api'
 
 export default {
@@ -342,6 +450,7 @@ export default {
       { id: 'cuisines', label: 'Cuisines' },
       { id: 'tags', label: 'Tags' },
       { id: 'tiers', label: 'Tiers' },
+      { id: 'methodology', label: 'Methodology' },
     ]
 
     const activeTab = ref('cuisines')
@@ -357,6 +466,38 @@ export default {
       color_hex: '#86efac',
       sort_order: 0,
     })
+
+    // Methodology
+    const {
+      methodology,
+      loading: methodologyLoading,
+      loadMethodology,
+      saveMethodology,
+      addSection,
+      removeSection,
+      moveSection,
+    } = useMethodology()
+
+    const methodologySaving = ref(false)
+
+    // Load methodology when tab is switched to methodology
+    watch(activeTab, (newTab) => {
+      if (newTab === 'methodology') {
+        loadMethodology(true)
+      }
+    })
+
+    const handleSaveMethodology = async () => {
+      methodologySaving.value = true
+      try {
+        await saveMethodology()
+        alert('Methodology saved successfully!')
+      } catch (error) {
+        alert('Failed to save methodology: ' + (error.response?.data?.error || error.message))
+      } finally {
+        methodologySaving.value = false
+      }
+    }
 
     // Get tags for selected cuisine
     const cuisineTags = computed(() => {
@@ -523,6 +664,14 @@ export default {
       handleUpdateTier,
       handleDeleteTier,
       handleMoveTier,
+      // Methodology
+      methodology,
+      methodologyLoading,
+      methodologySaving,
+      addSection,
+      removeSection,
+      moveSection,
+      handleSaveMethodology,
     }
   },
 }

@@ -76,6 +76,15 @@ CREATE TABLE IF NOT EXISTS tiers (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Site settings table for key-value storage (e.g., methodology content)
+CREATE TABLE IF NOT EXISTS site_settings (
+    id SERIAL PRIMARY KEY,
+    setting_key VARCHAR(100) NOT NULL UNIQUE,
+    setting_value JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_places_name ON places(name);
 CREATE INDEX IF NOT EXISTS idx_places_cuisine ON places(cuisine_type);
@@ -84,6 +93,7 @@ CREATE INDEX IF NOT EXISTS idx_preferences_user ON preferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_preferences_place ON preferences(place_id);
 CREATE INDEX IF NOT EXISTS idx_comments_place ON comments(place_id);
 CREATE INDEX IF NOT EXISTS idx_votes_place ON votes(place_id);
+CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(setting_key);
 
 -- Create a function to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -105,4 +115,8 @@ CREATE TRIGGER update_preferences_updated_at BEFORE UPDATE ON preferences
 
 DROP TRIGGER IF EXISTS update_comments_updated_at ON comments;
 CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON comments
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_site_settings_updated_at ON site_settings;
+CREATE TRIGGER update_site_settings_updated_at BEFORE UPDATE ON site_settings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

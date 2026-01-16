@@ -41,6 +41,7 @@
           @focus-place="focusOnPlace"
           @view-all="showViewAllModal = true"
           @close-sidebar="toggleSidebar"
+          @show-methodology="showMethodologyModal = true"
         />
       </div>
 
@@ -90,6 +91,23 @@
         :is-open="showAdminPanel"
         @close="showAdminPanel = false"
       />
+
+      <!-- Desktop Methodology Button -->
+      <button
+        @click="showMethodologyModal = true"
+        class="hidden lg:flex fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-white px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors items-center gap-2"
+      >
+        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-sm font-medium text-slate-700">Methodology</span>
+      </button>
+
+      <!-- Methodology Modal -->
+      <MethodologyModal
+        :is-open="showMethodologyModal"
+        @close="showMethodologyModal = false"
+      />
     </div>
   </div>
 </template>
@@ -100,6 +118,7 @@ import Sidebar from './components/Sidebar.vue'
 import MapContainer from './components/MapContainer.vue'
 import ViewAllModal from './components/ViewAllModal.vue'
 import AdminPanel from './components/AdminPanel.vue'
+import MethodologyModal from './components/MethodologyModal.vue'
 import { useFoodTracker } from './composables/useFoodTracker'
 import { useAdmin } from './composables/useAdmin'
 import { useVoting } from './composables/useVoting'
@@ -112,12 +131,14 @@ export default {
     MapContainer,
     ViewAllModal,
     AdminPanel,
+    MethodologyModal,
   },
   setup() {
     // Start with sidebar closed on mobile, open on desktop
     const showSidebar = ref(window.innerWidth >= 1024)
     const showViewAllModal = ref(false)
     const showAdminPanel = ref(false)
+    const showMethodologyModal = ref(false)
     const mapContainer = ref(null)
 
     const { places, searchQuery, selectedTier, selectedCategory, loading, addPlace, updatePlace, deletePlace, loadSavedData, getComments, addComment, deleteComment } =
@@ -168,6 +189,7 @@ export default {
       showSidebar,
       showViewAllModal,
       showAdminPanel,
+      showMethodologyModal,
       mapContainer,
       toggleSidebar,
       places,

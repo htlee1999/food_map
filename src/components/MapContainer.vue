@@ -149,32 +149,33 @@ export default {
         ? `<div class="popup-tags">${place.tags.map(tag => `<span class="popup-tag">${tag}</span>`).join('')}</div>`
         : ''
 
-      // Comments section only for admin
-      let commentsSection = ''
-      if (props.isAdmin) {
-        const commentsHtml = comments.length > 0
-          ? comments.map(c => `
-              <div class="comment-item" data-comment-id="${c.id}">
-                <div class="comment-content">${c.content}</div>
-                <div class="comment-meta">
-                  <span class="comment-date">${new Date(c.created_at).toLocaleDateString()}</span>
-                  <button class="comment-delete-btn" data-delete-comment="${c.id}">Delete</button>
-                </div>
+      // Comments section - visible to all, but add/delete only for admin
+      const commentsHtml = comments.length > 0
+        ? comments.map(c => `
+            <div class="comment-item" data-comment-id="${c.id}">
+              <div class="comment-content">${c.content}</div>
+              <div class="comment-meta">
+                <span class="comment-date">${new Date(c.created_at).toLocaleDateString()}</span>
+                ${props.isAdmin ? `<button class="comment-delete-btn" data-delete-comment="${c.id}">Delete</button>` : ''}
               </div>
-            `).join('')
-          : '<div class="no-comments">No reviews yet</div>'
-
-        commentsSection = `
-          <div class="popup-comments">
-            <div class="comments-header">Reviews</div>
-            <div class="comments-list">${commentsHtml}</div>
-            <div class="comment-form">
-              <textarea class="comment-input" data-place-id="${place.id}" placeholder="Write a review..."></textarea>
-              <button class="comment-submit-btn" data-submit-place="${place.id}">Add Review</button>
             </div>
-          </div>
-        `
-      }
+          `).join('')
+        : '<div class="no-comments">No reviews yet</div>'
+
+      const commentForm = props.isAdmin ? `
+        <div class="comment-form">
+          <textarea class="comment-input" data-place-id="${place.id}" placeholder="Write a review..."></textarea>
+          <button class="comment-submit-btn" data-submit-place="${place.id}">Add Review</button>
+        </div>
+      ` : ''
+
+      const commentsSection = `
+        <div class="popup-comments">
+          <div class="comments-header">Reviews</div>
+          <div class="comments-list">${commentsHtml}</div>
+          ${commentForm}
+        </div>
+      `
 
       const tierColor = getTierColorHex(place.tier)
       const tierDescription = getTierDescription(place.tier)
