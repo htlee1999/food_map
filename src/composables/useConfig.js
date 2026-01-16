@@ -83,6 +83,12 @@ export function useConfig() {
     return tier?.color_hex || '#d1d5db'
   }
 
+  // Get tier description by code
+  const getTierDescription = (tierCode) => {
+    const tier = tiers.value.find(t => t.code === tierCode)
+    return tier?.description || ''
+  }
+
   // Get tags for a cuisine
   const getTagsForCuisine = (cuisineName) => {
     return tagsByCategory.value[cuisineName] || []
@@ -158,6 +164,7 @@ export function useConfig() {
     refreshConfig,
     getTierBadgeClass,
     getTierColorHex,
+    getTierDescription,
     getTagsForCuisine,
 
     // Admin operations

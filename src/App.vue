@@ -1,8 +1,9 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600">
     <div class="flex h-screen">
-      <!-- Mobile toggle button -->
+      <!-- Mobile toggle button (hidden when sidebar is open) -->
       <button
+        v-show="!showSidebar"
         @click="toggleSidebar"
         class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2.5 rounded-lg shadow-lg hover:bg-slate-50 transition-colors"
       >

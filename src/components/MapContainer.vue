@@ -72,7 +72,7 @@ export default {
     },
   },
   setup(props, { emit }) {
-    const { getTierColorHex, tiers } = useConfig()
+    const { getTierColorHex, getTierDescription, tiers } = useConfig()
 
     const mapElement = ref(null)
     const map = ref(null)
@@ -177,6 +177,7 @@ export default {
       }
 
       const tierColor = getTierColorHex(place.tier)
+      const tierDescription = getTierDescription(place.tier)
       const { lat, lng } = place.coords
       const encodedName = encodeURIComponent(place.name)
 
@@ -186,6 +187,7 @@ export default {
           <div class="popup-address">${place.address}</div>
           <div class="popup-tier">
             <span class="tier-badge" style="background: ${tierColor}; color: #374151;">${place.tier}</span>
+            <span class="tier-description">${tierDescription}</span>
           </div>
           ${tagsHtml}
           <div class="popup-navigate">
@@ -510,6 +512,13 @@ export default {
   font-weight: bold;
   text-align: center;
   min-width: 20px;
+}
+
+:global(.tier-description) {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-left: 8px;
+  font-style: italic;
 }
 
 :global(.popup-tags) {
