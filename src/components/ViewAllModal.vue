@@ -233,6 +233,42 @@
                     </span>
                   </div>
                 </div>
+                <!-- Navigation buttons -->
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <a
+                    :href="getGoogleMapsUrl(place)"
+                    target="_blank"
+                    @click.stop
+                    class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Open in Google Maps"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                  </a>
+                  <a
+                    :href="getWazeUrl(place)"
+                    target="_blank"
+                    @click.stop
+                    class="p-2 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
+                    title="Open in Waze"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2c-4.42 0-8 3.58-8 8 0 5.25 8 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm-2 11h-.5v.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-.5H8c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h.5v-.5c0-.28.22-.5.5-.5s.5.22.5.5v.5h.5c.28 0 .5.22.5.5s-.22.5-.5.5zm4.5.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5s.5.22.5.5v1zm2 0c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5s.5.22.5.5v1z"/>
+                    </svg>
+                  </a>
+                  <a
+                    :href="getAppleMapsUrl(place)"
+                    target="_blank"
+                    @click.stop
+                    class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    title="Open in Apple Maps"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                  </a>
+                </div>
                 <div v-if="isAdmin" class="flex items-center gap-2 flex-shrink-0">
                   <button
                     @click="startEdit(place)"
@@ -394,6 +430,25 @@ export default {
       }
     }
 
+    // Navigation URL helpers
+    const getGoogleMapsUrl = (place) => {
+      if (!place.coords) return '#'
+      const { lat, lng } = place.coords
+      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+    }
+
+    const getWazeUrl = (place) => {
+      if (!place.coords) return '#'
+      const { lat, lng } = place.coords
+      return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`
+    }
+
+    const getAppleMapsUrl = (place) => {
+      if (!place.coords) return '#'
+      const { lat, lng } = place.coords
+      return `https://maps.apple.com/?daddr=${lat},${lng}`
+    }
+
     // Reset filters when modal opens
     watch(
       () => props.isOpen,
@@ -424,6 +479,9 @@ export default {
       cancelEdit,
       saveEdit,
       confirmDelete,
+      getGoogleMapsUrl,
+      getWazeUrl,
+      getAppleMapsUrl,
     }
   },
 }

@@ -53,16 +53,56 @@
               Add
             </button>
           </div>
+          <p class="text-xs text-slate-500">Drag cuisines or use arrows to reorder. Order affects sidebar display.</p>
           <div class="space-y-2">
             <div
-              v-for="cuisine in cuisines"
+              v-for="(cuisine, index) in cuisines"
               :key="cuisine.id"
-              class="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+              class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg group"
             >
-              <span class="text-sm text-slate-700">{{ cuisine.name }}</span>
+              <!-- Reorder buttons -->
+              <div class="flex flex-col gap-0.5">
+                <button
+                  @click="handleMoveCuisine(index, 'up')"
+                  :disabled="index === 0 || reordering"
+                  class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Move up"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </button>
+                <button
+                  @click="handleMoveCuisine(index, 'down')"
+                  :disabled="index === cuisines.length - 1 || reordering"
+                  class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Move down"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              </div>
+              <!-- Order number -->
+              <span class="w-6 h-6 flex items-center justify-center bg-slate-200 text-slate-600 rounded text-xs font-medium">
+                {{ index + 1 }}
+              </span>
+              <!-- Cuisine name (editable) -->
+              <input
+                v-model="cuisine.name"
+                class="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
+              />
+              <!-- Save button -->
+              <button
+                @click="handleUpdateCuisine(cuisine)"
+                class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-200 transition-colors"
+              >
+                Save
+              </button>
+              <!-- Delete button -->
               <button
                 @click="handleDeleteCuisine(cuisine.id)"
-                class="text-slate-400 hover:text-rose-500 transition-colors"
+                class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -196,12 +236,36 @@
           </div>
 
           <!-- Existing Tiers -->
+          <p class="text-xs text-slate-500">Use arrows to reorder tiers. Order affects dropdowns and display.</p>
           <div
-            v-for="tier in tiers"
+            v-for="(tier, index) in tiers"
             :key="tier.id"
-            class="p-4 border border-slate-200 rounded-lg space-y-3"
+            class="p-4 border border-slate-200 rounded-lg"
           >
             <div class="flex items-center gap-3">
+              <!-- Reorder buttons -->
+              <div class="flex flex-col gap-0.5">
+                <button
+                  @click="handleMoveTier(index, 'up')"
+                  :disabled="index === 0 || reorderingTiers"
+                  class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Move up"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </button>
+                <button
+                  @click="handleMoveTier(index, 'down')"
+                  :disabled="index === tiers.length - 1 || reorderingTiers"
+                  class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Move down"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              </div>
               <span
                 :class="tier.color_class"
                 class="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold"
@@ -246,8 +310,9 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useConfig } from '../composables/useConfig'
+import { configApi } from '../services/api'
 
 export default {
   name: 'AdminPanel',
@@ -283,6 +348,8 @@ export default {
     const newCuisine = ref('')
     const newTag = ref('')
     const selectedCuisineId = ref('')
+    const reordering = ref(false)
+    const reorderingTiers = ref(false)
     const newTier = ref({
       code: '',
       description: '',
@@ -313,6 +380,65 @@ export default {
         await deleteCuisine(id)
       } catch (error) {
         alert('Failed to delete cuisine: ' + (error.response?.data?.error || error.message))
+      }
+    }
+
+    const handleUpdateCuisine = async (cuisine) => {
+      if (!cuisine.name.trim()) {
+        alert('Cuisine name cannot be empty')
+        return
+      }
+      try {
+        await configApi.updateCuisine(cuisine.id, { name: cuisine.name.trim() })
+        await refreshConfig()
+      } catch (error) {
+        alert('Failed to update cuisine: ' + (error.response?.data?.error || error.message))
+      }
+    }
+
+    const handleMoveCuisine = async (index, direction) => {
+      if (reordering.value) return
+
+      const newIndex = direction === 'up' ? index - 1 : index + 1
+      if (newIndex < 0 || newIndex >= cuisines.value.length) return
+
+      const currentCuisine = cuisines.value[index]
+      const targetCuisine = cuisines.value[newIndex]
+
+      reordering.value = true
+      try {
+        await Promise.all([
+          configApi.updateCuisine(currentCuisine.id, { sort_order: newIndex }),
+          configApi.updateCuisine(targetCuisine.id, { sort_order: index }),
+        ])
+        await refreshConfig()
+      } catch (error) {
+        alert('Failed to reorder: ' + (error.response?.data?.error || error.message))
+      } finally {
+        reordering.value = false
+      }
+    }
+
+    const handleMoveTier = async (index, direction) => {
+      if (reorderingTiers.value) return
+
+      const newIndex = direction === 'up' ? index - 1 : index + 1
+      if (newIndex < 0 || newIndex >= tiers.value.length) return
+
+      const currentTier = tiers.value[index]
+      const targetTier = tiers.value[newIndex]
+
+      reorderingTiers.value = true
+      try {
+        await Promise.all([
+          configApi.updateTier(currentTier.id, { sort_order: newIndex }),
+          configApi.updateTier(targetTier.id, { sort_order: index }),
+        ])
+        await refreshConfig()
+      } catch (error) {
+        alert('Failed to reorder: ' + (error.response?.data?.error || error.message))
+      } finally {
+        reorderingTiers.value = false
       }
     }
 
@@ -385,13 +511,18 @@ export default {
       newTier,
       selectedCuisineId,
       cuisineTags,
+      reordering,
+      reorderingTiers,
       handleAddCuisine,
+      handleUpdateCuisine,
       handleDeleteCuisine,
+      handleMoveCuisine,
       handleAddTag,
       handleDeleteTag,
       handleAddTier,
       handleUpdateTier,
       handleDeleteTier,
+      handleMoveTier,
     }
   },
 }

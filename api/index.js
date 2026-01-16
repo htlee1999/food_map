@@ -150,9 +150,6 @@ app.delete('/api/places/:id', requireAdmin, async (req, res) => {
   }
 })
 
-
-
-
 // Get comments for a place
 app.get('/api/places/:id/comments', async (req, res) => {
   try {

@@ -165,6 +165,9 @@ export default {
       }
 
       const tierColor = getTierColorHex(place.tier)
+      const { lat, lng } = place.coords
+      const encodedName = encodeURIComponent(place.name)
+
       return `
         <div class="custom-popup" data-place-id="${place.id}">
           <div class="popup-name">${place.name}</div>
@@ -173,6 +176,20 @@ export default {
             <span class="tier-badge" style="background: ${tierColor}; color: #374151;">${place.tier}</span>
           </div>
           ${tagsHtml}
+          <div class="popup-navigate">
+            <span class="navigate-label">Navigate with:</span>
+            <div class="navigate-buttons">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${encodedName}" target="_blank" class="nav-btn nav-gmaps" title="Google Maps">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              </a>
+              <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" class="nav-btn nav-waze" title="Waze">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#33CCFF" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              </a>
+              <a href="https://maps.apple.com/?daddr=${lat},${lng}" target="_blank" class="nav-btn nav-apple" title="Apple Maps">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#555" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              </a>
+            </div>
+          </div>
           <div class="popup-votes">
             <span class="votes-label">Do you agree?</span>
             <div class="votes-buttons">
@@ -599,6 +616,61 @@ export default {
 
 :global(.comment-submit-btn:hover) {
   opacity: 0.9;
+}
+
+:global(.popup-navigate) {
+  margin-top: 10px;
+  padding: 8px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  text-align: center;
+}
+
+:global(.navigate-label) {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: block;
+  margin-bottom: 6px;
+}
+
+:global(.navigate-buttons) {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+:global(.nav-btn) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+:global(.nav-btn:hover) {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+:global(.nav-gmaps:hover) {
+  border-color: #4285F4;
+  background: #e8f0fe;
+}
+
+:global(.nav-waze:hover) {
+  border-color: #33CCFF;
+  background: #e6f9ff;
+}
+
+:global(.nav-apple:hover) {
+  border-color: #555;
+  background: #f5f5f5;
 }
 
 :global(.popup-votes) {

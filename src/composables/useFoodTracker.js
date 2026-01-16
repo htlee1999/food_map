@@ -37,7 +37,6 @@ export function useFoodTracker() {
     }
   }
 
-
   // Add manually created place
   const addPlace = async (place) => {
     try {
