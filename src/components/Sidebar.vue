@@ -16,6 +16,16 @@
         </div>
         <!-- Mobile buttons -->
         <div class="flex items-center gap-2 lg:hidden">
+          <!-- Random picker button -->
+          <button
+            @click="$emit('show-random-picker')"
+            class="text-slate-400 hover:text-slate-600 transition-colors"
+            title="Random restaurant picker"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </button>
           <!-- Info/methodology button -->
           <button
             @click="$emit('show-methodology')"
@@ -111,6 +121,25 @@
           </div>
         </div>
 
+        <!-- Region Filter Section -->
+        <div class="relative">
+          <select
+            :value="selectedRegion"
+            @change="$emit('update-region', $event.target.value)"
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all text-sm text-slate-700 appearance-none cursor-pointer"
+          >
+            <option value="">All Regions</option>
+            <option v-for="region in availableRegions" :key="region" :value="region">
+              {{ region }}
+            </option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
+
         <!-- Places List Section -->
         <div class="pt-2">
           <div class="flex justify-between items-center mb-3">
@@ -138,7 +167,13 @@
                     {{ place.name }}
                   </div>
                   <div class="text-xs text-slate-500 mt-0.5 truncate">{{ place.address }}</div>
-                  <div v-if="place.tags && place.tags.length > 0" class="flex flex-wrap gap-1 mt-1.5">
+                  <div class="flex flex-wrap gap-1 mt-1.5">
+                    <span
+                      v-if="place.region"
+                      class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-medium"
+                    >
+                      {{ place.region }}
+                    </span>
                     <span
                       v-for="tag in place.tags"
                       :key="tag"
@@ -170,6 +205,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import AddPlaceForm from './AddPlaceForm.vue'
 import { useConfig } from '../composables/useConfig'
+import { getAvailableRegions } from '../utils/regionMapping'
 
 export default {
   name: 'Sidebar',
@@ -189,6 +225,10 @@ export default {
       type: String,
       default: '',
     },
+    selectedRegion: {
+      type: String,
+      default: '',
+    },
     selectedCategory: {
       type: String,
       default: '',
@@ -198,11 +238,12 @@ export default {
       default: false,
     },
   },
-  emits: ['update-search', 'update-tier', 'update-category', 'place-added', 'focus-place', 'view-all', 'close-sidebar', 'show-methodology'],
+  emits: ['update-search', 'update-tier', 'update-region', 'update-category', 'place-added', 'focus-place', 'view-all', 'close-sidebar', 'show-methodology', 'show-random-picker'],
   setup(props, { emit }) {
     const showAddPlaceForm = ref(false)
     const categoryScroller = ref(null)
     const { cuisineNames: categories, tierOptions, getTierBadgeClass } = useConfig()
+    const availableRegions = getAvailableRegions()
 
     // Convert vertical wheel scroll to horizontal scroll for category buttons
     const handleWheelScroll = (event) => {
@@ -246,6 +287,11 @@ export default {
         filtered = filtered.filter((place) => place.tier === props.selectedTier)
       }
 
+      // Filter by region
+      if (props.selectedRegion) {
+        filtered = filtered.filter((place) => place.region === props.selectedRegion)
+      }
+
       return filtered
     })
 
@@ -268,6 +314,7 @@ export default {
       toggleAddPlaceForm,
       categories,
       tierOptions,
+      availableRegions,
     }
   },
 }

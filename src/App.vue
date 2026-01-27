@@ -32,16 +32,19 @@
           :places="places"
           :search-query="searchQuery"
           :selected-tier="selectedTier"
+          :selected-region="selectedRegion"
           :selected-category="selectedCategory"
           :is-admin="isAdmin"
           @update-search="searchQuery = $event"
           @update-tier="selectedTier = $event"
+          @update-region="selectedRegion = $event"
           @update-category="selectedCategory = $event"
           @place-added="handlePlaceAdded"
           @focus-place="focusOnPlace"
           @view-all="showViewAllModal = true"
           @close-sidebar="toggleSidebar"
           @show-methodology="showMethodologyModal = true"
+          @show-random-picker="showSpinWheelModal = true"
         />
       </div>
 
@@ -92,33 +95,53 @@
         @close="showAdminPanel = false"
       />
 
-      <!-- Desktop Methodology Button -->
-      <button
-        @click="showMethodologyModal = true"
-        class="hidden lg:flex fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-white px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors items-center gap-2"
-      >
-        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <span class="text-sm font-medium text-slate-700">Methodology</span>
-      </button>
+      <!-- Desktop Header Buttons -->
+      <div class="hidden lg:flex fixed top-4 left-1/2 -translate-x-1/2 z-[100] gap-2">
+        <button
+          @click="showMethodologyModal = true"
+          class="bg-white px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-sm font-medium text-slate-700">Methodology</span>
+        </button>
+        <button
+          @click="showSpinWheelModal = true"
+          class="bg-white px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-sm font-medium text-slate-700">Random</span>
+        </button>
+      </div>
 
       <!-- Methodology Modal -->
       <MethodologyModal
         :is-open="showMethodologyModal"
         @close="showMethodologyModal = false"
       />
+
+      <!-- Spin Wheel Modal -->
+      <SpinWheelModal
+        :is-open="showSpinWheelModal"
+        :places="places"
+        @close="showSpinWheelModal = false"
+        @select-place="handleSpinWheelSelect"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import Sidebar from './components/Sidebar.vue'
 import MapContainer from './components/MapContainer.vue'
 import ViewAllModal from './components/ViewAllModal.vue'
 import AdminPanel from './components/AdminPanel.vue'
 import MethodologyModal from './components/MethodologyModal.vue'
+import SpinWheelModal from './components/SpinWheelModal.vue'
 import { useFoodTracker } from './composables/useFoodTracker'
 import { useAdmin } from './composables/useAdmin'
 import { useVoting } from './composables/useVoting'
@@ -132,6 +155,7 @@ export default {
     ViewAllModal,
     AdminPanel,
     MethodologyModal,
+    SpinWheelModal,
   },
   setup() {
     // Start with sidebar closed on mobile, open on desktop
@@ -139,9 +163,10 @@ export default {
     const showViewAllModal = ref(false)
     const showAdminPanel = ref(false)
     const showMethodologyModal = ref(false)
+    const showSpinWheelModal = ref(false)
     const mapContainer = ref(null)
 
-    const { places, searchQuery, selectedTier, selectedCategory, loading, addPlace, updatePlace, deletePlace, loadSavedData, getComments, addComment, deleteComment } =
+    const { places, searchQuery, selectedTier, selectedRegion, selectedCategory, loading, addPlace, updatePlace, deletePlace, loadSavedData, getComments, addComment, deleteComment } =
       useFoodTracker()
 
     // Admin state
@@ -179,6 +204,23 @@ export default {
       }
     }
 
+    const handleSpinWheelSelect = async (place) => {
+      // Switch to the restaurant's cuisine category first so its marker exists
+      if (place.cuisine_type && place.cuisine_type !== selectedCategory.value) {
+        selectedCategory.value = place.cuisine_type
+        // Wait for Vue reactivity to process
+        await nextTick()
+        // Additional delay for MapContainer's watcher to reload markers
+        setTimeout(() => {
+          focusOnPlace(place)
+        }, 100)
+      } else {
+        focusOnPlace(place)
+      }
+      // Close the spin wheel modal
+      showSpinWheelModal.value = false
+    }
+
     onMounted(async () => {
       initAdmin()
       await loadConfig()
@@ -190,17 +232,20 @@ export default {
       showViewAllModal,
       showAdminPanel,
       showMethodologyModal,
+      showSpinWheelModal,
       mapContainer,
       toggleSidebar,
       places,
       searchQuery,
       selectedTier,
+      selectedRegion,
       selectedCategory,
       loading,
       handlePlaceAdded,
       handlePlaceUpdate,
       handlePlaceDelete,
       focusOnPlace,
+      handleSpinWheelSelect,
       getComments,
       addComment,
       deleteComment,

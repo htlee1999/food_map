@@ -30,19 +30,8 @@ export function useAdmin() {
   // Computed property to check if user is admin
   const isAdmin = computed(() => !!adminKey.value)
 
-  // Get the admin key for API requests
-  const getAdminKey = () => adminKey.value
-
-  // Clear admin session (logout)
-  const clearAdmin = () => {
-    adminKey.value = null
-    sessionStorage.removeItem('adminKey')
-  }
-
   return {
     isAdmin,
     initAdmin,
-    getAdminKey,
-    clearAdmin,
   }
 }

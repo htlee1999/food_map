@@ -223,7 +223,13 @@
                     </span>
                   </div>
                   <p class="text-slate-600 text-xs">{{ place.address }}</p>
-                  <div v-if="place.tags && place.tags.length > 0" class="flex flex-wrap gap-1 mt-2">
+                  <div class="flex flex-wrap gap-1 mt-2">
+                    <span
+                      v-if="place.region"
+                      class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-medium"
+                    >
+                      {{ place.region }}
+                    </span>
                     <span
                       v-for="tag in place.tags"
                       :key="tag"

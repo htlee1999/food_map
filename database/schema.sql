@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS places (
     tags JSONB DEFAULT '[]', -- Store tags as JSON array e.g., ["thai", "spicy"]
     price_range VARCHAR(20),
     tier VARCHAR(10),
+    region VARCHAR(20), -- Singapore region: Central, East, West, North, North-East
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -89,6 +90,7 @@ CREATE TABLE IF NOT EXISTS site_settings (
 CREATE INDEX IF NOT EXISTS idx_places_name ON places(name);
 CREATE INDEX IF NOT EXISTS idx_places_cuisine ON places(cuisine_type);
 CREATE INDEX IF NOT EXISTS idx_places_tier ON places(tier);
+CREATE INDEX IF NOT EXISTS idx_places_region ON places(region);
 CREATE INDEX IF NOT EXISTS idx_preferences_user ON preferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_preferences_place ON preferences(place_id);
 CREATE INDEX IF NOT EXISTS idx_comments_place ON comments(place_id);

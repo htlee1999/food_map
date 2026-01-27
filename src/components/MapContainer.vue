@@ -145,8 +145,14 @@ export default {
 
     // Generate info window content with comments and votes
     const generateInfoWindowContent = (place, comments = [], votes = { up: 0, down: 0, userVote: null }) => {
-      const tagsHtml = place.tags && place.tags.length > 0
-        ? `<div class="popup-tags">${place.tags.map(tag => `<span class="popup-tag">${tag}</span>`).join('')}</div>`
+      const regionBadge = place.region
+        ? `<span class="popup-tag popup-tag-region">${place.region}</span>`
+        : ''
+      const tagsBadges = place.tags && place.tags.length > 0
+        ? place.tags.map(tag => `<span class="popup-tag">${tag}</span>`).join('')
+        : ''
+      const tagsHtml = (regionBadge || tagsBadges)
+        ? `<div class="popup-tags">${regionBadge}${tagsBadges}</div>`
         : ''
 
       // Comments section - visible to all, but add/delete only for admin
@@ -325,15 +331,25 @@ export default {
         animation: google.maps.Animation.DROP
       })
 
-      // Fetch comments and votes when marker is created
+      // Create info window with loading state initially
+      const infoWindow = new google.maps.InfoWindow({
+        content: generateInfoWindowContent(place, [], { up: 0, down: 0, userVote: null })
+      })
+
+      // Track marker immediately before async calls to prevent race conditions
+      const markerData = { marker, place, infoWindow }
+      markers.value.push(markerData)
+
+      // Fetch comments and votes asynchronously
       const [comments, votes] = await Promise.all([
         props.getComments(place.id),
         props.getVotes(place.id)
       ])
 
-      const infoWindow = new google.maps.InfoWindow({
-        content: generateInfoWindowContent(place, comments, votes)
-      })
+      // Update info window content with fetched data (only if marker still exists)
+      if (markers.value.includes(markerData)) {
+        infoWindow.setContent(generateInfoWindowContent(place, comments, votes))
+      }
 
       marker.addListener('click', async () => {
         // Refresh comments and votes when marker is clicked to get latest data
@@ -344,8 +360,6 @@ export default {
         infoWindow.setContent(generateInfoWindowContent(place, freshComments, freshVotes))
         infoWindow.open(map.value, marker)
       })
-
-      markers.value.push({ marker, place, infoWindow })
 
       return marker
     }
@@ -543,6 +557,11 @@ export default {
   border-radius: 4px;
   font-size: 0.7rem;
   font-weight: 500;
+}
+
+:global(.popup-tag-region) {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 :global(.popup-comments) {

@@ -63,16 +63,9 @@ export function useVoting() {
     }
   }
 
-  // Get cached votes for a place
-  const getCachedVotes = (placeId) => {
-    return votesCache.value[placeId] || { up: 0, down: 0, userVote: null }
-  }
-
   return {
-    voterId,
     votesCache,
     getVotes,
     vote,
-    getCachedVotes,
   }
 }

@@ -5,6 +5,7 @@ export function useFoodTracker() {
   const places = ref([])
   const searchQuery = ref('')
   const selectedTier = ref('')
+  const selectedRegion = ref('')
   const loading = ref(false)
   const selectedCategory = ref('Zi Char')
 
@@ -123,6 +124,7 @@ export function useFoodTracker() {
     places,
     searchQuery,
     selectedTier,
+    selectedRegion,
     selectedCategory,
     loading,
     addPlace,

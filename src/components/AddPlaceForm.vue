@@ -160,6 +160,7 @@
 <script>
 import { ref, reactive, computed, watch } from 'vue'
 import { useConfig } from '../composables/useConfig'
+import { classifyRegion } from '../utils/regionMapping'
 
 export default {
   name: 'AddPlaceForm',
@@ -205,11 +206,13 @@ export default {
 
         if (data.status === 'OK' && data.results.length > 0) {
           const result = data.results[0]
+          const region = classifyRegion(address, result.formatted_address)
           return {
             lat: result.geometry.location.lat,
             lng: result.geometry.location.lng,
             confidence: 'high',
-            formatted_address: result.formatted_address
+            formatted_address: result.formatted_address,
+            region
           }
         }
 
@@ -226,11 +229,13 @@ export default {
 
           if (data.status === 'OK' && data.results.length > 0) {
             const result = data.results[0]
+            const region = classifyRegion(addressWithoutUnit, result.formatted_address)
             return {
               lat: result.geometry.location.lat,
               lng: result.geometry.location.lng,
               confidence: 'medium',
-              formatted_address: result.formatted_address
+              formatted_address: result.formatted_address,
+              region
             }
           }
         }
@@ -250,11 +255,13 @@ export default {
 
           if (data.status === 'OK' && data.results.length > 0) {
             const result = data.results[0]
+            const region = classifyRegion(simplifiedAddress, result.formatted_address)
             return {
               lat: result.geometry.location.lat,
               lng: result.geometry.location.lng,
               confidence: 'low',
-              formatted_address: result.formatted_address
+              formatted_address: result.formatted_address,
+              region
             }
           }
         }
@@ -269,11 +276,13 @@ export default {
 
           if (data.status === 'OK' && data.results.length > 0) {
             const result = data.results[0]
+            const region = classifyRegion(streetOnly, result.formatted_address)
             return {
               lat: result.geometry.location.lat,
               lng: result.geometry.location.lng,
               confidence: 'very-low',
-              formatted_address: result.formatted_address
+              formatted_address: result.formatted_address,
+              region
             }
           }
         }
@@ -324,6 +333,7 @@ export default {
           tier: formData.tier,
           cuisine_type: formData.cuisine_type,
           tags: [...formData.tags],
+          region: coords.region,
           coords: {
             lat: coords.lat,
             lng: coords.lng,
