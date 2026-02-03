@@ -80,7 +80,7 @@
       <button
         v-if="isAdmin"
         @click="showAdminPanel = true"
-        class="fixed top-4 right-4 z-[100] bg-white p-2.5 rounded-lg shadow-lg hover:bg-slate-50 transition-colors"
+        class="fixed top-16 left-4 lg:left-auto lg:right-4 z-[70] lg:z-[100] bg-white p-2.5 rounded-lg shadow-lg hover:bg-slate-50 transition-colors"
         title="Admin Settings"
       >
         <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
