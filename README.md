@@ -1,17 +1,18 @@
-# Singapore Food Tracker
+# Singapore Food Map
 
-A Vue.js application for tracking and rating food places in Singapore with an interactive Google Maps integration. Organize restaurants by cuisine type (Zi Char, Ramen) and rate them using a tier system.
+A Vue.js application for tracking and rating food places in Singapore with an interactive Google Maps integration. Organize restaurants by cuisine type and rate them using a tier system.
 
 ## Features
 
 - Interactive Google Maps showing restaurant locations in Singapore
-- Category filtering (Zi Char / Ramen)
+- Category filtering by cuisine type (Zi Char, Chinese, Ramen, Korean, etc.)
 - Tier-based rating system (S, A, B, C, D, F)
+- **"Up to you" spin wheel** - Can't decide? Let the wheel pick a random restaurant for you
 - **Admin-only management** - Only authenticated users can add, edit, and delete restaurants
 - **Public voting system** - Visitors can agree/disagree with ratings using thumbs up/down
 - Search and filter by name, address, or tier
 - Address geocoding with Google Maps API
-- Responsive mobile-first design
+- Responsive mobile-first design with dedicated mobile controls
 - Real-time data synchronization with PostgreSQL
 
 ## Tech Stack
