@@ -14,7 +14,7 @@
     <script
       async
       defer
-      src="https://maps.googleapis.com/maps/api/js?key=%VITE_GOOGLE_MAP_API%&libraries=places&callback=initGoogleMaps"
+      src="https://maps.googleapis.com/maps/api/js?key=%VITE_GOOGLE_MAP_API%&libraries=places&callback=initGoogleMaps&loading=async"
       onerror="window.dispatchEvent(new CustomEvent('googleMapsLoaded', { detail: { error: 'Failed to load Google Maps API.' } }))"
     ></script>
   </head>
