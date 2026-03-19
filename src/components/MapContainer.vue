@@ -4,23 +4,15 @@
       <div class="spinner"></div>
       <div>Loading map and places...</div>
     </div>
-    <div v-if="!googleMapsLoaded && !googleMapsError" class="loading">
+    <div v-if="!mapLoaded && !mapError" class="loading">
       <div class="spinner"></div>
-      <div>Loading Google Maps...</div>
+      <div>Loading map...</div>
     </div>
-    <div v-if="googleMapsError" class="error-message">
+    <div v-if="mapError" class="error-message">
       <div class="error-icon">⚠️</div>
       <div class="error-text">
-        <h3>Google Maps API Error</h3>
-        <p>{{ googleMapsError }}</p>
-        <p class="error-instructions">
-          To fix this issue:
-          <br>1. Get your Google Maps API key from <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
-          <br>2. Create a <code>.env.local</code> file in your project root
-          <br>3. Add <code>VITE_GOOGLE_MAP_API=your_actual_api_key_here</code> to the file
-          <br>4. Enable Maps JavaScript API and Geocoding API
-          <br>5. Restart your development server
-        </p>
+        <h3>Map Error</h3>
+        <p>{{ mapError }}</p>
       </div>
     </div>
     <div ref="mapElement" id="map"></div>
@@ -30,6 +22,8 @@
 <script>
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { useConfig } from '../composables/useConfig'
+
+const ONEMAP_ATTRIBUTION = '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" style="height:20px;width:20px;"/>&nbsp;<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap</a>&nbsp;&copy;&nbsp;contributors&nbsp;&#124;&nbsp;<a href="https://www.sla.gov.sg/" target="_blank" rel="noopener noreferrer">Singapore Land Authority</a>'
 
 export default {
   name: 'MapContainer',
@@ -77,35 +71,29 @@ export default {
     const mapElement = ref(null)
     const map = ref(null)
     const markers = ref([])
-    const googleMapsLoaded = ref(false)
-    const googleMapsError = ref(null)
+    const mapLoaded = ref(false)
+    const mapError = ref(null)
+    const provider = ref(null)
 
-    // Initialize Google Maps
-    const initMap = () => {
-      if (!window.google || !window.google.maps) {
-        return
-      }
+    // ─── Google Maps implementation ───
 
-      // Prevent multiple map initializations
-      if (map.value) {
-        return
-      }
+    const initGoogleMap = () => {
+      if (!window.google || !window.google.maps) return
+      if (map.value) return
 
-      // Singapore bounds
       const singaporeBounds = new google.maps.LatLngBounds(
-        new google.maps.LatLng(1.144, 103.535), // Southwest
-        new google.maps.LatLng(1.494, 104.502)  // Northeast
+        new google.maps.LatLng(1.144, 103.535),
+        new google.maps.LatLng(1.494, 104.502)
       )
 
       map.value = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 1.3521, lng: 103.8198 }, // Singapore center
+        center: { lat: 1.3521, lng: 103.8198 },
         zoom: 12,
         restriction: {
           latLngBounds: singaporeBounds,
           strictBounds: false,
         },
         mapTypeId: google.maps.MapTypeId.ROADMAP,
-        // Reposition controls to avoid hamburger menu on mobile
         mapTypeControl: true,
         mapTypeControlOptions: {
           position: google.maps.ControlPosition.TOP_RIGHT,
@@ -125,13 +113,11 @@ export default {
         ]
       })
 
-      googleMapsLoaded.value = true
+      mapLoaded.value = true
     }
 
-    // Get marker icon based on tier
-    const getMarkerIcon = (tier) => {
+    const getGoogleMarkerIcon = (tier) => {
       const color = getTierColorHex(tier)
-
       return {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 8,
@@ -143,8 +129,163 @@ export default {
       }
     }
 
-    // Generate info window content with comments and votes
-    const generateInfoWindowContent = (place, comments = [], votes = { up: 0, down: 0, userVote: null }) => {
+    const addGoogleMarker = async (place) => {
+      if (!map.value || !place.coords) return
+
+      const marker = new google.maps.Marker({
+        position: { lat: place.coords.lat, lng: place.coords.lng },
+        map: map.value,
+        icon: getGoogleMarkerIcon(place.tier),
+        title: place.name,
+        animation: google.maps.Animation.DROP
+      })
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: generatePopupContent(place, [], { up: 0, down: 0, userVote: null })
+      })
+
+      const markerData = { marker, place, infoWindow }
+      markers.value.push(markerData)
+
+      const [comments, votes] = await Promise.all([
+        props.getComments(place.id),
+        props.getVotes(place.id)
+      ])
+
+      if (markers.value.includes(markerData)) {
+        infoWindow.setContent(generatePopupContent(place, comments, votes))
+      }
+
+      marker.addListener('click', async () => {
+        const [freshComments, freshVotes] = await Promise.all([
+          props.getComments(place.id),
+          props.getVotes(place.id)
+        ])
+        infoWindow.setContent(generatePopupContent(place, freshComments, freshVotes))
+        infoWindow.open(map.value, marker)
+      })
+
+      return marker
+    }
+
+    const clearGoogleMarkers = () => {
+      for (const { marker, infoWindow } of markers.value) {
+        infoWindow.close()
+        marker.setVisible(false)
+        marker.setMap(null)
+      }
+      markers.value = []
+    }
+
+    const focusGoogleMap = (place) => {
+      if (!map.value || !place.coords) return
+      map.value.setCenter({ lat: place.coords.lat, lng: place.coords.lng })
+      map.value.setZoom(16)
+      const markerData = markers.value.find((m) => m.place.id === place.id)
+      if (markerData) {
+        markerData.infoWindow.open(map.value, markerData.marker)
+      }
+    }
+
+    // ─── OneMap (Leaflet) implementation ───
+
+    const initOneMap = () => {
+      if (!window.L) return
+      if (map.value) return
+
+      const sw = L.latLng(1.144, 103.535)
+      const ne = L.latLng(1.494, 104.502)
+      const bounds = L.latLngBounds(sw, ne)
+
+      const leafletMap = L.map('map', {
+        center: L.latLng(1.3521, 103.8198),
+        zoom: 12,
+        minZoom: 11,
+        maxZoom: 19,
+        maxBounds: bounds
+      })
+
+      L.tileLayer('https://www.onemap.gov.sg/maps/tiles/Original/{z}/{x}/{y}.png', {
+        detectRetina: true,
+        maxZoom: 19,
+        minZoom: 11,
+        attribution: ONEMAP_ATTRIBUTION
+      }).addTo(leafletMap)
+
+      map.value = leafletMap
+      mapLoaded.value = true
+    }
+
+    const createLeafletIcon = (tier) => {
+      const color = getTierColorHex(tier)
+      const svgIcon = `
+        <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="8" fill="${color}" stroke="#ffffff" stroke-width="3"/>
+        </svg>`
+      return L.divIcon({
+        html: svgIcon,
+        className: 'leaflet-tier-marker',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        popupAnchor: [0, -10]
+      })
+    }
+
+    const addLeafletMarker = async (place) => {
+      if (!map.value || !place.coords) return
+
+      const marker = L.marker(
+        [place.coords.lat, place.coords.lng],
+        { icon: createLeafletIcon(place.tier), title: place.name }
+      ).addTo(map.value)
+
+      const popup = L.popup({ maxWidth: 350, maxHeight: 400 })
+        .setContent(generatePopupContent(place, [], { up: 0, down: 0, userVote: null }))
+
+      marker.bindPopup(popup)
+
+      const markerData = { marker, place, popup }
+      markers.value.push(markerData)
+
+      const [comments, votes] = await Promise.all([
+        props.getComments(place.id),
+        props.getVotes(place.id)
+      ])
+
+      if (markers.value.includes(markerData)) {
+        popup.setContent(generatePopupContent(place, comments, votes))
+      }
+
+      marker.on('click', async () => {
+        const [freshComments, freshVotes] = await Promise.all([
+          props.getComments(place.id),
+          props.getVotes(place.id)
+        ])
+        popup.setContent(generatePopupContent(place, freshComments, freshVotes))
+      })
+
+      return marker
+    }
+
+    const clearLeafletMarkers = () => {
+      for (const { marker } of markers.value) {
+        marker.remove()
+      }
+      markers.value = []
+    }
+
+    const focusLeafletMap = (place) => {
+      if (!map.value || !place.coords) return
+      map.value.setView([place.coords.lat, place.coords.lng], 16)
+      const markerData = markers.value.find((m) => m.place.id === place.id)
+      if (markerData) {
+        markerData.marker.openPopup()
+      }
+    }
+
+    // ─── Shared logic ───
+
+    const generatePopupContent = (place, comments = [], votes = { up: 0, down: 0, userVote: null }) => {
       const regionBadge = place.region
         ? `<span class="popup-tag popup-tag-region">${place.region}</span>`
         : ''
@@ -155,7 +296,6 @@ export default {
         ? `<div class="popup-tags">${regionBadge}${tagsBadges}</div>`
         : ''
 
-      // Comments section - visible to all, but add/delete only for admin
       const commentsHtml = comments.length > 0
         ? comments.map(c => `
             <div class="comment-item" data-comment-id="${c.id}">
@@ -229,44 +369,42 @@ export default {
       `
     }
 
-    // Handle info window interactions
     const handleInfoWindowClick = async (event) => {
       const target = event.target
 
-      // Handle vote buttons (check both button and child elements)
       const voteBtn = target.closest('.vote-btn')
       if (voteBtn) {
         const placeId = voteBtn.dataset.votePlace
         const voteType = voteBtn.dataset.voteType
         if (placeId && voteType) {
-          // Optimistic UI: immediately show loading state on button
           const allVoteBtns = document.querySelectorAll(`.vote-btn[data-vote-place="${placeId}"]`)
           allVoteBtns.forEach(btn => btn.classList.add('loading'))
           voteBtn.classList.add('voting')
 
           const newVotes = await props.vote(parseInt(placeId), voteType)
 
-          // Remove loading state
           allVoteBtns.forEach(btn => btn.classList.remove('loading', 'voting'))
 
           if (newVotes) {
-            // Refresh the info window
             const markerData = markers.value.find(m => m.place.id === parseInt(placeId))
             if (markerData) {
               const comments = await props.getComments(parseInt(placeId))
-              markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, newVotes))
+              const content = generatePopupContent(markerData.place, comments, newVotes)
+              if (provider.value === 'google') {
+                markerData.infoWindow.setContent(content)
+              } else {
+                markerData.popup.setContent(content)
+              }
             }
           }
         }
         return
       }
 
-      // Handle comment submission
       if (target.classList.contains('comment-submit-btn')) {
         const placeId = target.dataset.submitPlace
         const textarea = document.querySelector(`.comment-input[data-place-id="${placeId}"]`)
         if (textarea && textarea.value.trim()) {
-          // Show loading state
           target.classList.add('loading')
           target.disabled = true
           target.innerHTML = '<span class="btn-spinner"></span> Adding...'
@@ -274,15 +412,18 @@ export default {
 
           const newComment = await props.addComment(parseInt(placeId), textarea.value.trim())
           if (newComment) {
-            // Refresh the info window
             const markerData = markers.value.find(m => m.place.id === parseInt(placeId))
             if (markerData) {
               const comments = await props.getComments(parseInt(placeId))
               const votes = await props.getVotes(parseInt(placeId))
-              markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, votes))
+              const content = generatePopupContent(markerData.place, comments, votes)
+              if (provider.value === 'google') {
+                markerData.infoWindow.setContent(content)
+              } else {
+                markerData.popup.setContent(content)
+              }
             }
           } else {
-            // Reset button on error
             target.classList.remove('loading')
             target.disabled = false
             target.innerHTML = 'Add Review'
@@ -291,27 +432,28 @@ export default {
         }
       }
 
-      // Handle comment deletion
       if (target.classList.contains('comment-delete-btn')) {
         const commentId = target.dataset.deleteComment
         const popup = target.closest('.custom-popup')
         const placeId = popup?.dataset.placeId
         if (commentId && placeId) {
-          // Show loading state
           target.innerHTML = '...'
           target.disabled = true
 
           const success = await props.deleteComment(parseInt(commentId))
           if (success) {
-            // Refresh the info window
             const markerData = markers.value.find(m => m.place.id === parseInt(placeId))
             if (markerData) {
               const comments = await props.getComments(parseInt(placeId))
               const votes = await props.getVotes(parseInt(placeId))
-              markerData.infoWindow.setContent(generateInfoWindowContent(markerData.place, comments, votes))
+              const content = generatePopupContent(markerData.place, comments, votes)
+              if (provider.value === 'google') {
+                markerData.infoWindow.setContent(content)
+              } else {
+                markerData.popup.setContent(content)
+              }
             }
           } else {
-            // Reset on error
             target.innerHTML = 'Delete'
             target.disabled = false
           }
@@ -319,144 +461,81 @@ export default {
       }
     }
 
-    // Add marker to map
-    const addMarker = async (place) => {
-      if (!map.value || !place.coords) return
-
-      const marker = new google.maps.Marker({
-        position: { lat: place.coords.lat, lng: place.coords.lng },
-        map: map.value,
-        icon: getMarkerIcon(place.tier),
-        title: place.name,
-        animation: google.maps.Animation.DROP
-      })
-
-      // Create info window with loading state initially
-      const infoWindow = new google.maps.InfoWindow({
-        content: generateInfoWindowContent(place, [], { up: 0, down: 0, userVote: null })
-      })
-
-      // Track marker immediately before async calls to prevent race conditions
-      const markerData = { marker, place, infoWindow }
-      markers.value.push(markerData)
-
-      // Fetch comments and votes asynchronously
-      const [comments, votes] = await Promise.all([
-        props.getComments(place.id),
-        props.getVotes(place.id)
-      ])
-
-      // Update info window content with fetched data (only if marker still exists)
-      if (markers.value.includes(markerData)) {
-        infoWindow.setContent(generateInfoWindowContent(place, comments, votes))
-      }
-
-      marker.addListener('click', async () => {
-        // Refresh comments and votes when marker is clicked to get latest data
-        const [freshComments, freshVotes] = await Promise.all([
-          props.getComments(place.id),
-          props.getVotes(place.id)
-        ])
-        infoWindow.setContent(generateInfoWindowContent(place, freshComments, freshVotes))
-        infoWindow.open(map.value, marker)
-      })
-
-      return marker
-    }
-
-    // Clear all markers
-    const clearMarkers = () => {
-      for (let i = 0; i < markers.value.length; i++) {
-        const { marker, infoWindow } = markers.value[i]
-        infoWindow.close()
-        marker.setVisible(false)
-        marker.setMap(null)
-      }
-      markers.value = []
-    }
-
-    // Add all places as markers
     const addAllMarkers = async () => {
-      clearMarkers()
+      if (provider.value === 'google') {
+        clearGoogleMarkers()
+      } else {
+        clearLeafletMarkers()
+      }
+
       const placesToAdd = props.places.filter(
         (place) => place.cuisine_type === props.selectedCategory && place.coords
       )
-      // Fetch comments for all markers in parallel
-      await Promise.all(placesToAdd.map((place) => addMarker(place)))
+
+      const addFn = provider.value === 'google' ? addGoogleMarker : addLeafletMarker
+      await Promise.all(placesToAdd.map((place) => addFn(place)))
     }
 
-    // Focus on a specific place
     const focusOnPlace = (place) => {
-      if (!map.value || !place.coords) return
-
-      const position = { lat: place.coords.lat, lng: place.coords.lng }
-      
-      map.value.setCenter(position)
-      map.value.setZoom(16)
-
-      // Find and open the info window for this place
-      const markerData = markers.value.find((m) => m.place.id === place.id)
-      if (markerData) {
-        markerData.infoWindow.open(map.value, markerData.marker)
+      if (provider.value === 'google') {
+        focusGoogleMap(place)
+      } else {
+        focusLeafletMap(place)
       }
     }
 
-    // Listen for Google Maps loaded event
-    const handleGoogleMapsLoaded = (event) => {
+    const handleMapReady = (event) => {
       if (event && event.detail && event.detail.error) {
-        googleMapsError.value = event.detail.error
+        mapError.value = event.detail.error
         return
       }
 
-      initMap()
+      provider.value = event?.detail?.provider || window.mapProvider
+
+      if (provider.value === 'google') {
+        initGoogleMap()
+      } else if (provider.value === 'onemap') {
+        initOneMap()
+      }
+
       if (props.places.length > 0) {
         addAllMarkers()
       }
     }
 
-    // Watch for changes in places
     watch(
       () => props.places,
       () => {
-        if (map.value) {
-          addAllMarkers()
-        }
+        if (map.value) addAllMarkers()
       },
       { deep: true }
     )
 
-    // Watch for changes in selectedCategory
     watch(
       () => props.selectedCategory,
       () => {
-        if (map.value) {
-          addAllMarkers()
-        }
+        if (map.value) addAllMarkers()
       }
     )
 
     onMounted(() => {
-      // Listen for Google Maps loaded event
-      window.addEventListener('googleMapsLoaded', handleGoogleMapsLoaded)
-
-      // Listen for info window interactions (using event delegation)
+      window.addEventListener('mapReady', handleMapReady)
       document.addEventListener('click', handleInfoWindowClick)
 
-      // If Google Maps is already loaded, initialize immediately
-      if (window.google && window.google.maps) {
-        handleGoogleMapsLoaded()
+      if (window.mapProvider) {
+        handleMapReady({ detail: { provider: window.mapProvider } })
       }
     })
 
     onUnmounted(() => {
-      window.removeEventListener('googleMapsLoaded', handleGoogleMapsLoaded)
+      window.removeEventListener('mapReady', handleMapReady)
       document.removeEventListener('click', handleInfoWindowClick)
     })
 
     return {
       mapElement,
-      googleMapsLoaded,
-      googleMapsError,
+      mapLoaded,
+      mapError,
       focusOnPlace,
     }
   },
@@ -862,26 +941,9 @@ export default {
   line-height: 1.6;
 }
 
-.error-instructions {
-  background: #fef3c7;
-  padding: 15px;
-  border-radius: 8px;
-  border-left: 4px solid #f59e0b;
-  text-align: left;
-  font-size: 0.9rem;
-}
-
-.error-instructions a {
-  color: #2563eb;
-  text-decoration: underline;
-}
-
-.error-instructions code {
-  background: #f3f4f6;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
-  color: #1f2937;
+/* Leaflet marker cleanup */
+:global(.leaflet-tier-marker) {
+  background: none !important;
+  border: none !important;
 }
 </style>
