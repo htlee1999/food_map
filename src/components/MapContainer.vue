@@ -78,6 +78,7 @@ export default {
     // ─── Fallback: tear down Google Maps and switch to OneMap ───
 
     const switchToOneMap = async () => {
+      console.log('[MapContainer] Switching to OneMap fallback')
       // Clean up Google Map
       if (map.value) {
         clearGoogleMarkers()
@@ -92,11 +93,13 @@ export default {
 
       const loaded = await window.loadOneMap()
       if (loaded && window.L) {
+        console.log('[MapContainer] OneMap loaded successfully')
         initOneMap()
         if (props.places.length > 0) {
           addAllMarkers()
         }
       } else {
+        console.error('[MapContainer] OneMap also failed to load')
         mapError.value = 'Failed to load any map provider.'
       }
     }
@@ -104,8 +107,15 @@ export default {
     // ─── Google Maps implementation ───
 
     const initGoogleMap = () => {
-      if (!window.google || !window.google.maps) return
-      if (map.value) return
+      console.log('[MapContainer] initGoogleMap called')
+      if (!window.google || !window.google.maps) {
+        console.warn('[MapContainer] google.maps not available')
+        return
+      }
+      if (map.value) {
+        console.log('[MapContainer] Map already initialized')
+        return
+      }
 
       const singaporeBounds = new google.maps.LatLngBounds(
         new google.maps.LatLng(1.144, 103.535),
@@ -138,26 +148,33 @@ export default {
           }
         ]
       })
+      console.log('[MapContainer] Google Map instance created')
 
       // Detect Google Maps tile rendering failures
-      // Check for "sorry we have no imagery" or other error overlays after tiles should have loaded
       let tilesDidLoad = false
       google.maps.event.addListenerOnce(map.value, 'tilesloaded', () => {
         tilesDidLoad = true
+        console.log('[MapContainer] Google Maps tiles loaded successfully')
       })
 
       setTimeout(() => {
         const mapDiv = document.getElementById('map')
-        const hasErrorOverlay = mapDiv && (
-          mapDiv.querySelector('.gm-err-container') ||
-          mapDiv.querySelector('.gm-style-cc') === null ||
-          mapDiv.innerText.includes('sorry') ||
-          mapDiv.innerText.includes('imagery')
-        )
-        if (!tilesDidLoad || hasErrorOverlay) {
+        const errContainer = mapDiv?.querySelector('.gm-err-container')
+        const hasCopyright = mapDiv?.querySelector('.gm-style-cc')
+        const mapText = mapDiv?.innerText || ''
+        const hasErrorText = mapText.includes('sorry') || mapText.includes('imagery') || mapText.includes('error')
+
+        console.log('[MapContainer] Tile check — tilesLoaded:', tilesDidLoad)
+        console.log('[MapContainer] Tile check — errContainer:', !!errContainer)
+        console.log('[MapContainer] Tile check — hasCopyright:', !!hasCopyright)
+        console.log('[MapContainer] Tile check — mapText snippet:', mapText.substring(0, 200))
+
+        if (!tilesDidLoad || errContainer || hasErrorText) {
+          console.warn('[MapContainer] Google Maps tile failure detected, switching to OneMap')
           switchToOneMap()
           return
         }
+        console.log('[MapContainer] Google Maps rendering OK')
       }, 5000)
 
       mapLoaded.value = true
@@ -308,7 +325,8 @@ export default {
       }
 
       marker.on('click', async () => {
-        map.value.flyTo([place.coords.lat, place.coords.lng], 16, {
+        map.value.setView([place.coords.lat, place.coords.lng], 16, {
+          animate: true,
           duration: 0.8
         })
         const [freshComments, freshVotes] = await Promise.all([
@@ -330,15 +348,15 @@ export default {
 
     const focusLeafletMap = (place) => {
       if (!map.value || !place.coords) return
-      map.value.flyTo([place.coords.lat, place.coords.lng], 16, {
+      map.value.setView([place.coords.lat, place.coords.lng], 16, {
+        animate: true,
         duration: 0.8
       })
       const markerData = markers.value.find((m) => m.place.id === place.id)
       if (markerData) {
-        // Open popup after fly animation completes
-        map.value.once('moveend', () => {
+        setTimeout(() => {
           markerData.marker.openPopup()
-        })
+        }, 850)
       }
     }
 
