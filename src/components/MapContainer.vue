@@ -75,6 +75,32 @@ export default {
     const mapError = ref(null)
     const provider = ref(null)
 
+    // ─── Fallback: tear down Google Maps and switch to OneMap ───
+
+    const switchToOneMap = async () => {
+      // Clean up Google Map
+      if (map.value) {
+        clearGoogleMarkers()
+        map.value = null
+      }
+      // Clear the map div contents left by Google Maps
+      const mapDiv = document.getElementById('map')
+      if (mapDiv) mapDiv.innerHTML = ''
+
+      mapLoaded.value = false
+      provider.value = 'onemap'
+
+      const loaded = await window.loadOneMap()
+      if (loaded && window.L) {
+        initOneMap()
+        if (props.places.length > 0) {
+          addAllMarkers()
+        }
+      } else {
+        mapError.value = 'Failed to load any map provider.'
+      }
+    }
+
     // ─── Google Maps implementation ───
 
     const initGoogleMap = () => {
@@ -112,6 +138,27 @@ export default {
           }
         ]
       })
+
+      // Detect Google Maps tile rendering failures
+      // Check for "sorry we have no imagery" or other error overlays after tiles should have loaded
+      let tilesDidLoad = false
+      google.maps.event.addListenerOnce(map.value, 'tilesloaded', () => {
+        tilesDidLoad = true
+      })
+
+      setTimeout(() => {
+        const mapDiv = document.getElementById('map')
+        const hasErrorOverlay = mapDiv && (
+          mapDiv.querySelector('.gm-err-container') ||
+          mapDiv.querySelector('.gm-style-cc') === null ||
+          mapDiv.innerText.includes('sorry') ||
+          mapDiv.innerText.includes('imagery')
+        )
+        if (!tilesDidLoad || hasErrorOverlay) {
+          switchToOneMap()
+          return
+        }
+      }, 5000)
 
       mapLoaded.value = true
     }
@@ -484,13 +531,20 @@ export default {
       }
     }
 
-    const handleMapReady = (event) => {
+    const handleMapReady = async (event) => {
       if (event && event.detail && event.detail.error) {
         mapError.value = event.detail.error
         return
       }
 
-      provider.value = event?.detail?.provider || window.mapProvider
+      const eventProvider = event?.detail?.provider || window.mapProvider
+
+      if (eventProvider === 'google_failed') {
+        await switchToOneMap()
+        return
+      }
+
+      provider.value = eventProvider
 
       if (provider.value === 'google') {
         initGoogleMap()
@@ -524,6 +578,13 @@ export default {
 
       if (window.mapProvider) {
         handleMapReady({ detail: { provider: window.mapProvider } })
+      }
+
+      // Also listen for late Google Maps errors (e.g. gm_authFailure)
+      window.gm_authFailure = () => {
+        if (provider.value === 'google') {
+          switchToOneMap()
+        }
       }
     })
 
