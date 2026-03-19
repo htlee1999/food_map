@@ -162,11 +162,12 @@ export default {
         const errContainer = mapDiv?.querySelector('.gm-err-container')
         const hasCopyright = mapDiv?.querySelector('.gm-style-cc')
         const mapText = mapDiv?.innerText || ''
-        const hasErrorText = mapText.includes('sorry') || mapText.includes('imagery') || mapText.includes('error')
+        const hasErrorText = mapText.includes('Sorry, we have no imagery') || mapText.includes('This page can\'t load Google Maps')
 
         console.log('[MapContainer] Tile check — tilesLoaded:', tilesDidLoad)
         console.log('[MapContainer] Tile check — errContainer:', !!errContainer)
         console.log('[MapContainer] Tile check — hasCopyright:', !!hasCopyright)
+        console.log('[MapContainer] Tile check — hasErrorText:', hasErrorText)
         console.log('[MapContainer] Tile check — mapText snippet:', mapText.substring(0, 200))
 
         if (!tilesDidLoad || errContainer || hasErrorText) {
