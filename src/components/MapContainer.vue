@@ -249,7 +249,11 @@ export default {
         zoom: 12,
         minZoom: 11,
         maxZoom: 19,
-        maxBounds: bounds
+        maxBounds: bounds,
+        zoomAnimation: true,
+        zoomSnap: 0.5,
+        zoomDelta: 0.5,
+        wheelPxPerZoomLevel: 120
       })
 
       L.tileLayer('https://www.onemap.gov.sg/maps/tiles/Original/{z}/{x}/{y}.png', {
@@ -304,6 +308,9 @@ export default {
       }
 
       marker.on('click', async () => {
+        map.value.flyTo([place.coords.lat, place.coords.lng], 16, {
+          duration: 0.8
+        })
         const [freshComments, freshVotes] = await Promise.all([
           props.getComments(place.id),
           props.getVotes(place.id)
@@ -323,10 +330,15 @@ export default {
 
     const focusLeafletMap = (place) => {
       if (!map.value || !place.coords) return
-      map.value.setView([place.coords.lat, place.coords.lng], 16)
+      map.value.flyTo([place.coords.lat, place.coords.lng], 16, {
+        duration: 0.8
+      })
       const markerData = markers.value.find((m) => m.place.id === place.id)
       if (markerData) {
-        markerData.marker.openPopup()
+        // Open popup after fly animation completes
+        map.value.once('moveend', () => {
+          markerData.marker.openPopup()
+        })
       }
     }
 
