@@ -11,6 +11,7 @@ export function useFoodTracker() {
 
   // Load saved data from API and localStorage fallback
   const loadSavedData = async () => {
+    loading.value = true
     try {
       // Check if backend is available
       const health = await healthApi.check()
@@ -26,6 +27,8 @@ export function useFoodTracker() {
     } catch (error) {
       // Fallback to localStorage
       loadFromLocalStorage()
+    } finally {
+      loading.value = false
     }
   }
 

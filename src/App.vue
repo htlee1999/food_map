@@ -100,6 +100,7 @@
       <CuisinePanel
         :is-open="showCuisinePanel"
         :places="places"
+        :loading="loading"
         :selected-category="selectedCategory"
         :selected-region="selectedRegion"
         :selected-tier="selectedTier"
@@ -158,6 +159,7 @@
       <ViewAllModal
         :is-open="showViewAllModal"
         :places="places"
+        :loading="loading"
         :selected-category="selectedCategory"
         :is-admin="isAdmin"
         @close="showViewAllModal = false"

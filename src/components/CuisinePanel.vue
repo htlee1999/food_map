@@ -88,7 +88,16 @@
 
     <!-- Cards list -->
     <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-      <div v-if="filteredPlaces.length === 0" class="text-center text-stone-400 py-12 text-xs">
+      <div
+        v-if="loading && places.length === 0"
+        class="text-center text-stone-400 py-12 text-xs"
+      >
+        Loading restaurants…
+      </div>
+      <div
+        v-else-if="filteredPlaces.length === 0"
+        class="text-center text-stone-400 py-12 text-xs"
+      >
         No restaurants found
       </div>
       <article
@@ -175,6 +184,7 @@ export default {
   props: {
     isOpen: { type: Boolean, default: false },
     places: { type: Array, default: () => [] },
+    loading: { type: Boolean, default: false },
     selectedCategory: { type: String, default: '' },
     selectedRegion: { type: String, default: '' },
     selectedTier: { type: String, default: '' },

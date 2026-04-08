@@ -82,7 +82,14 @@
 
       <!-- Content -->
       <div class="flex-1 overflow-y-auto p-6">
-        <div v-if="filteredPlaces.length === 0" class="text-center text-slate-400 py-16">
+        <div v-if="loading && places.length === 0" class="text-center text-slate-400 py-16">
+          <svg class="w-10 h-10 mx-auto mb-3 text-slate-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="2" stroke-dasharray="50 100"></circle>
+          </svg>
+          <h3 class="text-base font-medium text-slate-600 mb-1">Loading restaurants…</h3>
+          <p class="text-sm text-slate-500">Hang tight while we fetch the collection</p>
+        </div>
+        <div v-else-if="filteredPlaces.length === 0" class="text-center text-slate-400 py-16">
           <svg class="w-16 h-16 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
@@ -318,6 +325,10 @@ export default {
     places: {
       type: Array,
       default: () => [],
+    },
+    loading: {
+      type: Boolean,
+      default: false,
     },
     selectedCategory: {
       type: String,
