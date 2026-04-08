@@ -142,10 +142,13 @@ export default {
         streetViewControl: false,
         fullscreenControl: false,
         styles: [
-          {
-            featureType: 'poi',
-            stylers: [{ visibility: 'off' }]
-          }
+          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+          { elementType: 'geometry', stylers: [{ saturation: -100 }] },
+          { elementType: 'labels', stylers: [{ saturation: -100 }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#d6d6d6' }] },
+          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+          { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#777777' }] }
         ]
       })
       console.log('[MapContainer] Google Map instance created')
@@ -274,7 +277,7 @@ export default {
         wheelPxPerZoomLevel: 120
       })
 
-      L.tileLayer('https://www.onemap.gov.sg/maps/tiles/Original/{z}/{x}/{y}.png', {
+      L.tileLayer('https://www.onemap.gov.sg/maps/tiles/Grey/{z}/{x}/{y}.png', {
         detectRetina: true,
         maxZoom: 19,
         minZoom: 11,
@@ -680,37 +683,52 @@ export default {
   }
 }
 
+:global(.custom-popup) {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1c1917;
+  min-width: 240px;
+}
+
 :global(.popup-name) {
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 8px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #1c1917;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 :global(.popup-address) {
-  color: #666;
-  font-size: 0.9rem;
+  color: #78716c;
+  font-size: 0.78rem;
   margin-bottom: 10px;
+  letter-spacing: 0.01em;
 }
 
 :global(.popup-tier) {
-  margin-top: 8px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 :global(.tier-badge) {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  text-align: center;
-  min-width: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 2px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 :global(.tier-description) {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin-left: 8px;
+  font-size: 0.7rem;
+  color: #78716c;
   font-style: italic;
+  letter-spacing: 0.01em;
 }
 
 :global(.popup-tags) {
@@ -723,11 +741,13 @@ export default {
 :global(.popup-tag) {
   display: inline-block;
   padding: 2px 6px;
-  background: #f1f5f9;
-  color: #475569;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 500;
+  background: #f5f5f4;
+  color: #57534e;
+  border-radius: 2px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 :global(.popup-tag-region) {
@@ -818,37 +838,43 @@ export default {
 
 :global(.comment-input:focus) {
   outline: none;
-  border-color: #4facfe;
+  border-color: #1c1917;
 }
 
 :global(.comment-submit-btn) {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: #1c1917;
   color: white;
   border: none;
   padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: 2px;
+  font-size: 0.7rem;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 :global(.comment-submit-btn:hover) {
-  opacity: 0.9;
+  background: #44403c;
 }
 
 :global(.popup-navigate) {
   margin-top: 10px;
   padding: 8px;
-  background: #f1f5f9;
-  border-radius: 8px;
+  background: #fafaf9;
+  border: 1px solid #e7e5e4;
+  border-radius: 2px;
   text-align: center;
 }
 
 :global(.navigate-label) {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: 0.62rem;
+  color: #78716c;
   display: block;
   margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
 }
 
 :global(.navigate-buttons) {
@@ -894,50 +920,57 @@ export default {
 :global(.popup-votes) {
   margin-top: 12px;
   padding: 10px;
-  background: #f8fafc;
-  border-radius: 8px;
+  background: #fafaf9;
+  border: 1px solid #e7e5e4;
+  border-radius: 2px;
   text-align: center;
 }
 
 :global(.votes-label) {
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.62rem;
+  color: #78716c;
   display: block;
   margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
 }
 
 :global(.votes-buttons) {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 :global(.vote-btn) {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 20px;
+  padding: 6px 14px;
+  border: 1px solid #e7e5e4;
+  border-radius: 2px;
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
+  color: #57534e;
 }
 
 :global(.vote-btn:hover) {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: #1c1917;
+  color: #1c1917;
 }
 
 :global(.vote-btn.vote-up.active) {
-  border-color: #22c55e;
-  background: #dcfce7;
+  border-color: #1c1917;
+  background: #1c1917;
+  color: #ffffff;
 }
 
 :global(.vote-btn.vote-down.active) {
-  border-color: #ef4444;
-  background: #fee2e2;
+  border-color: #1c1917;
+  background: #ffffff;
+  color: #1c1917;
 }
 
 :global(.vote-icon) {

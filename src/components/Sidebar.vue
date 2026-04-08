@@ -1,201 +1,139 @@
 <template>
-  <div
-    class="w-80 min-w-80 h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col flex-shrink-0 relative z-[90]"
+  <aside
+    class="w-72 lg:w-[16vw] lg:min-w-[210px] lg:max-w-[260px] h-screen bg-white border-r border-stone-200 flex flex-col flex-shrink-0 relative z-[90]"
   >
-    <!-- Header Section -->
-    <div class="px-6 pt-8 pb-6">
-      <div class="flex items-center justify-between gap-3 mb-2">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-600 flex items-center justify-center text-xl">
-            🍽️
-          </div>
-          <div>
-            <h1 class="text-xl font-semibold text-slate-900 tracking-tight">{{ selectedCategory }}</h1>
-            <p class="text-xs text-slate-500">Tier List</p>
-          </div>
+    <!-- Header / Title -->
+    <div class="px-7 pt-7 pb-5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-[26px] leading-none text-stone-900 tracking-tight font-semibold">
+            Curated Maps
+          </h2>
+          <p class="mt-2 text-[10px] tracking-[0.22em] uppercase text-stone-500">
+            {{ subtitle }}
+          </p>
         </div>
-        <!-- Mobile buttons -->
-        <div class="flex items-center gap-2 lg:hidden">
-          <!-- Info/methodology button -->
-          <button
-            @click="$emit('show-methodology')"
-            class="text-slate-400 hover:text-slate-600 transition-colors"
-            title="About this map"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </button>
-          <!-- Close button -->
-          <button
-            @click="$emit('close-sidebar')"
-            class="text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
+        <!-- Mobile close -->
+        <button
+          @click="$emit('close-sidebar')"
+          class="lg:hidden text-stone-400 hover:text-stone-700 transition-colors"
+          aria-label="Close menu"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
     </div>
 
-    <!-- Main Content Section -->
-    <div class="flex-1 overflow-y-auto px-6 pb-6">
-      <div class="space-y-4">
-        <!-- Category Toggle Section -->
-        <div class="relative">
-          <div ref="categoryScroller" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <button
-              v-for="category in categories"
-              :key="category"
-              @click="$emit('update-category', category)"
-              :class="selectedCategory === category ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
-              class="px-3 py-2 rounded-lg focus:outline-none transition-all text-xs font-medium whitespace-nowrap flex-shrink-0"
-            >
-              {{ category }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Add New Place Section (Admin Only) -->
-        <div v-if="isAdmin">
-          <button
-            @click="toggleAddPlaceForm"
-            :class="
-              showAddPlaceForm
-                ? 'bg-slate-100 text-slate-700'
-                : 'bg-slate-900 text-white hover:bg-slate-800'
-            "
-            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg focus:outline-none transition-all duration-200 text-sm font-medium"
-          >
-            <span class="text-base">{{ showAddPlaceForm ? '−' : '+' }}</span>
-            <span>{{ showAddPlaceForm ? 'Close' : 'Add Place' }}</span>
-          </button>
-
-          <div v-if="showAddPlaceForm" class="mt-3">
-            <AddPlaceForm @place-added="handlePlaceAdded" />
-          </div>
-        </div>
-
-        <!-- Search Section -->
-        <div class="relative">
-          <input
-            :value="searchQuery"
-            @input="$emit('update-search', $event.target.value)"
-            placeholder="Search restaurants..."
-            class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all text-sm placeholder:text-slate-400"
-          />
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Tier Filter Section -->
-        <div class="relative">
-          <select
-            :value="selectedTier"
-            @change="$emit('update-tier', $event.target.value)"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all text-sm text-slate-700 appearance-none cursor-pointer"
-          >
-            <option value="">All Tiers</option>
-            <option v-for="tier in tierOptions" :key="tier.code" :value="tier.code">
-              {{ tier.label }}
-            </option>
-          </select>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Region Filter Section -->
-        <div class="relative">
-          <select
-            :value="selectedRegion"
-            @change="$emit('update-region', $event.target.value)"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all text-sm text-slate-700 appearance-none cursor-pointer"
-          >
-            <option value="">All Regions</option>
-            <option v-for="region in availableRegions" :key="region" :value="region">
-              {{ region }}
-            </option>
-          </select>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Places List Section -->
-        <div class="pt-2">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-sm font-medium text-slate-900">Restaurants</h3>
-            <button
-              @click="$emit('view-all')"
-              class="text-slate-500 hover:text-slate-900 text-xs font-medium transition-colors"
-            >
-              View All
-            </button>
-          </div>
-          <div v-if="filteredPlaces.length === 0" class="text-center text-slate-400 py-12 text-sm">
-            No restaurants found
-          </div>
-          <div v-else class="space-y-2">
-            <div
-              v-for="place in filteredPlaces.slice(0, 5)"
-              :key="place.id"
-              class="group p-3 bg-white border border-slate-100 rounded-lg cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all duration-200"
-              @click="$emit('focus-place', place)"
-            >
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium text-slate-900 text-sm truncate group-hover:text-slate-700">
-                    {{ place.name }}
-                  </div>
-                  <div class="text-xs text-slate-500 mt-0.5 truncate">{{ place.address }}</div>
-                  <div class="flex flex-wrap gap-1 mt-1.5">
-                    <span
-                      v-if="place.region"
-                      class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-medium"
-                    >
-                      {{ place.region }}
-                    </span>
-                    <span
-                      v-for="tag in place.tags"
-                      :key="tag"
-                      class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium"
-                    >
-                      {{ tag }}
-                    </span>
-                  </div>
-                </div>
-                <span
-                  :class="getTierBadgeClass(place.tier)"
-                  class="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-xs font-semibold"
-                >
-                  {{ place.tier }}
-                </span>
-              </div>
-            </div>
-            <div v-if="filteredPlaces.length > 5" class="text-center text-slate-400 text-xs pt-2">
-              +{{ filteredPlaces.length - 5 }} more
-            </div>
-          </div>
-        </div>
+    <!-- Categories — vertical icon list (grows to fill available space) -->
+    <div class="relative flex-1 min-h-0">
+      <nav
+        ref="categoryScroller"
+        @scroll="updateScrollState"
+        class="px-3 space-y-1 h-full overflow-y-auto sidebar-scroll"
+      >
+        <button
+          v-for="category in categories"
+          :key="category"
+          @click="$emit('update-category', category)"
+          :class="[
+            'w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-150 text-left',
+            selectedCategory === category
+              ? 'bg-stone-900 text-white'
+              : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900',
+          ]"
+        >
+          <span class="w-5 h-5 flex-shrink-0" v-html="getCategoryIcon(category)"></span>
+          <span class="text-[11px] tracking-[0.18em] uppercase font-medium">{{ category }}</span>
+        </button>
+      </nav>
+      <!-- Bottom fade hint when more content is below the fold -->
+      <div
+        v-show="canScrollDown"
+        class="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white via-white/80 to-transparent"
+      ></div>
+      <!-- Chevron pulse when scrollable -->
+      <div
+        v-show="canScrollDown"
+        class="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-stone-400"
+      >
+        <svg class="w-4 h-4 animate-bounce-soft" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
     </div>
-  </div>
+
+    <!-- Add place (admin) -->
+    <div v-if="isAdmin" class="px-7 pt-5 pb-4">
+      <button
+        @click="toggleAddPlaceForm"
+        :class="
+          showAddPlaceForm
+            ? 'bg-stone-100 text-stone-700'
+            : 'bg-white text-stone-700 border border-stone-300 hover:border-stone-900'
+        "
+        class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-all text-[11px] tracking-[0.15em] uppercase font-medium"
+      >
+        <span>{{ showAddPlaceForm ? '− Close' : '+ Add Place' }}</span>
+      </button>
+      <div v-if="showAddPlaceForm" class="mt-3">
+        <AddPlaceForm @place-added="handlePlaceAdded" />
+      </div>
+    </div>
+
+    <!-- Footer (admin settings only) -->
+    <div v-if="isAdmin" class="px-7 pt-3 pb-6 border-t border-stone-100">
+      <button
+        @click="$emit('open-settings')"
+        class="w-full flex items-center gap-2.5 text-stone-500 hover:text-stone-900 transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span class="text-[10px] tracking-[0.22em] uppercase font-medium">Settings</span>
+      </button>
+    </div>
+  </aside>
 </template>
 
 <script>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import AddPlaceForm from './AddPlaceForm.vue'
 import { useConfig } from '../composables/useConfig'
-import { getAvailableRegions } from '../utils/regionMapping'
+
+// Lucide-style stroke icons keyed by lowercase keyword in the cuisine name.
+// Order matters — first match wins.
+const ICON_PATHS = {
+  forkKnife:
+    '<path d="M6 2v8a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2M8 12v10M18 2c-1.5 0-3 1.5-3 4v6h2v10"/>',
+  bowl:
+    '<path d="M3 11h18l-1.2 5.5A4 4 0 0 1 15.9 20H8.1a4 4 0 0 1-3.9-3.5L3 11z"/><path d="M7 11c0-2 2-3 5-3s5 1 5 3"/><path d="M11 4c0 1 1 1 1 2s-1 1-1 2"/>',
+  coffee:
+    '<path d="M17 8h1a3 3 0 0 1 0 6h-1"/><path d="M3 8h14v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><path d="M6 2v3M10 2v3M14 2v3"/>',
+  moon:
+    '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  wine:
+    '<path d="M8 22h8M12 15v7M17 3H7l1 9a4 4 0 0 0 8 0l1-9z"/>',
+  burger:
+    '<path d="M3 11h18M4 15h16M7 19h10"/><path d="M3 11a9 9 0 0 1 18 0"/>',
+}
+
+const ICON_MATCHERS = [
+  { keys: ['ramen', 'noodle', 'pho'], icon: 'bowl' },
+  { keys: ['cafe', 'coffee', 'bakery', 'dessert'], icon: 'coffee' },
+  { keys: ['bar', 'wine', 'cocktail'], icon: 'wine' },
+  { keys: ['late', 'night', 'supper'], icon: 'moon' },
+  { keys: ['burger', 'western', 'american'], icon: 'burger' },
+]
+
+const getCategoryIcon = (name) => {
+  const lower = (name || '').toLowerCase()
+  const match = ICON_MATCHERS.find((m) => m.keys.some((k) => lower.includes(k)))
+  const key = match ? match.icon : 'forkKnife'
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%">${ICON_PATHS[key]}</svg>`
+}
 
 export default {
   name: 'Sidebar',
@@ -203,91 +141,30 @@ export default {
     AddPlaceForm,
   },
   props: {
-    places: {
-      type: Array,
-      default: () => [],
-    },
-    searchQuery: {
-      type: String,
-      default: '',
-    },
-    selectedTier: {
-      type: String,
-      default: '',
-    },
-    selectedRegion: {
-      type: String,
-      default: '',
-    },
-    selectedCategory: {
-      type: String,
-      default: '',
-    },
-    isAdmin: {
-      type: Boolean,
-      default: false,
-    },
+    selectedRegion: { type: String, default: '' },
+    selectedCategory: { type: String, default: '' },
+    isAdmin: { type: Boolean, default: false },
   },
-  emits: ['update-search', 'update-tier', 'update-region', 'update-category', 'place-added', 'focus-place', 'view-all', 'close-sidebar', 'show-methodology', 'show-random-picker'],
+  emits: [
+    'update-category',
+    'place-added',
+    'close-sidebar',
+    'open-settings',
+  ],
   setup(props, { emit }) {
     const showAddPlaceForm = ref(false)
     const categoryScroller = ref(null)
-    const { cuisineNames: categories, tierOptions, getTierBadgeClass } = useConfig()
-    const availableRegions = getAvailableRegions()
+    const canScrollDown = ref(false)
+    const { cuisineNames: categories } = useConfig()
 
-    // Convert vertical wheel scroll to horizontal scroll for category buttons
-    const handleWheelScroll = (event) => {
-      if (categoryScroller.value) {
-        event.preventDefault()
-        categoryScroller.value.scrollLeft += event.deltaY
-      }
-    }
-
-    onMounted(() => {
-      if (categoryScroller.value) {
-        categoryScroller.value.addEventListener('wheel', handleWheelScroll, { passive: false })
-      }
-    })
-
-    onUnmounted(() => {
-      if (categoryScroller.value) {
-        categoryScroller.value.removeEventListener('wheel', handleWheelScroll)
-      }
-    })
-
-    const filteredPlaces = computed(() => {
-      let filtered = props.places
-
-      // Filter by category
-      if (props.selectedCategory) {
-        filtered = filtered.filter((place) => place.cuisine_type === props.selectedCategory)
-      }
-
-      // Filter by search query
-      if (props.searchQuery) {
-        const query = props.searchQuery.toLowerCase()
-        filtered = filtered.filter(
-          (place) =>
-            place.name.toLowerCase().includes(query) || place.address.toLowerCase().includes(query)
-        )
-      }
-
-      // Filter by tier
-      if (props.selectedTier) {
-        filtered = filtered.filter((place) => place.tier === props.selectedTier)
-      }
-
-      // Filter by region
-      if (props.selectedRegion) {
-        filtered = filtered.filter((place) => place.region === props.selectedRegion)
-      }
-
-      return filtered
+    const subtitle = computed(() => {
+      if (props.selectedRegion) return props.selectedRegion
+      if (props.selectedCategory) return `${props.selectedCategory} dining`
+      return 'Street-Chic Dining'
     })
 
     const handlePlaceAdded = (place) => {
       emit('place-added', place)
-      // Hide the form after successfully adding a place
       showAddPlaceForm.value = false
     }
 
@@ -295,27 +172,81 @@ export default {
       showAddPlaceForm.value = !showAddPlaceForm.value
     }
 
+    // Track whether the category list has more content below the fold so we
+    // can render the bottom fade + chevron indicator.
+    const updateScrollState = () => {
+      const el = categoryScroller.value
+      if (!el) {
+        canScrollDown.value = false
+        return
+      }
+      canScrollDown.value = el.scrollTop + el.clientHeight < el.scrollHeight - 1
+    }
+
+    let resizeObserver = null
+    onMounted(() => {
+      updateScrollState()
+      // Recompute when the category list resizes (e.g., cuisines load late,
+      // viewport changes).
+      if (categoryScroller.value && typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(updateScrollState)
+        resizeObserver.observe(categoryScroller.value)
+      }
+      window.addEventListener('resize', updateScrollState)
+    })
+    onUnmounted(() => {
+      if (resizeObserver) resizeObserver.disconnect()
+      window.removeEventListener('resize', updateScrollState)
+    })
+
+    // Re-check whenever the categories array (asynchronously loaded) changes.
+    watch(categories, () => nextTick(updateScrollState))
+
     return {
       showAddPlaceForm,
       categoryScroller,
-      filteredPlaces,
-      getTierBadgeClass,
+      canScrollDown,
+      updateScrollState,
+      subtitle,
       handlePlaceAdded,
       toggleAddPlaceForm,
       categories,
-      tierOptions,
-      availableRegions,
+      getCategoryIcon,
     }
   },
 }
 </script>
 
 <style scoped>
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* Thin visible scrollbar so the scroll affordance is obvious. */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d3d1 transparent;
 }
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 3px;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a8a29e;
+}
+
+/* Gentle bounce on the chevron hint so it's noticeable but not noisy. */
+@keyframes bounce-soft {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+.animate-bounce-soft {
+  animation: bounce-soft 1.6s ease-in-out infinite;
 }
 </style>

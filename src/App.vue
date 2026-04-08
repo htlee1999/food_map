@@ -1,31 +1,71 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600">
-    <div class="flex h-screen">
-      <!-- Mobile toggle button (hidden when sidebar is open) -->
+  <div class="min-h-screen bg-stone-50 font-sans">
+    <!-- Desktop top header -->
+    <header
+      class="hidden lg:flex fixed top-0 left-0 right-0 h-16 bg-white border-b border-stone-200 z-[110] items-center justify-between px-8"
+    >
+      <a class="text-xl font-bold tracking-[0.18em] text-stone-900 select-none">
+        SINGAPORE FOODs
+      </a>
+      <nav class="flex items-center gap-8 text-[13px] tracking-wide text-stone-500">
+        <button class="text-stone-900 font-medium border-b-2 border-stone-900 pb-1">Explore</button>
+        <button @click="showSpinWheelModal = true" class="hover:text-stone-900 transition-colors">
+          Up to You
+        </button>
+        <button @click="showMethodologyModal = true" class="hover:text-stone-900 transition-colors">
+          Methodology
+        </button>
+        <button @click="showViewAllModal = true" class="hover:text-stone-900 transition-colors">
+          View All
+        </button>
+      </nav>
+      <div class="flex items-center gap-5">
+        <button
+          @click="focusSearch"
+          class="text-stone-500 hover:text-stone-900 transition-colors"
+          title="Search"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        <button
+          v-if="isAdmin"
+          @click="showAdminPanel = true"
+          class="text-stone-500 hover:text-stone-900 transition-colors"
+          title="Admin Settings"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 21a8 8 0 0116 0" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="flex h-screen lg:pt-16">
+      <!-- Mobile toggle -->
       <button
         v-show="!showSidebar"
         @click="toggleSidebar"
-        class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2.5 rounded-lg shadow-lg hover:bg-slate-50 transition-colors"
+        class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2.5 rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
       >
-        <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        <svg class="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
 
-      <!-- Mobile "Up to you" button (confused face) -->
+      <!-- Mobile spin button -->
       <button
         v-show="!showSidebar"
         @click="showSpinWheelModal = true"
-        class="lg:hidden fixed top-16 left-4 z-[100] bg-white p-2.5 rounded-lg shadow-lg hover:bg-slate-50 transition-colors"
+        class="lg:hidden fixed top-16 left-4 z-[100] bg-white p-2.5 rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
         title="Up to you"
       >
-        <svg class="w-6 h-6 text-slate-700" viewBox="0 0 24 24" fill="none">
-          <!-- Left eye -->
-          <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
-          <!-- Right eye (raised) -->
-          <circle cx="15" cy="7" r="1.5" fill="currentColor"/>
-          <!-- Wavy uncertain mouth -->
-          <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M7 16c2-2 3 1 5 0s3 2 5 0"/>
+        <svg class="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none">
+          <circle cx="9" cy="9" r="1.5" fill="currentColor" />
+          <circle cx="15" cy="7" r="1.5" fill="currentColor" />
+          <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M7 16c2-2 3 1 5 0s3 2 5 0" />
         </svg>
       </button>
 
@@ -43,29 +83,37 @@
           showSidebar ? 'translate-x-0' : '-translate-x-full',
           'lg:translate-x-0',
         ]"
-        class="lg:relative fixed lg:static top-0 left-0 z-[90] flex-shrink-0"
+        class="lg:relative fixed lg:static top-0 lg:top-auto left-0 z-[90] flex-shrink-0 lg:h-[calc(100vh-4rem)]"
       >
         <Sidebar
-          :places="places"
-          :search-query="searchQuery"
-          :selected-tier="selectedTier"
           :selected-region="selectedRegion"
           :selected-category="selectedCategory"
           :is-admin="isAdmin"
-          @update-search="searchQuery = $event"
-          @update-tier="selectedTier = $event"
-          @update-region="selectedRegion = $event"
-          @update-category="selectedCategory = $event"
+          @update-category="handleCategorySelect"
           @place-added="handlePlaceAdded"
-          @focus-place="focusOnPlace"
-          @view-all="showViewAllModal = true"
           @close-sidebar="toggleSidebar"
-          @show-methodology="showMethodologyModal = true"
-          @show-random-picker="showSpinWheelModal = true"
+          @open-settings="showAdminPanel = true"
         />
       </div>
 
-      <!-- Map Container -->
+      <!-- Cuisine detail panel (desktop) -->
+      <CuisinePanel
+        :is-open="showCuisinePanel"
+        :places="places"
+        :selected-category="selectedCategory"
+        :selected-region="selectedRegion"
+        :selected-tier="selectedTier"
+        :search-query="searchQuery"
+        :get-votes="getVotes"
+        @close="showCuisinePanel = false"
+        @select-place="focusOnPlace"
+        @view-all="showViewAllModal = true"
+        @update-search="searchQuery = $event"
+        @update-tier="selectedTier = $event"
+        @update-region="selectedRegion = $event"
+      />
+
+      <!-- Map area -->
       <div class="flex-1 relative z-[1]">
         <MapContainer
           ref="mapContainer"
@@ -79,9 +127,34 @@
           :get-votes="getVotes"
           :vote="vote"
         />
+
+        <!-- Currently Viewing card overlay -->
+        <div
+          class="hidden md:block absolute bottom-6 left-6 z-[60] bg-stone-900 text-white px-6 py-4 max-w-[19rem] shadow-2xl"
+        >
+          <div class="text-[9px] tracking-[0.25em] uppercase text-stone-400 font-medium">
+            Currently Viewing
+          </div>
+          <div class="text-[1.35rem] mt-1 leading-tight font-semibold">
+            {{ currentlyViewingTitle }}
+          </div>
+          <div class="text-[10px] italic text-stone-300 mt-1.5 leading-snug max-w-xs">
+            "{{ currentlyViewingTagline }}"
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-5 pt-2.5 border-t border-stone-700">
+            <div>
+              <div class="text-[1.35rem] leading-none font-semibold">{{ filteredCount }}</div>
+              <div class="text-[8px] tracking-[0.2em] uppercase text-stone-400 mt-1">Restaurants</div>
+            </div>
+            <div>
+              <div class="text-[1.35rem] leading-none font-semibold">{{ sTierCount }}</div>
+              <div class="text-[8px] tracking-[0.2em] uppercase text-stone-400 mt-1">S-Tier Spots</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- View All Modal -->
+      <!-- Modals -->
       <ViewAllModal
         :is-open="showViewAllModal"
         :places="places"
@@ -93,54 +166,8 @@
         @delete-place="handlePlaceDelete"
       />
 
-      <!-- Admin Settings Button -->
-      <button
-        v-if="isAdmin"
-        @click="showAdminPanel = true"
-        class="fixed top-16 left-4 lg:left-auto lg:right-4 z-[70] lg:z-[100] bg-white p-2.5 rounded-lg shadow-lg hover:bg-slate-50 transition-colors"
-        title="Admin Settings"
-      >
-        <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-      </button>
-
-      <!-- Admin Panel -->
-      <AdminPanel
-        :is-open="showAdminPanel"
-        @close="showAdminPanel = false"
-      />
-
-      <!-- Desktop Header Buttons -->
-      <div class="hidden lg:flex fixed top-4 left-1/2 -translate-x-1/2 z-[100] gap-2">
-        <button
-          @click="showMethodologyModal = true"
-          class="bg-white px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
-        >
-          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <span class="text-sm font-medium text-slate-700">Methodology</span>
-        </button>
-        <button
-          @click="showSpinWheelModal = true"
-          class="bg-white px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
-        >
-          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <span class="text-sm font-medium text-slate-700">Up to you</span>
-        </button>
-      </div>
-
-      <!-- Methodology Modal -->
-      <MethodologyModal
-        :is-open="showMethodologyModal"
-        @close="showMethodologyModal = false"
-      />
-
-      <!-- Spin Wheel Modal -->
+      <AdminPanel :is-open="showAdminPanel" @close="showAdminPanel = false" />
+      <MethodologyModal :is-open="showMethodologyModal" @close="showMethodologyModal = false" />
       <SpinWheelModal
         :is-open="showSpinWheelModal"
         :places="places"
@@ -152,8 +179,9 @@
 </template>
 
 <script>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import Sidebar from './components/Sidebar.vue'
+import CuisinePanel from './components/CuisinePanel.vue'
 import MapContainer from './components/MapContainer.vue'
 import ViewAllModal from './components/ViewAllModal.vue'
 import AdminPanel from './components/AdminPanel.vue'
@@ -164,10 +192,15 @@ import { useAdmin } from './composables/useAdmin'
 import { useVoting } from './composables/useVoting'
 import { useConfig } from './composables/useConfig'
 
+const TAGLINES = {
+  default: 'A monochrome love letter to Singapore food.',
+}
+
 export default {
   name: 'App',
   components: {
     Sidebar,
+    CuisinePanel,
     MapContainer,
     ViewAllModal,
     AdminPanel,
@@ -175,38 +208,51 @@ export default {
     SpinWheelModal,
   },
   setup() {
-    // Start with sidebar closed on mobile, open on desktop
     const showSidebar = ref(window.innerWidth >= 1024)
+    const showCuisinePanel = ref(false)
     const showViewAllModal = ref(false)
     const showAdminPanel = ref(false)
     const showMethodologyModal = ref(false)
     const showSpinWheelModal = ref(false)
     const mapContainer = ref(null)
 
-    const { places, searchQuery, selectedTier, selectedRegion, selectedCategory, loading, addPlace, updatePlace, deletePlace, loadSavedData, getComments, addComment, deleteComment } =
-      useFoodTracker()
+    const {
+      places,
+      searchQuery,
+      selectedTier,
+      selectedRegion,
+      selectedCategory,
+      loading,
+      addPlace,
+      updatePlace,
+      deletePlace,
+      loadSavedData,
+      getComments,
+      addComment,
+      deleteComment,
+    } = useFoodTracker()
 
-    // Admin state
     const { isAdmin, initAdmin } = useAdmin()
-
-    // Voting functionality
     const { getVotes, vote } = useVoting()
-
-    // Config (cuisines, tags, tiers)
     const { loadConfig } = useConfig()
 
     const toggleSidebar = () => {
       showSidebar.value = !showSidebar.value
     }
 
+    // Selecting a cuisine in the sidebar both updates the filter and pops
+    // open the cuisine detail panel (per the design).
+    const handleCategorySelect = (category) => {
+      selectedCategory.value = category
+      showCuisinePanel.value = true
+    }
+
     const handlePlaceAdded = async (place) => {
       await addPlace(place)
     }
-
     const handlePlaceUpdate = async (id, updatedPlace) => {
       await updatePlace(id, updatedPlace)
     }
-
     const handlePlaceDelete = async (id) => {
       await deletePlace(id)
     }
@@ -214,7 +260,6 @@ export default {
     const focusOnPlace = (place) => {
       if (mapContainer.value && mapContainer.value.focusOnPlace) {
         mapContainer.value.focusOnPlace(place)
-        // Close sidebar on mobile when focusing on a place
         if (window.innerWidth < 1024) {
           showSidebar.value = false
         }
@@ -222,20 +267,61 @@ export default {
     }
 
     const handleSpinWheelSelect = async (place) => {
-      // Switch to the restaurant's cuisine category first so its marker exists
       if (place.cuisine_type && place.cuisine_type !== selectedCategory.value) {
         selectedCategory.value = place.cuisine_type
-        // Wait for Vue reactivity to process
         await nextTick()
-        // Additional delay for MapContainer's watcher to reload markers
-        setTimeout(() => {
-          focusOnPlace(place)
-        }, 100)
+        setTimeout(() => focusOnPlace(place), 100)
       } else {
         focusOnPlace(place)
       }
-      // Close the spin wheel modal
       showSpinWheelModal.value = false
+    }
+
+    // Filtered places mirror the Sidebar's filtering logic so the stats card stays in sync.
+    const filteredPlaces = computed(() => {
+      let result = places.value
+      if (selectedCategory.value) {
+        result = result.filter((p) => p.cuisine_type === selectedCategory.value)
+      }
+      if (searchQuery.value) {
+        const q = searchQuery.value.toLowerCase()
+        result = result.filter(
+          (p) => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q)
+        )
+      }
+      if (selectedTier.value) {
+        result = result.filter((p) => p.tier === selectedTier.value)
+      }
+      if (selectedRegion.value) {
+        result = result.filter((p) => p.region === selectedRegion.value)
+      }
+      return result
+    })
+
+    const filteredCount = computed(() => filteredPlaces.value.length)
+    const sTierCount = computed(
+      () => filteredPlaces.value.filter((p) => p.tier === 'S').length
+    )
+
+    const currentlyViewingTitle = computed(() => {
+      if (selectedRegion.value) return selectedRegion.value
+      if (selectedCategory.value) return selectedCategory.value
+      return 'All Singapore'
+    })
+
+    const currentlyViewingTagline = computed(() => {
+      if (selectedCategory.value) {
+        return `The heart of Singapore's ${selectedCategory.value.toLowerCase()} scene.`
+      }
+      return TAGLINES.default
+    })
+
+    const focusSearch = () => {
+      if (!showSidebar.value) showSidebar.value = true
+      nextTick(() => {
+        const input = document.querySelector('aside input[placeholder="Search restaurants"]')
+        if (input) input.focus()
+      })
     }
 
     onMounted(async () => {
@@ -246,6 +332,8 @@ export default {
 
     return {
       showSidebar,
+      showCuisinePanel,
+      handleCategorySelect,
       showViewAllModal,
       showAdminPanel,
       showMethodologyModal,
@@ -269,6 +357,11 @@ export default {
       isAdmin,
       getVotes,
       vote,
+      filteredCount,
+      sTierCount,
+      currentlyViewingTitle,
+      currentlyViewingTagline,
+      focusSearch,
     }
   },
 }
