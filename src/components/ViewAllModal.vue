@@ -1,15 +1,15 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[9999] sm:p-4"
     @click="closeModal"
   >
     <div
-      class="bg-white rounded-xl shadow-xl w-[90%] max-w-5xl h-[80vh] flex flex-col"
+      class="bg-white sm:rounded-xl rounded-t-2xl shadow-xl w-full sm:w-[90%] max-w-5xl h-[92vh] sm:h-[80vh] flex flex-col"
       @click.stop
     >
       <!-- Header -->
-      <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200">
+      <div class="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-slate-200">
         <div>
           <h2 class="text-lg font-semibold text-slate-900">{{ selectedCategory || 'All Restaurants' }}</h2>
           <p class="text-xs text-slate-500 mt-0.5">Browse and manage your collection</p>
@@ -25,8 +25,8 @@
       </div>
 
       <!-- Search and Filter -->
-      <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
-        <div class="flex gap-3 mb-3">
+      <div class="px-4 sm:px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-3">
           <div class="flex-1 relative">
             <input
               v-model="searchQuery"
@@ -39,7 +39,7 @@
               </svg>
             </div>
           </div>
-          <div class="w-32 relative">
+          <div class="w-full sm:w-32 relative">
             <select
               v-model="selectedTier"
               class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 text-sm appearance-none cursor-pointer text-slate-700"
@@ -55,7 +55,7 @@
               </svg>
             </div>
           </div>
-          <div class="w-40 relative" v-if="!selectedCategory">
+          <div class="w-full sm:w-40 relative" v-if="!selectedCategory">
             <select
               v-model="localCategory"
               class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 text-sm appearance-none cursor-pointer text-slate-700"
@@ -71,7 +71,7 @@
               </svg>
             </div>
           </div>
-          <div v-else class="w-40 px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 font-medium">
+          <div v-else class="w-full sm:w-40 px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 font-medium">
             {{ selectedCategory }}
           </div>
         </div>
@@ -81,7 +81,7 @@
       </div>
 
       <!-- Content -->
-      <div class="flex-1 overflow-y-auto p-6">
+      <div class="flex-1 overflow-y-auto p-3 sm:p-6">
         <div v-if="loading && places.length === 0" class="text-center text-slate-400 py-16">
           <svg class="w-10 h-10 mx-auto mb-3 text-slate-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" stroke-width="2" stroke-dasharray="50 100"></circle>
@@ -216,8 +216,8 @@
 
             <!-- Normal View (shown when not editing) -->
             <div v-else>
-              <div class="flex justify-between items-start gap-4">
-                <div class="flex-1 cursor-pointer" @click="selectPlace(place)">
+              <div class="flex flex-wrap sm:flex-nowrap justify-between items-start gap-3 sm:gap-4">
+                <div class="flex-1 min-w-0 cursor-pointer" @click="selectPlace(place)">
                   <div class="flex items-start gap-3 mb-1.5">
                     <h3 class="font-medium text-slate-900 text-sm group-hover:text-slate-700 transition-colors flex-1">
                       {{ place.name }}
@@ -314,6 +314,8 @@
 <script>
 import { computed, ref, watch } from 'vue'
 import { useConfig } from '../composables/useConfig'
+import { filterPlaces } from '../utils/filterPlaces'
+import { getGoogleMapsUrl, getWazeUrl, getAppleMapsUrl } from '../utils/mapLinks'
 
 export default {
   name: 'ViewAllModal',
@@ -361,34 +363,15 @@ export default {
       return getTagsForCuisine(editForm.value.cuisine_type)
     })
 
-    const filteredPlaces = computed(() => {
-      let filtered = props.places
-
-      // Filter by parent's selected category first (from sidebar)
-      if (props.selectedCategory) {
-        filtered = filtered.filter((place) => place.cuisine_type === props.selectedCategory)
-      }
-      // Then filter by local category selection (from modal dropdown) if different from parent
-      else if (localCategory.value) {
-        filtered = filtered.filter((place) => place.cuisine_type === localCategory.value)
-      }
-
-      // Filter by search query
-      if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(
-          (place) =>
-            place.name.toLowerCase().includes(query) || place.address.toLowerCase().includes(query)
-        )
-      }
-
-      // Filter by tier
-      if (selectedTier.value) {
-        filtered = filtered.filter((place) => place.tier === selectedTier.value)
-      }
-
-      return filtered
-    })
+    // Parent category (from sidebar) takes precedence over the modal's
+    // local category dropdown.
+    const filteredPlaces = computed(() =>
+      filterPlaces(props.places, {
+        category: props.selectedCategory || localCategory.value,
+        search: searchQuery.value,
+        tier: selectedTier.value,
+      })
+    )
 
     const closeModal = () => {
       emit('close')
@@ -445,25 +428,6 @@ export default {
       if (confirm(`Are you sure you want to delete "${place.name}"? This action cannot be undone.`)) {
         emit('delete-place', place.id)
       }
-    }
-
-    // Navigation URL helpers
-    const getGoogleMapsUrl = (place) => {
-      if (!place.coords) return '#'
-      const { lat, lng } = place.coords
-      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
-    }
-
-    const getWazeUrl = (place) => {
-      if (!place.coords) return '#'
-      const { lat, lng } = place.coords
-      return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`
-    }
-
-    const getAppleMapsUrl = (place) => {
-      if (!place.coords) return '#'
-      const { lat, lng } = place.coords
-      return `https://maps.apple.com/?daddr=${lat},${lng}`
     }
 
     // Reset filters when modal opens

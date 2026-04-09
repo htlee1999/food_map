@@ -1,11 +1,11 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[9999] sm:p-4"
     @click="$emit('close')"
   >
     <div
-      class="bg-white rounded-xl shadow-xl w-[90%] max-w-lg max-h-[90vh] flex flex-col"
+      class="bg-white sm:rounded-xl rounded-t-2xl shadow-xl w-full sm:w-[90%] max-w-lg max-h-[92vh] sm:max-h-[90vh] flex flex-col"
       @click.stop
     >
       <!-- Header -->
@@ -162,6 +162,7 @@
 import { ref, computed, watch } from 'vue'
 import { useConfig } from '../composables/useConfig'
 import { getAvailableRegions } from '../utils/regionMapping'
+import { filterPlaces } from '../utils/filterPlaces'
 
 export default {
   name: 'SpinWheelModal',
@@ -204,23 +205,13 @@ export default {
       '#94a3b8', // slate
     ]
 
-    const filteredPlaces = computed(() => {
-      let filtered = props.places
-
-      if (selectedCuisines.value.length > 0) {
-        filtered = filtered.filter(place => selectedCuisines.value.includes(place.cuisine_type))
-      }
-
-      if (selectedTiers.value.length > 0) {
-        filtered = filtered.filter(place => selectedTiers.value.includes(place.tier))
-      }
-
-      if (selectedRegions.value.length > 0) {
-        filtered = filtered.filter(place => selectedRegions.value.includes(place.region))
-      }
-
-      return filtered
-    })
+    const filteredPlaces = computed(() =>
+      filterPlaces(props.places, {
+        categories: selectedCuisines.value,
+        tiers: selectedTiers.value,
+        regions: selectedRegions.value,
+      })
+    )
 
     const conicGradient = computed(() => {
       const places = filteredPlaces.value

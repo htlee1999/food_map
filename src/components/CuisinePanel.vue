@@ -1,10 +1,28 @@
 <template>
+  <!-- Mobile backdrop (only when sheet is open) -->
+  <div
+    v-if="isOpen"
+    @click="$emit('close')"
+    class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[84]"
+  ></div>
+
   <aside
     v-if="isOpen"
-    class="hidden lg:flex lg:w-[20vw] lg:min-w-[260px] lg:max-w-[340px] h-full bg-stone-50 border-r border-stone-200 flex-col flex-shrink-0 z-[80]"
+    :class="[
+      'fixed lg:static inset-x-0 bottom-0 lg:inset-auto',
+      'h-[88vh] lg:h-full lg:w-[20vw] lg:min-w-[260px] lg:max-w-[340px]',
+      'bg-stone-50 border-t lg:border-t-0 lg:border-r border-stone-200',
+      'flex flex-col flex-shrink-0 z-[85] lg:z-[80]',
+      'rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none',
+    ]"
   >
+    <!-- Mobile drag handle -->
+    <div class="lg:hidden flex justify-center pt-2 pb-1">
+      <div class="w-10 h-1 rounded-full bg-stone-300"></div>
+    </div>
+
     <!-- Header -->
-    <div class="px-7 pt-7 pb-4 bg-white border-b border-stone-200">
+    <div class="px-5 lg:px-7 pt-3 lg:pt-7 pb-4 bg-white border-b border-stone-200">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
           <h2
@@ -178,6 +196,7 @@
 import { computed, ref, watch } from 'vue'
 import { useConfig } from '../composables/useConfig'
 import { getAvailableRegions } from '../utils/regionMapping'
+import { filterPlaces } from '../utils/filterPlaces'
 
 export default {
   name: 'CuisinePanel',
@@ -204,25 +223,14 @@ export default {
     const availableRegions = getAvailableRegions()
     const votesById = ref({})
 
-    const filteredPlaces = computed(() => {
-      let result = props.places
-      if (props.selectedCategory) {
-        result = result.filter((p) => p.cuisine_type === props.selectedCategory)
-      }
-      if (props.searchQuery) {
-        const q = props.searchQuery.toLowerCase()
-        result = result.filter(
-          (p) => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q)
-        )
-      }
-      if (props.selectedTier) {
-        result = result.filter((p) => p.tier === props.selectedTier)
-      }
-      if (props.selectedRegion) {
-        result = result.filter((p) => p.region === props.selectedRegion)
-      }
-      return result
-    })
+    const filteredPlaces = computed(() =>
+      filterPlaces(props.places, {
+        category: props.selectedCategory,
+        search: props.searchQuery,
+        tier: props.selectedTier,
+        region: props.selectedRegion,
+      })
+    )
 
     // Lazy-load vote counts for each visible card. Cached by place id so
     // re-filtering doesn't refetch.

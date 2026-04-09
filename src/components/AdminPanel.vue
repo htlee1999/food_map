@@ -1,11 +1,11 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[9999] sm:p-4"
     @click="$emit('close')"
   >
     <div
-      class="bg-white rounded-xl shadow-xl w-[90%] max-w-2xl max-h-[80vh] flex flex-col"
+      class="bg-white sm:rounded-xl rounded-t-2xl shadow-xl w-full sm:w-[90%] max-w-2xl max-h-[92vh] sm:max-h-[80vh] flex flex-col"
       @click.stop
     >
       <!-- Header -->
@@ -437,6 +437,7 @@ export default {
       tags,
       tiers,
       addCuisine,
+      updateCuisine,
       deleteCuisine,
       addTag,
       deleteTag,
@@ -530,8 +531,7 @@ export default {
         return
       }
       try {
-        await configApi.updateCuisine(cuisine.id, { name: cuisine.name.trim() })
-        await refreshConfig()
+        await updateCuisine(cuisine.id, { name: cuisine.name.trim() })
       } catch (error) {
         alert('Failed to update cuisine: ' + (error.response?.data?.error || error.message))
       }

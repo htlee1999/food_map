@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="w-72 lg:w-[16vw] lg:min-w-[210px] lg:max-w-[260px] h-screen bg-white border-r border-stone-200 flex flex-col flex-shrink-0 relative z-[90]"
+    class="w-[85vw] max-w-[300px] lg:w-[16vw] lg:min-w-[210px] lg:max-w-[260px] h-[100dvh] lg:h-full bg-white border-r border-stone-200 flex flex-col flex-shrink-0 relative z-[90]"
   >
     <!-- Header / Title -->
     <div class="px-7 pt-7 pb-5">

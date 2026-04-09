@@ -22,6 +22,7 @@
 <script>
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { useConfig } from '../composables/useConfig'
+import { getGoogleMapsUrl, getWazeUrl, getAppleMapsUrl } from '../utils/mapLinks'
 
 const ONEMAP_ATTRIBUTION = '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" style="height:20px;width:20px;"/>&nbsp;<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap</a>&nbsp;&copy;&nbsp;contributors&nbsp;&#124;&nbsp;<a href="https://www.sla.gov.sg/" target="_blank" rel="noopener noreferrer">Singapore Land Authority</a>'
 
@@ -65,8 +66,8 @@ export default {
       required: true,
     },
   },
-  setup(props, { emit }) {
-    const { getTierColorHex, getTierDescription, tiers } = useConfig()
+  setup(props) {
+    const { getTierColorHex, getTierDescription } = useConfig()
 
     const mapElement = ref(null)
     const map = ref(null)
@@ -209,7 +210,8 @@ export default {
       })
 
       const infoWindow = new google.maps.InfoWindow({
-        content: generatePopupContent(place, [], { up: 0, down: 0, userVote: null })
+        content: generatePopupContent(place, [], { up: 0, down: 0, userVote: null }),
+        maxWidth: Math.min(window.innerWidth - 48, 340)
       })
 
       const markerData = { marker, place, infoWindow }
@@ -311,7 +313,11 @@ export default {
         { icon: createLeafletIcon(place.tier), title: place.name }
       ).addTo(map.value)
 
-      const popup = L.popup({ maxWidth: 350, maxHeight: 400 })
+      const popup = L.popup({
+        maxWidth: Math.min(window.innerWidth - 48, 340),
+        maxHeight: Math.min(window.innerHeight - 160, 480),
+        autoPanPadding: [16, 16]
+      })
         .setContent(generatePopupContent(place, [], { up: 0, down: 0, userVote: null }))
 
       marker.bindPopup(popup)
@@ -406,8 +412,9 @@ export default {
 
       const tierColor = getTierColorHex(place.tier)
       const tierDescription = getTierDescription(place.tier)
-      const { lat, lng } = place.coords
-      const encodedName = encodeURIComponent(place.name)
+      const gmapsHref = getGoogleMapsUrl(place)
+      const wazeHref = getWazeUrl(place)
+      const appleHref = getAppleMapsUrl(place)
 
       return `
         <div class="custom-popup" data-place-id="${place.id}">
@@ -421,13 +428,13 @@ export default {
           <div class="popup-navigate">
             <span class="navigate-label">Navigate with:</span>
             <div class="navigate-buttons">
-              <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${encodedName}" target="_blank" class="nav-btn nav-gmaps" title="Google Maps">
+              <a href="${gmapsHref}" target="_blank" class="nav-btn nav-gmaps" title="Google Maps">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
               </a>
-              <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" class="nav-btn nav-waze" title="Waze">
+              <a href="${wazeHref}" target="_blank" class="nav-btn nav-waze" title="Waze">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#33CCFF" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
               </a>
-              <a href="https://maps.apple.com/?daddr=${lat},${lng}" target="_blank" class="nav-btn nav-apple" title="Apple Maps">
+              <a href="${appleHref}" target="_blank" class="nav-btn nav-apple" title="Apple Maps">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#555" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
               </a>
             </div>
@@ -640,7 +647,7 @@ export default {
 <style scoped>
 .map-container {
   position: relative;
-  height: 100vh;
+  height: 100%;
   width: 100%;
   z-index: 1;
 }
@@ -686,7 +693,8 @@ export default {
 :global(.custom-popup) {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: #1c1917;
-  min-width: 240px;
+  min-width: 220px;
+  max-width: 100%;
 }
 
 :global(.popup-name) {
@@ -831,9 +839,17 @@ export default {
   padding: 8px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 0.85rem;
+  /* 16px prevents iOS Safari from auto-zooming the viewport on focus. */
+  font-size: 16px;
   resize: vertical;
   font-family: inherit;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  :global(.comment-input) {
+    font-size: 0.85rem;
+  }
 }
 
 :global(.comment-input:focus) {
@@ -887,8 +903,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: white;
   border: 1px solid #e2e8f0;
@@ -1009,10 +1025,6 @@ export default {
   animation: spin 0.6s linear infinite;
   margin-right: 4px;
   vertical-align: middle;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 :global(.comment-submit-btn.loading) {

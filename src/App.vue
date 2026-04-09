@@ -43,31 +43,67 @@
       </div>
     </header>
 
-    <div class="flex h-screen lg:pt-16">
-      <!-- Mobile toggle -->
-      <button
+    <div class="flex h-[100dvh] lg:pt-16">
+      <!-- Mobile floating action buttons (stacked, safe-area aware) -->
+      <div
         v-show="!showSidebar"
-        @click="toggleSidebar"
-        class="lg:hidden fixed top-4 left-4 z-[100] bg-white p-2.5 rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
+        class="lg:hidden fixed left-3 z-[100] flex flex-col gap-2"
+        style="top: calc(env(safe-area-inset-top, 0px) + 0.75rem)"
       >
-        <svg class="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+        <button
+          @click="toggleSidebar"
+          class="bg-white w-11 h-11 flex items-center justify-center rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
+          aria-label="Open menu"
+        >
+          <svg class="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <button
+          @click="showSpinWheelModal = true"
+          class="bg-white w-11 h-11 flex items-center justify-center rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
+          aria-label="Random pick"
+        >
+          <svg class="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none">
+            <circle cx="9" cy="9" r="1.5" fill="currentColor" />
+            <circle cx="15" cy="7" r="1.5" fill="currentColor" />
+            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M7 16c2-2 3 1 5 0s3 2 5 0" />
+          </svg>
+        </button>
+      </div>
 
-      <!-- Mobile spin button -->
-      <button
+      <!-- Mobile pill: View All / Methodology -->
+      <div
         v-show="!showSidebar"
-        @click="showSpinWheelModal = true"
-        class="lg:hidden fixed top-16 left-4 z-[100] bg-white p-2.5 rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
-        title="Up to you"
+        class="lg:hidden fixed left-1/2 -translate-x-1/2 z-[100] flex items-center bg-white rounded-full shadow-lg border border-stone-200 overflow-hidden"
+        style="top: calc(env(safe-area-inset-top, 0px) + 0.75rem)"
       >
-        <svg class="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none">
-          <circle cx="9" cy="9" r="1.5" fill="currentColor" />
-          <circle cx="15" cy="7" r="1.5" fill="currentColor" />
-          <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M7 16c2-2 3 1 5 0s3 2 5 0" />
-        </svg>
-      </button>
+        <button
+          @click="showViewAllModal = true"
+          class="flex items-center gap-1 pl-3 pr-2.5 h-8 hover:bg-stone-50 transition-colors text-stone-700"
+          aria-label="View all restaurants"
+        >
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          <span class="text-[9px] tracking-[0.14em] uppercase font-medium">View All</span>
+        </button>
+        <div class="w-px h-4 bg-stone-200"></div>
+        <button
+          @click="showMethodologyModal = true"
+          class="flex items-center gap-1 pl-2.5 pr-3 h-8 hover:bg-stone-50 transition-colors text-stone-700"
+          aria-label="About this map"
+        >
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1" />
+          </svg>
+          <span class="text-[9px] tracking-[0.14em] uppercase font-medium">About</span>
+        </button>
+      </div>
 
       <!-- Mobile backdrop -->
       <div
@@ -90,7 +126,7 @@
           :selected-category="selectedCategory"
           :is-admin="isAdmin"
           @update-category="handleCategorySelect"
-          @place-added="handlePlaceAdded"
+          @place-added="addPlace"
           @close-sidebar="toggleSidebar"
           @open-settings="showAdminPanel = true"
         />
@@ -164,8 +200,8 @@
         :is-admin="isAdmin"
         @close="showViewAllModal = false"
         @select-place="focusOnPlace"
-        @update-place="handlePlaceUpdate"
-        @delete-place="handlePlaceDelete"
+        @update-place="updatePlace"
+        @delete-place="deletePlace"
       />
 
       <AdminPanel :is-open="showAdminPanel" @close="showAdminPanel = false" />
@@ -193,6 +229,7 @@ import { useFoodTracker } from './composables/useFoodTracker'
 import { useAdmin } from './composables/useAdmin'
 import { useVoting } from './composables/useVoting'
 import { useConfig } from './composables/useConfig'
+import { filterPlaces } from './utils/filterPlaces'
 
 const TAGLINES = {
   default: 'A monochrome love letter to Singapore food.',
@@ -247,16 +284,10 @@ export default {
     const handleCategorySelect = (category) => {
       selectedCategory.value = category
       showCuisinePanel.value = true
-    }
-
-    const handlePlaceAdded = async (place) => {
-      await addPlace(place)
-    }
-    const handlePlaceUpdate = async (id, updatedPlace) => {
-      await updatePlace(id, updatedPlace)
-    }
-    const handlePlaceDelete = async (id) => {
-      await deletePlace(id)
+      // On mobile, close the sidebar so the cuisine sheet has the screen.
+      if (window.innerWidth < 1024) {
+        showSidebar.value = false
+      }
     }
 
     const focusOnPlace = (place) => {
@@ -264,6 +295,7 @@ export default {
         mapContainer.value.focusOnPlace(place)
         if (window.innerWidth < 1024) {
           showSidebar.value = false
+          showCuisinePanel.value = false
         }
       }
     }
@@ -280,25 +312,14 @@ export default {
     }
 
     // Filtered places mirror the Sidebar's filtering logic so the stats card stays in sync.
-    const filteredPlaces = computed(() => {
-      let result = places.value
-      if (selectedCategory.value) {
-        result = result.filter((p) => p.cuisine_type === selectedCategory.value)
-      }
-      if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase()
-        result = result.filter(
-          (p) => p.name.toLowerCase().includes(q) || p.address.toLowerCase().includes(q)
-        )
-      }
-      if (selectedTier.value) {
-        result = result.filter((p) => p.tier === selectedTier.value)
-      }
-      if (selectedRegion.value) {
-        result = result.filter((p) => p.region === selectedRegion.value)
-      }
-      return result
-    })
+    const filteredPlaces = computed(() =>
+      filterPlaces(places.value, {
+        category: selectedCategory.value,
+        search: searchQuery.value,
+        tier: selectedTier.value,
+        region: selectedRegion.value,
+      })
+    )
 
     const filteredCount = computed(() => filteredPlaces.value.length)
     const sTierCount = computed(
@@ -348,9 +369,9 @@ export default {
       selectedRegion,
       selectedCategory,
       loading,
-      handlePlaceAdded,
-      handlePlaceUpdate,
-      handlePlaceDelete,
+      addPlace,
+      updatePlace,
+      deletePlace,
       focusOnPlace,
       handleSpinWheelSelect,
       getComments,
