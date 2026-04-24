@@ -67,20 +67,45 @@
     <!-- Add place (admin) -->
     <div v-if="isAdmin" class="px-7 pt-5 pb-4">
       <button
-        @click="toggleAddPlaceForm"
-        :class="
-          showAddPlaceForm
-            ? 'bg-stone-100 text-stone-700'
-            : 'bg-white text-stone-700 border border-stone-300 hover:border-stone-900'
-        "
-        class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-all text-[11px] tracking-[0.15em] uppercase font-medium"
+        @click="openAddPlaceModal"
+        class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-all text-[11px] tracking-[0.15em] uppercase font-medium bg-white text-stone-700 border border-stone-300 hover:border-stone-900"
       >
-        <span>{{ showAddPlaceForm ? '− Close' : '+ Add Place' }}</span>
+        <span>+ Add Place</span>
       </button>
-      <div v-if="showAddPlaceForm" class="mt-3">
-        <AddPlaceForm @place-added="handlePlaceAdded" />
-      </div>
     </div>
+
+    <!-- Add place modal -->
+    <teleport to="body">
+      <div
+        v-if="showAddPlaceForm"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[9999] sm:p-4"
+        @click="closeAddPlaceModal"
+      >
+        <div
+          class="bg-white sm:rounded-xl rounded-t-2xl shadow-xl w-full sm:w-[90%] max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col"
+          @click.stop
+        >
+          <div class="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-stone-200">
+            <div>
+              <h2 class="text-lg font-semibold text-stone-900">Add New Restaurant</h2>
+              <p class="text-xs text-stone-500 mt-0.5">Add a place to your collection</p>
+            </div>
+            <button
+              @click="closeAddPlaceModal"
+              class="text-stone-400 hover:text-stone-600 transition-colors"
+              aria-label="Close"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
+            <AddPlaceForm @place-added="handlePlaceAdded" />
+          </div>
+        </div>
+      </div>
+    </teleport>
 
     <!-- Footer (admin settings only) -->
     <div v-if="isAdmin" class="px-7 pt-3 pb-6 border-t border-stone-100">
@@ -168,8 +193,12 @@ export default {
       showAddPlaceForm.value = false
     }
 
-    const toggleAddPlaceForm = () => {
-      showAddPlaceForm.value = !showAddPlaceForm.value
+    const openAddPlaceModal = () => {
+      showAddPlaceForm.value = true
+    }
+
+    const closeAddPlaceModal = () => {
+      showAddPlaceForm.value = false
     }
 
     // Track whether the category list has more content below the fold so we
@@ -209,7 +238,8 @@ export default {
       updateScrollState,
       subtitle,
       handlePlaceAdded,
-      toggleAddPlaceForm,
+      openAddPlaceModal,
+      closeAddPlaceModal,
       categories,
       getCategoryIcon,
     }

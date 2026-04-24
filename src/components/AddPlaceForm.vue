@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border border-slate-200 rounded-lg p-4">
+  <div>
     <form @submit.prevent="handleSubmit" class="space-y-3">
       <div class="space-y-1.5">
         <label for="placeName" class="text-xs font-medium text-slate-700">
