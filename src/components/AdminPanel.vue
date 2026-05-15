@@ -485,31 +485,83 @@
                   placeholder="Post title"
                 />
               </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="text-xs text-slate-500">Location</label>
-                  <input
-                    v-model="blogForm.location"
-                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
-                    placeholder="e.g., Katong"
-                  />
+              <div>
+                <label class="text-xs text-slate-500">Location</label>
+                <input
+                  v-model="blogForm.location"
+                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
+                  placeholder="e.g., Katong"
+                />
+              </div>
+
+              <!-- Rating picker -->
+              <div>
+                <label class="text-xs text-slate-500">Rating icon</label>
+                <div class="flex flex-wrap gap-1 mt-1">
+                  <button
+                    v-for="opt in RATING_ICONS"
+                    :key="opt.filled"
+                    type="button"
+                    @click="setRatingIcon(opt.filled, opt.empty)"
+                    :class="blogForm.content.ratingIcon === opt.filled
+                      ? 'border-slate-900 bg-slate-100'
+                      : 'border-slate-200 hover:bg-slate-50'"
+                    class="border rounded-lg w-9 h-9 flex items-center justify-center text-lg transition-colors"
+                    :title="opt.label"
+                  >
+                    {{ opt.filled }}
+                  </button>
                 </div>
-                <div>
-                  <label class="text-xs text-slate-500">Rating</label>
-                  <input
-                    v-model="blogForm.rating"
-                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
-                    placeholder="🍔🍔🍔🍔🤍"
-                  />
+
+                <label class="text-xs text-slate-500 mt-3 block">
+                  Rating ({{ blogForm.content.ratingValue }}/{{ RATING_MAX }}) — click or drag
+                </label>
+                <div class="flex items-center gap-1 select-none mt-1 touch-none">
+                  <button
+                    v-for="n in RATING_MAX"
+                    :key="n"
+                    type="button"
+                    @pointerdown.prevent="onRatingPointerDown(n)"
+                    @pointerenter="onRatingPointerEnter(n)"
+                    @pointerup="endRatingDrag"
+                    class="text-3xl leading-none cursor-pointer transition-transform hover:scale-110"
+                  >
+                    {{ n <= blogForm.content.ratingValue ? blogForm.content.ratingIcon : blogForm.content.ratingEmpty }}
+                  </button>
+                  <button
+                    v-if="blogForm.content.ratingValue > 0"
+                    type="button"
+                    @click="setRatingValue(0)"
+                    class="ml-3 text-xs text-slate-500 hover:text-slate-900 transition-colors"
+                  >
+                    Clear
+                  </button>
                 </div>
               </div>
               <div>
-                <label class="text-xs text-slate-500">Hero image URL</label>
-                <input
-                  v-model="blogForm.hero"
-                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
-                  placeholder="https://..."
-                />
+                <label class="text-xs text-slate-500">Hero image</label>
+                <div class="flex gap-2 items-start">
+                  <div class="flex-1 space-y-2">
+                    <input
+                      v-model="blogForm.hero"
+                      class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
+                      placeholder="Paste a URL or upload →"
+                    />
+                    <img
+                      v-if="blogForm.hero"
+                      :src="blogForm.hero"
+                      class="w-32 h-20 object-cover rounded border border-slate-200"
+                      alt="Hero preview"
+                    />
+                  </div>
+                  <button
+                    @click="uploadHeroImage"
+                    :disabled="blogUploading === 'hero'"
+                    class="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 disabled:opacity-50 transition-colors whitespace-nowrap"
+                  >
+                    {{ blogUploading === 'hero' ? 'Uploading...' : 'Upload' }}
+                  </button>
+                </div>
               </div>
               <div>
                 <label class="text-xs text-slate-500">Hero caption</label>
@@ -629,15 +681,28 @@
                   />
                   <input
                     v-model="item.image"
-                    placeholder="Image URL"
+                    placeholder="Image URL or upload →"
                     class="flex-1 px-2 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:border-slate-400"
                   />
+                  <button
+                    @click="uploadGalleryImage(i)"
+                    :disabled="blogUploading === `gallery-${i}`"
+                    class="px-2 py-1.5 bg-slate-100 text-slate-700 rounded text-xs font-medium hover:bg-slate-200 disabled:opacity-50 transition-colors whitespace-nowrap"
+                  >
+                    {{ blogUploading === `gallery-${i}` ? '...' : 'Upload' }}
+                  </button>
                   <button @click="blogForm.content.gallery.splice(i, 1)" class="text-slate-400 hover:text-rose-500">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
+                <img
+                  v-if="item.image"
+                  :src="item.image"
+                  class="w-24 h-16 object-cover rounded border border-slate-200"
+                  alt="Gallery preview"
+                />
                 <textarea
                   v-model="item.notes"
                   rows="2"
@@ -701,11 +766,26 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useConfig } from '../composables/useConfig'
 import { useMethodology } from '../composables/useMethodology'
 import { useBlog } from '../composables/useBlog'
-import { configApi } from '../services/api'
+import { configApi, blogApi } from '../services/api'
+
+const RATING_ICONS = [
+  { filled: '🍔', empty: '🤍', label: 'Burger' },
+  { filled: '🍜', empty: '🤍', label: 'Noodles' },
+  { filled: '🍕', empty: '🤍', label: 'Pizza' },
+  { filled: '🍣', empty: '🤍', label: 'Sushi' },
+  { filled: '🥟', empty: '🤍', label: 'Dumpling' },
+  { filled: '🍰', empty: '🤍', label: 'Cake' },
+  { filled: '☕', empty: '🤍', label: 'Coffee' },
+  { filled: '⭐', empty: '☆', label: 'Star' },
+  { filled: '❤️', empty: '🤍', label: 'Heart' },
+  { filled: '🔥', empty: '🤍', label: 'Fire' },
+]
+
+const RATING_MAX = 5
 
 const emptyBlogForm = () => ({
   id: null,
@@ -713,7 +793,6 @@ const emptyBlogForm = () => ({
   location: '',
   hero: '',
   summary: '',
-  rating: '',
   content: {
     heroCaption: '',
     stats: [],
@@ -722,8 +801,33 @@ const emptyBlogForm = () => ({
     verdictQuote: '',
     wouldReturn: '',
     bestFor: '',
+    ratingIcon: '🍔',
+    ratingEmpty: '🤍',
+    ratingValue: 0,
   },
 })
+
+// Best-effort parse of a saved rating string into icon + value for editing.
+// Uses grapheme segmentation so multi-codepoint emojis (e.g. ❤️) stay intact.
+const parseRatingString = (str) => {
+  if (!str) return null
+  try {
+    const segments = [...new Intl.Segmenter().segment(str)].map((s) => s.segment)
+    if (segments.length === 0) return null
+    const filled = segments[0]
+    let value = 0
+    while (value < segments.length && segments[value] === filled) value++
+    const empty = segments[value] || '🤍'
+    return { ratingIcon: filled, ratingEmpty: empty, ratingValue: value }
+  } catch {
+    return null
+  }
+}
+
+const buildRatingString = (icon, empty, value) => {
+  if (!value || value <= 0) return null
+  return (icon || '⭐').repeat(value) + (empty || '🤍').repeat(Math.max(0, RATING_MAX - value))
+}
 
 export default {
   name: 'AdminPanel',
@@ -799,6 +903,62 @@ export default {
     const blogEditing = ref(false)
     const blogSaving = ref(false)
     const blogForm = ref(emptyBlogForm())
+    const blogUploading = ref(null) // 'hero' | `gallery-${i}` | null
+
+    // Rating picker state
+    const draggingRating = ref(false)
+    const setRatingValue = (n) => {
+      blogForm.value.content.ratingValue = Math.max(0, Math.min(RATING_MAX, n))
+    }
+    const onRatingPointerDown = (n) => {
+      draggingRating.value = true
+      setRatingValue(n)
+    }
+    const onRatingPointerEnter = (n) => {
+      if (draggingRating.value) setRatingValue(n)
+    }
+    const endRatingDrag = () => {
+      draggingRating.value = false
+    }
+    const setRatingIcon = (filled, empty) => {
+      blogForm.value.content.ratingIcon = filled
+      blogForm.value.content.ratingEmpty = empty
+    }
+
+    onMounted(() => window.addEventListener('pointerup', endRatingDrag))
+    onUnmounted(() => window.removeEventListener('pointerup', endRatingDrag))
+
+    const pickAndUploadImage = (slot, onUrl) => {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.onchange = async () => {
+        const file = input.files?.[0]
+        if (!file) return
+        blogUploading.value = slot
+        try {
+          const { url } = await blogApi.uploadImage(file)
+          onUrl(url)
+        } catch (error) {
+          alert('Upload failed: ' + (error.response?.data?.error || error.message))
+        } finally {
+          blogUploading.value = null
+        }
+      }
+      input.click()
+    }
+
+    const uploadHeroImage = () => {
+      pickAndUploadImage('hero', (url) => {
+        blogForm.value.hero = url
+      })
+    }
+
+    const uploadGalleryImage = (index) => {
+      pickAndUploadImage(`gallery-${index}`, (url) => {
+        blogForm.value.content.gallery[index].image = url
+      })
+    }
 
     // Load tab data on switch
     watch(activeTab, (newTab) => {
@@ -818,13 +978,16 @@ export default {
       try {
         const full = await getBlogPost(post.id)
         const c = full.content || {}
+        // Prefer structured rating fields; fall back to parsing the saved string.
+        const parsed = c.ratingIcon
+          ? { ratingIcon: c.ratingIcon, ratingEmpty: c.ratingEmpty || '🤍', ratingValue: c.ratingValue || 0 }
+          : parseRatingString(full.rating) || { ratingIcon: '🍔', ratingEmpty: '🤍', ratingValue: 0 }
         blogForm.value = {
           id: full.id,
           title: full.title || '',
           location: full.location || '',
           hero: full.hero || '',
           summary: full.summary || '',
-          rating: full.rating || '',
           content: {
             heroCaption: c.heroCaption || '',
             stats: Array.isArray(c.stats) ? c.stats.map((s) => ({ ...s })) : [],
@@ -833,6 +996,9 @@ export default {
             verdictQuote: c.verdictQuote || '',
             wouldReturn: c.wouldReturn || '',
             bestFor: c.bestFor || '',
+            ratingIcon: parsed.ratingIcon,
+            ratingEmpty: parsed.ratingEmpty,
+            ratingValue: parsed.ratingValue,
           },
         }
         blogEditing.value = true
@@ -862,12 +1028,13 @@ export default {
       if (!blogForm.value.title.trim()) return
       blogSaving.value = true
       try {
+        const { ratingIcon, ratingEmpty, ratingValue } = blogForm.value.content
         const payload = {
           title: blogForm.value.title.trim(),
           location: blogForm.value.location.trim() || null,
           hero: blogForm.value.hero.trim() || null,
           summary: blogForm.value.summary.trim() || null,
-          rating: blogForm.value.rating.trim() || null,
+          rating: buildRatingString(ratingIcon, ratingEmpty, ratingValue),
           content: blogForm.value.content,
         }
         if (blogForm.value.id) {
@@ -1087,6 +1254,16 @@ export default {
       blogEditing,
       blogSaving,
       blogForm,
+      blogUploading,
+      uploadHeroImage,
+      uploadGalleryImage,
+      RATING_ICONS,
+      RATING_MAX,
+      onRatingPointerDown,
+      onRatingPointerEnter,
+      endRatingDrag,
+      setRatingValue,
+      setRatingIcon,
       startNewBlog,
       startEditBlog,
       cancelBlogEdit,

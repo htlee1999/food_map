@@ -76,6 +76,17 @@ export const blogApi = {
   create: (post) => adminRequest('post', '/blog', post),
   update: (id, post) => adminRequest('put', `/blog/${id}`, post),
   delete: (id) => adminRequest('delete', `/blog/${id}`),
+  uploadImage: async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await api({
+      method: 'post',
+      url: '/blog/upload',
+      data: formData,
+      headers: { ...getAdminHeaders(), 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
 }
 
 // Settings API

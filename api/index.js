@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import multer from 'multer'
+import { put } from '@vercel/blob'
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' })
@@ -656,6 +658,38 @@ app.put('/api/blog/:id', requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error updating blog post:', error)
     res.status(500).json({ error: 'Failed to update blog post' })
+  }
+})
+
+// Upload blog image (admin only). Returns a public Blob URL.
+const blogUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+})
+
+app.post('/api/blog/upload', requireAdmin, blogUpload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' })
+    }
+    if (!req.file.mimetype?.startsWith('image/')) {
+      return res.status(400).json({ error: 'Only image uploads are allowed' })
+    }
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return res.status(500).json({ error: 'Blob storage is not configured on the server' })
+    }
+
+    const safeName = (req.file.originalname || 'image').replace(/[^a-zA-Z0-9._-]/g, '_')
+    const blob = await put(`blog/${Date.now()}-${safeName}`, req.file.buffer, {
+      access: 'public',
+      contentType: req.file.mimetype,
+      addRandomSuffix: true,
+    })
+
+    res.json({ url: blob.url })
+  } catch (error) {
+    console.error('Blob upload failed:', error)
+    res.status(500).json({ error: 'Upload failed' })
   }
 })
 
