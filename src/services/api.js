@@ -69,6 +69,15 @@ export const configApi = {
   deleteTier: (id) => adminRequest('delete', `/tiers/${id}`),
 }
 
+// Blog API
+export const blogApi = {
+  list: () => request('get', '/blog'),
+  get: (id) => request('get', `/blog/${id}`),
+  create: (post) => adminRequest('post', '/blog', post),
+  update: (id, post) => adminRequest('put', `/blog/${id}`, post),
+  delete: (id) => adminRequest('delete', `/blog/${id}`),
+}
+
 // Settings API
 export const settingsApi = {
   get: (key) => request('get', `/settings/${key}`),

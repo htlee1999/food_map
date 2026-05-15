@@ -77,6 +77,20 @@ CREATE TABLE IF NOT EXISTS tiers (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Blog posts (admin-authored)
+CREATE TABLE IF NOT EXISTS blog_posts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    location VARCHAR(255),
+    hero TEXT,
+    summary TEXT,
+    rating VARCHAR(50),
+    content JSONB NOT NULL DEFAULT '{}',
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Site settings table for key-value storage (e.g., methodology content)
 CREATE TABLE IF NOT EXISTS site_settings (
     id SERIAL PRIMARY KEY,
@@ -96,6 +110,7 @@ CREATE INDEX IF NOT EXISTS idx_preferences_place ON preferences(place_id);
 CREATE INDEX IF NOT EXISTS idx_comments_place ON comments(place_id);
 CREATE INDEX IF NOT EXISTS idx_votes_place ON votes(place_id);
 CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(setting_key);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_created ON blog_posts(created_at DESC);
 
 -- Create a function to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -121,4 +136,8 @@ CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON comments
 
 DROP TRIGGER IF EXISTS update_site_settings_updated_at ON site_settings;
 CREATE TRIGGER update_site_settings_updated_at BEFORE UPDATE ON site_settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_blog_posts_updated_at ON blog_posts;
+CREATE TRIGGER update_blog_posts_updated_at BEFORE UPDATE ON blog_posts
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

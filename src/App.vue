@@ -18,6 +18,9 @@
         <button @click="showViewAllModal = true" class="hover:text-stone-900 transition-colors">
           View All
         </button>
+        <button @click="showBlogModal = true" class="hover:text-stone-900 transition-colors">
+          Blog
+        </button>
       </nav>
       <div class="flex items-center gap-5">
         <button
@@ -102,6 +105,17 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1" />
           </svg>
           <span class="text-[9px] tracking-[0.14em] uppercase font-medium">About</span>
+        </button>
+        <div class="w-px h-4 bg-stone-200"></div>
+        <button
+          @click="showBlogModal = true"
+          class="flex items-center gap-1 pl-2.5 pr-3 h-8 hover:bg-stone-50 transition-colors text-stone-700"
+          aria-label="Blog"
+        >
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 5h12M4 9h12M4 13h8M4 17h6" />
+          </svg>
+          <span class="text-[9px] tracking-[0.14em] uppercase font-medium">Blog</span>
         </button>
       </div>
 
@@ -206,6 +220,7 @@
 
       <AdminPanel :is-open="showAdminPanel" @close="showAdminPanel = false" />
       <MethodologyModal :is-open="showMethodologyModal" @close="showMethodologyModal = false" />
+      <BlogModal :is-open="showBlogModal" @close="showBlogModal = false" />
       <SpinWheelModal
         :is-open="showSpinWheelModal"
         :places="places"
@@ -225,6 +240,7 @@ import ViewAllModal from './components/ViewAllModal.vue'
 import AdminPanel from './components/AdminPanel.vue'
 import MethodologyModal from './components/MethodologyModal.vue'
 import SpinWheelModal from './components/SpinWheelModal.vue'
+import BlogModal from './components/BlogModal.vue'
 import { useFoodTracker } from './composables/useFoodTracker'
 import { useAdmin } from './composables/useAdmin'
 import { useVoting } from './composables/useVoting'
@@ -245,6 +261,7 @@ export default {
     AdminPanel,
     MethodologyModal,
     SpinWheelModal,
+    BlogModal,
   },
   setup() {
     const showSidebar = ref(window.innerWidth >= 1024)
@@ -253,6 +270,7 @@ export default {
     const showAdminPanel = ref(false)
     const showMethodologyModal = ref(false)
     const showSpinWheelModal = ref(false)
+    const showBlogModal = ref(false)
     const mapContainer = ref(null)
 
     const {
@@ -361,6 +379,7 @@ export default {
       showAdminPanel,
       showMethodologyModal,
       showSpinWheelModal,
+      showBlogModal,
       mapContainer,
       toggleSidebar,
       places,
