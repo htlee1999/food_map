@@ -9,10 +9,10 @@
   <aside
     v-if="isOpen"
     :class="[
-      'fixed lg:static inset-x-0 bottom-0 lg:inset-auto',
-      'h-[88vh] lg:h-full lg:w-[20vw] lg:min-w-[260px] lg:max-w-[340px]',
+      'fixed lg:absolute inset-x-0 bottom-0 lg:inset-auto lg:left-0 lg:top-16 lg:bottom-0',
+      'h-[88vh] lg:h-auto lg:w-[24vw] lg:min-w-[340px] lg:max-w-[420px]',
       'bg-stone-50 border-t lg:border-t-0 lg:border-r border-stone-200',
-      'flex flex-col flex-shrink-0 z-[85] lg:z-[80]',
+      'flex flex-col flex-shrink-0 z-[85] lg:z-[95]',
       'rounded-t-2xl lg:rounded-none shadow-2xl lg:shadow-none',
     ]"
   >
@@ -23,34 +23,34 @@
 
     <!-- Header -->
     <div class="px-5 lg:px-7 pt-3 lg:pt-7 pb-4 bg-white border-b border-stone-200">
-      <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0">
-          <h2
-            class="text-[30px] leading-none text-stone-900 uppercase tracking-tight truncate font-semibold"
-          >
-            {{ selectedCategory || 'All' }}
-          </h2>
-          <p class="mt-2 text-[10px] tracking-[0.22em] uppercase text-stone-500 font-medium">
-            {{ filteredPlaces.length }}
-            {{ filteredPlaces.length === 1 ? 'establishment' : 'establishments' }} found
-            <template v-if="selectedRegion"> / {{ selectedRegion }}</template>
-          </p>
-        </div>
-        <button
-          @click="$emit('close')"
-          class="text-stone-400 hover:text-stone-900 transition-colors flex-shrink-0"
-          aria-label="Close panel"
+      <!-- Back to categories -->
+      <button
+        @click="$emit('close')"
+        class="flex items-center gap-1.5 text-stone-500 hover:text-stone-900 transition-colors mb-3"
+        aria-label="Back to categories"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          viewBox="0 0 24 24"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="text-[10px] tracking-[0.18em] uppercase font-medium">Back</span>
+      </button>
+      <div class="min-w-0">
+        <h2
+          class="text-[30px] leading-none text-stone-900 uppercase tracking-tight truncate font-semibold"
+        >
+          {{ selectedCategory || 'All' }}
+        </h2>
+        <p class="mt-2 text-[10px] tracking-[0.22em] uppercase text-stone-500 font-medium">
+          {{ filteredPlaces.length }}
+          {{ filteredPlaces.length === 1 ? 'establishment' : 'establishments' }} found
+          <template v-if="selectedRegion"> / {{ selectedRegion }}</template>
+        </p>
       </div>
 
       <!-- Filters -->

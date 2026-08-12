@@ -66,7 +66,7 @@
       </div>
     </header>
 
-    <div class="flex h-[100dvh] lg:pt-16">
+    <div class="flex h-[100dvh] lg:pt-16 relative">
       <!-- Mobile floating action buttons (stacked, safe-area aware) -->
       <div
         v-show="!showSidebar"
