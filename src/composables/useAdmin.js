@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import { useAuth } from './useAuth'
 
 // Shared state (singleton pattern)
 const adminKey = ref(null)
@@ -27,8 +28,9 @@ export function useAdmin() {
     initialized.value = true
   }
 
-  // Computed property to check if user is admin
-  const isAdmin = computed(() => !!adminKey.value)
+  // Admin via the legacy ?admin= secret, or a signed-in account with the admin flag
+  const { currentUser } = useAuth()
+  const isAdmin = computed(() => !!adminKey.value || !!currentUser.value?.is_admin)
 
   return {
     isAdmin,

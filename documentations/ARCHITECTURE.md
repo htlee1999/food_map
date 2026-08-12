@@ -1,12 +1,14 @@
 # Technical Architecture Documentation
 
-> Singapore Food Tracker - A Vue 3 + Express food rating application
+> Singapore Food Map - A Vue 3 + Express food rating application with friend groups
 
 ## Table of Contents
 - [Technology Stack](#technology-stack)
 - [Project Structure](#project-structure)
 - [Frontend Architecture](#frontend-architecture)
 - [Backend Architecture](#backend-architecture)
+- [Authentication & Authorization](#authentication--authorization)
+- [Friend Groups & Visibility Model](#friend-groups--visibility-model)
 - [Database Design](#database-design)
 - [Design Patterns](#design-patterns)
 - [Code Quality Guidelines](#code-quality-guidelines)
@@ -17,12 +19,14 @@
 
 | Layer | Technology | Version |
 |-------|------------|---------|
-| **Frontend** | Vue 3 (Composition API) | 3.5.18 |
-| **Build Tool** | Vite | 7.0.6 |
-| **Styling** | Tailwind CSS | 3.4.17 |
-| **HTTP Client** | Axios | 1.12.2 |
-| **Backend** | Express | 5.1.0 |
-| **Database** | PostgreSQL | 12+ |
+| **Frontend** | Vue 3 (Composition API) | 3.5.x |
+| **Build Tool** | Vite | 7.x |
+| **Styling** | Tailwind CSS | 3.4.x |
+| **HTTP Client** | Axios | 1.x |
+| **Backend** | Express | 5.x |
+| **Auth** | Google Identity Services + JWT session cookie | - |
+| **Database** | PostgreSQL (Neon) | 12+ |
+| **Maps** | Google Maps JS API, OneMap (Leaflet) fallback | - |
 | **Deployment** | Vercel (Serverless) | - |
 | **Package Manager** | pnpm | - |
 
@@ -33,167 +37,223 @@
 ```
 food_map/
 ├── src/
-│   ├── components/           # Vue 3 SFC components
-│   │   ├── MapContainer.vue  # Google Maps integration
-│   │   ├── Sidebar.vue       # Filters, search, place list
-│   │   ├── AddPlaceForm.vue  # Admin form for adding places
-│   │   ├── AdminPanel.vue    # Configuration management
-│   │   ├── ViewAllModal.vue  # View/edit all places modal
+│   ├── components/
+│   │   ├── MapContainer.vue      # Map orchestrator (provider lifecycle, markers, popup mounting)
+│   │   ├── map/
+│   │   │   ├── googleMapProvider.js  # Google Maps provider (init/markers/popup/focus)
+│   │   │   ├── oneMapProvider.js     # OneMap/Leaflet fallback provider (same interface)
+│   │   │   └── PlacePopup.vue        # Marker popup (tier, votes, friend ratings, reviews)
+│   │   ├── Sidebar.vue           # Categories, account section, add place
+│   │   ├── CuisinePanel.vue      # Cuisine detail list panel
+│   │   ├── AuthControl.vue       # Google sign-in button / signed-in user chip
+│   │   ├── GroupsModal.vue       # Create/join/leave friend groups, invite links
+│   │   ├── AddPlaceForm.vue      # Add place form (admins + signed-in friends)
+│   │   ├── AdminPanel.vue        # Configuration management (cuisines/tiers/blog)
+│   │   ├── ViewAllModal.vue      # View/edit all places modal
+│   │   ├── SpinWheelModal.vue    # "Up to you" random picker
+│   │   ├── BlogModal.vue         # Blog posts
 │   │   └── MethodologyModal.vue
-│   ├── composables/          # State management (Composition API)
-│   │   ├── useFoodTracker.js # Main app state + API
-│   │   ├── useAdmin.js       # Authentication singleton
-│   │   ├── useVoting.js      # Public voting with caching
-│   │   ├── useConfig.js      # Configuration state
-│   │   └── useMethodology.js # Methodology content
+│   ├── composables/              # State management (Composition API singletons)
+│   │   ├── useFoodTracker.js     # Places state + CRUD (per-instance, owned by App)
+│   │   ├── useAuth.js            # Session user (Google sign-in)
+│   │   ├── useAdmin.js           # isAdmin (legacy ?admin= key OR admin account)
+│   │   ├── useRatings.js         # Friend ratings + group-tier summary for pins
+│   │   ├── useGroups.js          # Friend groups, ?join=CODE invite flow
+│   │   ├── useVoting.js          # Public thumbs voting with caching
+│   │   ├── useConfig.js          # Cuisines, tiers, tags
+│   │   ├── useBlog.js            # Blog content
+│   │   └── useMethodology.js     # Methodology content
 │   ├── services/
-│   │   └── api.js            # Axios HTTP client wrapper
-│   ├── main.js               # Vue app entry point
-│   └── style.css             # Tailwind imports
+│   │   └── api.js                # Axios wrapper: placesApi, authApi, ratingsApi, groupsApi, ...
+│   ├── main.js
+│   └── style.css
 ├── api/
-│   └── index.js              # Express backend (Vercel serverless)
+│   ├── index.js                  # App assembly only: middleware + router mounting
+│   ├── dev.js                    # Local dev entrypoint (app.listen)
+│   ├── _lib/                     # Shared helpers (underscore = not deployed as functions)
+│   │   ├── env.js                # dotenv loading (imported first)
+│   │   ├── auth.js               # Session/JWT helpers, requireUser, requireAdmin
+│   │   └── constants.js          # VISIBLE_USERS_SQL, shared limits
+│   └── _routes/                  # One Express router per domain
+│       ├── auth.js               # /api/auth/* (Google sign-in, session)
+│       ├── places.js             # Places CRUD + visibility scoping
+│       ├── ratings.js            # Friend ratings + /api/ratings/summary
+│       ├── groups.js             # Groups, membership, invite codes
+│       ├── comments.js           # Editorial reviews
+│       ├── votes.js              # Public thumbs votes
+│       ├── config.js             # Cuisines/tags/tiers
+│       ├── settings.js           # Site settings key-value store
+│       └── blog.js               # Blog posts + image upload (Vercel Blob)
 ├── database/
-│   ├── db.js                 # PostgreSQL connection pool
-│   ├── migrate.js            # Migration runner
-│   └── schema.sql            # Database schema
-├── vite.config.js
+│   ├── db.js                     # PostgreSQL connection pool
+│   ├── migrate.js                # Applies schema.sql (idempotent; runs on deploy)
+│   ├── schema.sql                # Full schema (CREATE IF NOT EXISTS + upgrade ALTERs)
+│   └── migrations/               # Numbered files documenting each schema change
+├── vite.config.js                # Dev proxy: /api -> localhost:3001
 ├── tailwind.config.js
-└── vercel.json               # Deployment config
+└── vercel.json                   # buildCommand runs migrations + build
 ```
 
 ---
 
 ## Frontend Architecture
 
-### Component Design
-
-All components use **Vue 3 Composition API** with the setup() pattern:
-
-```javascript
-export default {
-  name: 'ComponentName',
-  props: { /* typed props */ },
-  emits: ['event-name'],
-  setup(props, { emit }) {
-    // Reactive state with ref()
-    // Computed properties with computed()
-    // Event handlers
-    return { /* exposed bindings */ }
-  }
-}
-```
-
 ### Component Responsibilities
 
-| Component | Purpose | Key Props/Emits |
-|-----------|---------|-----------------|
-| `App.vue` | Root layout, modal orchestration | - |
-| `Sidebar.vue` | Filters, search, place list | Props: places, filters / Emits: updates |
-| `MapContainer.vue` | Google Maps, markers, popups | Props: places, callbacks |
-| `AdminPanel.vue` | Config management (tabs) | Props: isOpen / Emits: close |
-| `ViewAllModal.vue` | Table view of all places | Props: places / Emits: CRUD events |
+| Component | Purpose |
+|-----------|---------|
+| `App.vue` | Root layout, modal orchestration, Public/Friends view toggle |
+| `Sidebar.vue` | Category nav, account section (AuthControl + Groups), add place |
+| `MapContainer.vue` | Thin orchestrator: chooses provider, renders markers, mounts popups |
+| `map/PlacePopup.vue` | Everything inside a marker popup, as a real Vue component |
+| `map/*Provider.js` | Map-engine specifics behind one interface: `init / addMarker / clearMarkers / openPopup / focusOn / destroy` |
+| `AuthControl.vue` | Renders Google sign-in button or the signed-in user + sign out |
+| `GroupsModal.vue` | Group CRUD, member list, copyable invite links |
+
+The two map providers implement the same interface, so `MapContainer` is
+engine-agnostic. Google Maps is primary; when its tiles fail to render
+(detected ~5s after init) or `gm_authFailure` fires, the container tears it
+down and starts the OneMap/Leaflet provider.
+
+Popups are mounted with `createApp(PlacePopup, props)` into a detached
+element handed to the active provider. The popup fetches its own data
+(comments, votes, friend ratings) on mount and emits `loaded`, at which
+point the provider opens it. Because content is rendered by Vue templates,
+user-generated text is escaped by construction.
 
 ### State Management: Composables
 
-The app uses a **singleton composable pattern** for shared state:
+Most composables use a **singleton pattern** (module-level refs shared by
+every consumer). `useFoodTracker` is the exception: it creates per-instance
+state and is only instantiated by `App.vue`, which passes data down as props.
 
-```javascript
-// Module-level state (singleton)
-const sharedState = ref(initialValue)
+| Composable | Purpose | Singleton |
+|------------|---------|-----------|
+| `useAuth` | Current session user, login/logout | yes |
+| `useAdmin` | `isAdmin` = legacy `?admin=` key OR `user.is_admin` | yes |
+| `useRatings` | Rating CRUD + `ratingsSummary` (place → group tier) | yes (summary) |
+| `useGroups` | Group list, create/join/leave, `?join=CODE` invites | yes |
+| `useConfig` | Cuisines, tiers, tags | yes |
+| `useVoting` | Anonymous thumbs votes (localStorage voter id) | per-instance cache |
+| `useFoodTracker` | Places list + CRUD | no (App-owned) |
 
-export function useComposable() {
-  const method = () => { /* operate on sharedState */ }
-  return { sharedState, method }
-}
-```
+### View Modes
 
-#### Key Composables
+Signed-in users toggle between two map views (state lives in `App.vue`):
 
-| Composable | Purpose | Singleton State |
-|------------|---------|-----------------|
-| `useFoodTracker` | Place CRUD, comments | places, loading |
-| `useAdmin` | Authentication | adminKey, isAdmin |
-| `useConfig` | Cuisines, tiers, tags | cuisines, tiers, loaded |
-| `useVoting` | Vote management | voterId, votesCache |
-| `useMethodology` | Methodology content | methodology, loaded |
+- **public** — pins colored by `places.tier` (the owner's editorial rating)
+- **friends** — pins colored by the user's group median tier from
+  `GET /api/ratings/summary`; the spin wheel is scoped to group-rated places
 
-### Data Flow
-
-```
-Component (template)
-    ↓ @emit events
-Component (script)
-    ↓ composable methods
-Composables (useFoodTracker, etc.)
-    ↓ API calls
-Services (api.js)
-    ↓ HTTP requests
-Backend (api/index.js)
-    ↓ SQL queries
-Database (PostgreSQL)
-```
-
-### Styling Approach
-
-- **Utility-first** with Tailwind CSS
-- **Mobile-first** responsive design (`lg:` breakpoint at 1024px)
-- **Color palette**: Slate neutrals, tier-based semantics (pink, emerald, amber, rose)
-- **Minimal custom CSS**: Only `.scrollbar-hide` scoped styles
+Anonymous visitors always get the public view.
 
 ---
 
 ## Backend Architecture
 
-### API Design
+### Structure
 
-**Pattern**: RESTful with middleware-based admin authentication
-
-```javascript
-// Admin middleware
-function requireAdmin(req, res, next) {
-  const adminKey = req.headers['x-admin-key']
-  if (adminKey !== ADMIN_SECRET) {
-    return res.status(403).json({ error: 'Admin access required' })
-  }
-  next()
-}
-```
+`api/index.js` only assembles the app: JSON/cookie middleware, one
+`app.use(router)` per domain, and the health endpoint. Each domain router in
+`api/_routes/` declares its full `/api/...` paths and imports shared helpers
+from `api/_lib/`. The underscore-prefixed directories prevent Vercel from
+deploying each module as its own serverless function; the `vercel.json`
+rewrite sends every `/api/*` request to `api/index.js`.
 
 ### Endpoint Summary
 
-#### Public Endpoints
+#### Public
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/places` | Get all restaurants |
-| GET | `/api/places/:id/comments` | Get comments for a place |
-| GET | `/api/places/:id/votes` | Get vote counts |
-| POST | `/api/places/:id/votes` | Submit a vote |
-| DELETE | `/api/places/:id/votes` | Remove a vote |
-| GET | `/api/config` | Get cuisines, tiers, tags |
-| GET | `/api/settings/:key` | Get site setting |
+| GET | `/api/places` | Places (visibility-scoped by session, see below) |
+| GET | `/api/places/:id/comments` | Editorial reviews |
+| GET/POST/DELETE | `/api/places/:id/votes` | Anonymous thumbs voting |
+| GET | `/api/config` | Cuisines, tiers, tags |
+| GET | `/api/settings/:key` | Site setting |
+| GET | `/api/blog`, `/api/blog/:id` | Blog posts |
 | GET | `/api/health` | Health check |
+| POST | `/api/auth/google` | Exchange Google ID token for session cookie |
+| GET | `/api/auth/me` | Current user (`{ user: null }` when signed out) |
+| POST | `/api/auth/logout` | Clear session cookie |
 
-#### Admin Endpoints (require `x-admin-key` header)
+#### Signed-in users (session cookie)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/places` | Add a place |
-| PUT | `/api/places/:id` | Update a place |
-| DELETE | `/api/places/:id` | Delete a place |
-| POST | `/api/places/:id/comments` | Add a review |
-| DELETE | `/api/comments/:id` | Delete a review |
-| POST/PUT/DELETE | `/api/cuisines/:id` | Manage cuisines |
-| POST/DELETE | `/api/tags/:id` | Manage tags |
-| POST/PUT/DELETE | `/api/tiers/:id` | Manage tiers |
+| GET | `/api/places/:id/ratings` | Friend ratings (empty when signed out) |
+| PUT/DELETE | `/api/places/:id/rating` | Upsert/remove own rating |
+| GET | `/api/ratings/summary` | Per-place group median tier |
+| GET/POST | `/api/groups` | List / create groups |
+| POST | `/api/groups/join` | Join via invite code |
+| DELETE | `/api/groups/:id/members/me` | Leave (group deleted when empty) |
+| POST | `/api/places` | Friends add group-visible places (admins add public ones) |
+
+#### Admin (`x-admin-key` header OR admin account session)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| PUT/DELETE | `/api/places/:id` | Edit/delete places |
+| POST | `/api/places/:id/comments` | Add editorial review |
+| DELETE | `/api/comments/:id` | Delete review |
+| POST/PUT/DELETE | `/api/cuisines*`, `/api/tags/:id`, `/api/tiers*` | Config management |
 | PUT | `/api/settings/:key` | Update site setting |
+| POST/PUT/DELETE | `/api/blog*` | Blog management + image upload |
 
-### Authentication Flow
+---
 
-1. Admin accesses app with `?admin=SECRET_KEY` URL parameter
-2. `useAdmin` composable stores key in `sessionStorage`
-3. `api.js` attaches `x-admin-key` header to admin requests
-4. Backend `requireAdmin` middleware validates the key
+## Authentication & Authorization
+
+### User sessions (Google sign-in)
+
+1. `AuthControl.vue` loads Google Identity Services and renders the button
+2. Google returns an ID token (credential) to the browser
+3. `POST /api/auth/google` verifies the token server-side
+   (`google-auth-library`, audience = `VITE_GOOGLE_CLIENT_ID`) and upserts
+   the user by their stable `google_sub`
+4. The server signs a JWT (`{ userId }`, `SESSION_SECRET`, 30 days) and sets
+   it as an **httpOnly, SameSite=Lax cookie** — never readable from JS
+5. Every request resolves the cookie via `getSessionUser()`; `requireUser`
+   middleware gates user-only endpoints
+
+The app is same-origin in both dev (Vite proxies `/api` to the Express dev
+server) and production (Vercel rewrite), so no CORS layer exists.
+
+### Admin
+
+Two equivalent tracks, both accepted by `requireAdmin`:
+
+- **Admin account** (preferred): a signed-in user with `users.is_admin = TRUE`
+- **Legacy secret**: `?admin=SECRET` URL param → sessionStorage →
+  `x-admin-key` header, compared against `ADMIN_SECRET`
+
+Secrets **fail fast**: in production the server refuses to start if
+`ADMIN_SECRET` or `SESSION_SECRET` is unset (dev uses known fallbacks).
+
+---
+
+## Friend Groups & Visibility Model
+
+The core rule, defined once as `VISIBLE_USERS_SQL` (`api/_lib/constants.js`):
+a user sees content from **themselves plus anyone sharing at least one group
+with them**.
+
+| Content | Anonymous | Signed-in |
+|---------|-----------|-----------|
+| Places with `created_by NULL` (editorial) | visible | visible |
+| Places with `created_by` set (friend-added) | hidden | visible if creator is in your groups |
+| Friend ratings | hidden | own + group members' |
+| Editorial tier, comments, votes, blog | visible | visible |
+
+Mechanics:
+
+- **Invites** are shareable links (`?join=CODE`). The code is stashed in
+  sessionStorage until the visitor signs in, then consumed automatically.
+- **Group tier** (friends-view pin color) is the *median* visible rating,
+  computed by selecting the actual middle rating row ordered by
+  `tiers.sort_order` (ties broken by code, best-biased on even counts).
+- A friend's chosen tier when **adding a place** doubles as their personal
+  rating; groups **self-delete** when the last member leaves.
 
 ---
 
@@ -202,177 +262,113 @@ function requireAdmin(req, res, next) {
 ### Schema Overview
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   places    │────<│  comments   │     │    votes    │
-└─────────────┘     └─────────────┘     └─────────────┘
-       │
-       │            ┌─────────────┐     ┌─────────────┐
-       └───────────<│cuisine_tags │────<│  cuisines   │
-                    └─────────────┘     └─────────────┘
+users ──< group_members >── groups
+  │
+  ├──< ratings >── places ──< comments
+  │                  │
+  │                  └──< votes
+  └─ is_admin        └─ created_by → users (soft link)
 
-┌─────────────┐     ┌───────────────┐
-│    tiers    │     │ site_settings │
-└─────────────┘     └───────────────┘
+cuisines ──< cuisine_tags     tiers     site_settings     blog_posts
 ```
 
 ### Table Definitions
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `places` | Restaurants | name, address, coords (JSONB), cuisine_type, tier, tags (JSONB) |
-| `comments` | Reviews | place_id (FK), content |
-| `votes` | Public voting | place_id (FK), vote_type, voter_id |
-| `cuisines` | Categories | name, sort_order |
-| `cuisine_tags` | Nested tags | cuisine_id (FK), name |
-| `tiers` | Rating levels | code, description, color_class, color_hex |
+| `places` | Restaurants | name, coords (JSONB), cuisine_type, tier, tags (JSONB), region, `created_by` (NULL = editorial/public) |
+| `users` | Accounts | google_sub (unique), email, display_name, avatar_url, is_admin |
+| `ratings` | Per-user friend ratings | user_id, place_id, tier, review — UNIQUE(user, place) |
+| `groups` | Friend groups | name, invite_code (unique), created_by |
+| `group_members` | Membership | group_id, user_id — UNIQUE pair |
+| `comments` | Editorial reviews | place_id, content |
+| `votes` | Anonymous thumbs | place_id, vote_type, voter_id (localStorage id) |
+| `cuisines` / `cuisine_tags` | Categories + nested tags | name, sort_order |
+| `tiers` | Rating levels | code, description, color_class, color_hex, sort_order |
 | `site_settings` | Key-value store | setting_key, setting_value (JSONB) |
+| `blog_posts` | Blog content | title, content (JSONB), sort_order |
+
+### Migrations
+
+`database/schema.sql` is the source of truth: idempotent
+`CREATE TABLE IF NOT EXISTS` plus `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`
+upgrade lines for columns added after a table shipped. `pnpm migrate` applies
+it, and the Vercel build (`vercel-build`) runs it on every deploy. The
+numbered files in `database/migrations/` document each change for reference.
 
 ### Database Features
 
-- **Auto-timestamps**: Triggers update `updated_at` on row changes
-- **Cascade deletes**: Comments/tags deleted with parent
-- **JSONB**: Flexible storage for coords, tags, settings
-- **Connection pooling**: Max 20 connections, 30s idle timeout
+- **Auto-timestamps**: triggers update `updated_at` on row changes
+- **Cascade deletes**: ratings/memberships/comments deleted with parent
+- **Connection pooling**: max 20 connections, 30s idle timeout
 
 ---
 
 ## Design Patterns
 
-### 1. Singleton Pattern
+### 1. Singleton Composables
 
-Used for shared state across components:
+Module-level refs shared across all consumers — `useAuth`, `useConfig`,
+`useRatings`, `useGroups`, `useAdmin`.
 
-```javascript
-// Module-level (composables)
-const cuisines = ref([])
-const loaded = ref(false)
+### 2. Provider Interface (Strategy)
 
-export function useConfig() {
-  // All components share the same refs
-  return { cuisines, loaded }
-}
-```
-
-**Applied in**: `useAdmin`, `useConfig`, `useMethodology`, `db.js`
-
-### 2. Composition over Inheritance
-
-Functions return reactive objects instead of class inheritance:
+`MapContainer` depends on a small interface, not a map engine:
 
 ```javascript
-// Composable composition
-const { places, addPlace } = useFoodTracker()
-const { isAdmin } = useAdmin()
-const { tiers, getTierBadgeClass } = useConfig()
+{ init, addMarker, clearMarkers, openPopup, focusOn, destroy }
 ```
 
-### 3. Separation of Concerns
+`googleMapProvider` and `oneMapProvider` are interchangeable implementations,
+which is what makes the automatic Google → OneMap failover a one-line swap.
+
+### 3. Router-per-Domain
+
+Each Express router owns one resource family; cross-cutting concerns
+(sessions, admin checks, visibility SQL) live in `api/_lib/` and are imported
+where needed.
+
+### 4. Guard Clauses (Fail Fast)
+
+Validation at the top of every handler; missing production secrets abort
+startup rather than degrade to insecure defaults.
+
+### 5. Separation of Concerns
 
 | Layer | Responsibility | Location |
 |-------|----------------|----------|
 | Presentation | Rendering, events | `components/` |
 | Business Logic | State, transformations | `composables/` |
 | Data Access | HTTP abstraction | `services/api.js` |
-| API | Routes, middleware | `api/index.js` |
+| API | Routes, middleware | `api/_routes/`, `api/_lib/` |
 | Persistence | Connection, queries | `database/` |
-
-### 4. Guard Clauses (Fail Fast)
-
-```javascript
-function requireAdmin(req, res, next) {
-  if (adminKey !== ADMIN_SECRET) {
-    return res.status(403).json({ error: 'Admin access required' })
-  }
-  next()
-}
-```
-
-### 5. Middleware Pattern
-
-Express middleware chain for cross-cutting concerns:
-
-```javascript
-app.use(cors())
-app.use(express.json())
-app.post('/api/places', requireAdmin, handler)
-```
-
-### 6. Factory Pattern
-
-Creating derived objects from raw data:
-
-```javascript
-tierOptions: computed(() => tiers.value.map(t => ({
-  code: t.code,
-  label: `${t.code} - ${t.description}`,
-  colorClass: t.color_class,
-})))
-```
 
 ---
 
 ## Code Quality Guidelines
 
-This project adheres to the principles defined below
+### DRY
+- One `VISIBLE_USERS_SQL` definition drives all group-visibility queries
+- API wrapper functions (`request`, `adminRequest`); shared auth helpers
 
-### DRY (Don't Repeat Yourself)
-- API wrapper functions (`request`, `adminRequest`)
-- Reusable composables across components
-- Computed properties for derived state
+### KISS
+- Session = one signed JWT cookie; no refresh tokens or token rotation
+- Invite links instead of email infrastructure
+- REST, no GraphQL; composables, no Pinia
 
-### KISS (Keep It Simple)
-- Header-based auth (no JWT complexity)
-- localStorage fallback (no complex offline sync)
-- REST API (no GraphQL overhead)
+### YAGNI
+- No TypeScript (current scope), no WebSockets, no offline mode
+- Friend places are group-visible only — no moderation queue until needed
 
-### YAGNI (You Aren't Gonna Need It)
-- No TypeScript (not needed for current scope)
-- No Vuex/Pinia (composables sufficient)
-- No WebSockets (REST adequate for update frequency)
-- No user accounts (simple admin session)
-
-### SOLID Principles
+### SOLID
 
 | Principle | Application |
 |-----------|-------------|
-| **SRP** | Each composable has one responsibility |
-| **OCP** | Config system extensible without code changes |
-| **LSP** | All API calls follow consistent patterns |
-| **ISP** | Props are specific to component needs |
-| **DIP** | Components depend on composable abstractions |
-
----
-
-## Deployment
-
-### Vercel Configuration
-
-```json
-// vercel.json
-{
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/(.*)", "destination": "/" }
-  ]
-}
-```
-
-### Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `ADMIN_SECRET` | Admin authentication key |
-| `VITE_API_URL` | API base URL (optional) |
-
-### Build Process
-
-```bash
-pnpm install        # Install dependencies
-pnpm lint           # Run ESLint
-pnpm build          # Vite production build
-pnpm migrate        # Run database migrations
-```
+| **SRP** | One router per domain; one composable per concern; popup is its own component |
+| **OCP** | New map engines implement the provider interface without touching MapContainer |
+| **LSP** | Both map providers are drop-in substitutes |
+| **ISP** | PlacePopup receives only the callbacks it uses |
+| **DIP** | Components depend on composables, not axios or SQL |
 
 ---
 
@@ -380,11 +376,12 @@ pnpm migrate        # Run database migrations
 
 | Purpose | File |
 |---------|------|
-| App entry | `src/App.vue` |
-| Main state | `src/composables/useFoodTracker.js` |
+| App entry / view toggle | `src/App.vue` |
+| Map orchestration | `src/components/MapContainer.vue` |
+| Popup UI | `src/components/map/PlacePopup.vue` |
 | API client | `src/services/api.js` |
-| Backend routes | `api/index.js` |
-| DB connection | `database/db.js` |
+| API assembly | `api/index.js` |
+| Session/admin auth | `api/_lib/auth.js` |
+| Visibility rule | `api/_lib/constants.js` |
 | Schema | `database/schema.sql` |
-| Build config | `vite.config.js` |
-| Styling | `tailwind.config.js` |
+| Deployment config | `vercel.json` |

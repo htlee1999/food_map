@@ -13,22 +13,13 @@ CREATE TABLE IF NOT EXISTS places (
     price_range VARCHAR(20),
     tier VARCHAR(10),
     region VARCHAR(20), -- Singapore region: Central, East, West, North, North-East
+    created_by INTEGER, -- NULL = admin/editorial place (public); set = friend-added (group-visible only)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create preferences table to store user preferences
-CREATE TABLE IF NOT EXISTS preferences (
-    id SERIAL PRIMARY KEY,
-    place_id INTEGER REFERENCES places(id) ON DELETE CASCADE,
-    user_id VARCHAR(100) DEFAULT 'default_user', -- For future multi-user support
-    visited BOOLEAN DEFAULT FALSE,
-    want_to_visit BOOLEAN DEFAULT FALSE,
-    notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(place_id, user_id)
-);
+-- Upgrade path for databases created before the created_by column existed
+ALTER TABLE places ADD COLUMN IF NOT EXISTS created_by INTEGER;
 
 -- Create comments table to store reviews for each place
 CREATE TABLE IF NOT EXISTS comments (
@@ -91,6 +82,50 @@ CREATE TABLE IF NOT EXISTS blog_posts (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- User accounts (Google sign-in)
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    google_sub VARCHAR(64) NOT NULL UNIQUE, -- Google's stable account identifier
+    email VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255),
+    avatar_url TEXT,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Upgrade path for databases created before the is_admin column existed
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
+
+-- Friend groups
+CREATE TABLE IF NOT EXISTS groups (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    invite_code VARCHAR(20) NOT NULL UNIQUE, -- Shareable join code
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS group_members (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(group_id, user_id)
+);
+
+-- Per-user tier ratings for places (friend ratings)
+CREATE TABLE IF NOT EXISTS ratings (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    place_id INTEGER NOT NULL REFERENCES places(id) ON DELETE CASCADE,
+    tier VARCHAR(10) NOT NULL,
+    review TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, place_id) -- One rating per user per place
+);
+
 -- Site settings table for key-value storage (e.g., methodology content)
 CREATE TABLE IF NOT EXISTS site_settings (
     id SERIAL PRIMARY KEY,
@@ -105,10 +140,11 @@ CREATE INDEX IF NOT EXISTS idx_places_name ON places(name);
 CREATE INDEX IF NOT EXISTS idx_places_cuisine ON places(cuisine_type);
 CREATE INDEX IF NOT EXISTS idx_places_tier ON places(tier);
 CREATE INDEX IF NOT EXISTS idx_places_region ON places(region);
-CREATE INDEX IF NOT EXISTS idx_preferences_user ON preferences(user_id);
-CREATE INDEX IF NOT EXISTS idx_preferences_place ON preferences(place_id);
 CREATE INDEX IF NOT EXISTS idx_comments_place ON comments(place_id);
 CREATE INDEX IF NOT EXISTS idx_votes_place ON votes(place_id);
+CREATE INDEX IF NOT EXISTS idx_ratings_place ON ratings(place_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_group ON group_members(group_id);
 CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(setting_key);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_created ON blog_posts(created_at DESC);
 
@@ -126,10 +162,6 @@ DROP TRIGGER IF EXISTS update_places_updated_at ON places;
 CREATE TRIGGER update_places_updated_at BEFORE UPDATE ON places
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_preferences_updated_at ON preferences;
-CREATE TRIGGER update_preferences_updated_at BEFORE UPDATE ON preferences
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_comments_updated_at ON comments;
 CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON comments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -140,4 +172,12 @@ CREATE TRIGGER update_site_settings_updated_at BEFORE UPDATE ON site_settings
 
 DROP TRIGGER IF EXISTS update_blog_posts_updated_at ON blog_posts;
 CREATE TRIGGER update_blog_posts_updated_at BEFORE UPDATE ON blog_posts
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_ratings_updated_at ON ratings;
+CREATE TRIGGER update_ratings_updated_at BEFORE UPDATE ON ratings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -45,15 +45,27 @@ export const votesApi = {
   remove: (placeId, voterId) => request('delete', `/places/${placeId}/votes`, { data: { voter_id: voterId } }),
 }
 
-// Health check
-export const healthApi = {
-  async check() {
-    try {
-      return await request('get', '/health')
-    } catch {
-      return null
-    }
-  },
+// Ratings API (per-user friend ratings; requires sign-in to submit)
+export const ratingsApi = {
+  summary: () => request('get', '/ratings/summary'),
+  list: (placeId) => request('get', `/places/${placeId}/ratings`),
+  submit: (placeId, tier, review) => request('put', `/places/${placeId}/rating`, { data: { tier, review } }),
+  remove: (placeId) => request('delete', `/places/${placeId}/rating`),
+}
+
+// Groups API (all endpoints require sign-in)
+export const groupsApi = {
+  list: () => request('get', '/groups'),
+  create: (name) => request('post', '/groups', { data: { name } }),
+  join: (inviteCode) => request('post', '/groups/join', { data: { invite_code: inviteCode } }),
+  leave: (groupId) => request('delete', `/groups/${groupId}/members/me`),
+}
+
+// Auth API (session cookie is sent automatically on same-origin requests)
+export const authApi = {
+  me: () => request('get', '/auth/me'),
+  loginWithGoogle: (credential) => request('post', '/auth/google', { data: { credential } }),
+  logout: () => request('post', '/auth/logout'),
 }
 
 // Config API

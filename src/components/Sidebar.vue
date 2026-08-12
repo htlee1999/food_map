@@ -64,8 +64,8 @@
       </div>
     </div>
 
-    <!-- Add place (admin) -->
-    <div v-if="isAdmin" class="px-7 pt-5 pb-4">
+    <!-- Add place (admins add public places; signed-in friends add group-visible ones) -->
+    <div v-if="isAdmin || isLoggedIn" class="px-7 pt-5 pb-4">
       <button
         @click="openAddPlaceModal"
         class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-all text-[11px] tracking-[0.15em] uppercase font-medium bg-white text-stone-700 border border-stone-300 hover:border-stone-900"
@@ -107,6 +107,21 @@
       </div>
     </teleport>
 
+    <!-- Account (sign in / user info) -->
+    <div class="px-7 pt-4 pb-4 border-t border-stone-100">
+      <AuthControl />
+      <button
+        v-if="isLoggedIn"
+        @click="$emit('open-groups')"
+        class="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-all text-[11px] tracking-[0.15em] uppercase font-medium bg-white text-stone-700 border border-stone-300 hover:border-stone-900"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6-4a3 3 0 11-3-3" />
+        </svg>
+        <span>Friend Groups</span>
+      </button>
+    </div>
+
     <!-- Footer (admin settings only) -->
     <div v-if="isAdmin" class="px-7 pt-3 pb-6 border-t border-stone-100">
       <button
@@ -126,7 +141,9 @@
 <script>
 import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import AddPlaceForm from './AddPlaceForm.vue'
+import AuthControl from './AuthControl.vue'
 import { useConfig } from '../composables/useConfig'
+import { useAuth } from '../composables/useAuth'
 
 // Lucide-style stroke icons keyed by lowercase keyword in the cuisine name.
 // Order matters — first match wins.
@@ -164,6 +181,7 @@ export default {
   name: 'Sidebar',
   components: {
     AddPlaceForm,
+    AuthControl,
   },
   props: {
     selectedRegion: { type: String, default: '' },
@@ -175,12 +193,14 @@ export default {
     'place-added',
     'close-sidebar',
     'open-settings',
+    'open-groups',
   ],
   setup(props, { emit }) {
     const showAddPlaceForm = ref(false)
     const categoryScroller = ref(null)
     const canScrollDown = ref(false)
     const { cuisineNames: categories } = useConfig()
+    const { isLoggedIn } = useAuth()
 
     const subtitle = computed(() => {
       if (props.selectedRegion) return props.selectedRegion
@@ -242,6 +262,7 @@ export default {
       closeAddPlaceModal,
       categories,
       getCategoryIcon,
+      isLoggedIn,
     }
   },
 }

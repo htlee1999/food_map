@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { placesApi, healthApi } from '../services/api'
+import { placesApi } from '../services/api'
 
 export function useFoodTracker() {
   const places = ref([])
@@ -9,56 +9,27 @@ export function useFoodTracker() {
   const loading = ref(false)
   const selectedCategory = ref('Zi Char')
 
-  // Load saved data from API and localStorage fallback
+  // Load places from the API
   const loadSavedData = async () => {
     loading.value = true
     try {
-      // Check if backend is available
-      const health = await healthApi.check()
-
-      if (health) {
-        // Load from API
-        const placesData = await placesApi.getAll()
-        places.value = placesData
-      } else {
-        // Fallback to localStorage
-        loadFromLocalStorage()
-      }
+      places.value = await placesApi.getAll()
     } catch (error) {
-      // Fallback to localStorage
-      loadFromLocalStorage()
+      console.error('Failed to load places:', error)
     } finally {
       loading.value = false
-    }
-  }
-
-  // Fallback to localStorage
-  const loadFromLocalStorage = () => {
-    const saved = localStorage.getItem('foodTrackerData')
-    if (saved) {
-      const data = JSON.parse(saved)
-      places.value = data.places || []
     }
   }
 
   // Add manually created place
   const addPlace = async (place) => {
     try {
-      // Save to backend API
+      // The API returns the saved place with its database ID
       const result = await placesApi.add(place)
-
-      // Add the place returned from the API to local state (with correct database ID)
       places.value.push(result.place)
       return true
     } catch (error) {
-      if (error.response?.status === 409) {
-        // Place already exists
-        return false
-      } else {
-        // Other error - still add to local state as fallback
-        places.value.push(place)
-        return true
-      }
+      return false
     }
   }
 

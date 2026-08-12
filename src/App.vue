@@ -23,6 +23,26 @@
         </button>
       </nav>
       <div class="flex items-center gap-5">
+        <!-- Public / Friends view toggle -->
+        <div
+          v-if="isLoggedIn"
+          class="flex items-center border border-stone-300 rounded-md overflow-hidden text-[11px] tracking-[0.15em] uppercase font-medium"
+        >
+          <button
+            @click="viewMode = 'public'"
+            :class="viewMode === 'public' ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-900'"
+            class="px-3 py-1.5 transition-colors"
+          >
+            Public
+          </button>
+          <button
+            @click="viewMode = 'friends'"
+            :class="viewMode === 'friends' ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-900'"
+            class="px-3 py-1.5 transition-colors"
+          >
+            Friends
+          </button>
+        </div>
         <button
           @click="focusSearch"
           class="text-stone-500 hover:text-stone-900 transition-colors"
@@ -71,6 +91,25 @@
             <circle cx="9" cy="9" r="1.5" fill="currentColor" />
             <circle cx="15" cy="7" r="1.5" fill="currentColor" />
             <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M7 16c2-2 3 1 5 0s3 2 5 0" />
+          </svg>
+        </button>
+        <!-- Public / Friends view toggle (mobile) -->
+        <button
+          v-if="isLoggedIn"
+          @click="viewMode = viewMode === 'friends' ? 'public' : 'friends'"
+          :class="viewMode === 'friends' ? 'bg-stone-900 border-stone-900' : 'bg-white border-stone-200 hover:bg-stone-50'"
+          class="w-11 h-11 flex items-center justify-center rounded-md shadow-lg transition-colors border"
+          :aria-label="viewMode === 'friends' ? 'Switch to public view' : 'Switch to friends view'"
+        >
+          <svg
+            :class="viewMode === 'friends' ? 'text-white' : 'text-stone-700'"
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6-4a3 3 0 11-3-3" />
           </svg>
         </button>
       </div>
@@ -143,6 +182,7 @@
           @place-added="addPlace"
           @close-sidebar="toggleSidebar"
           @open-settings="showAdminPanel = true"
+          @open-groups="showGroupsModal = true"
         />
       </div>
 
@@ -177,6 +217,7 @@
           :is-admin="isAdmin"
           :get-votes="getVotes"
           :vote="vote"
+          :view-mode="viewMode"
         />
 
         <!-- Currently Viewing card overlay -->
@@ -219,11 +260,12 @@
       />
 
       <AdminPanel :is-open="showAdminPanel" @close="showAdminPanel = false" />
+      <GroupsModal :is-open="showGroupsModal" @close="showGroupsModal = false" />
       <MethodologyModal :is-open="showMethodologyModal" @close="showMethodologyModal = false" />
       <BlogModal :is-open="showBlogModal" @close="showBlogModal = false" />
       <SpinWheelModal
         :is-open="showSpinWheelModal"
-        :places="places"
+        :places="wheelPlaces"
         @close="showSpinWheelModal = false"
         @select-place="handleSpinWheelSelect"
       />
@@ -232,12 +274,13 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import Sidebar from './components/Sidebar.vue'
 import CuisinePanel from './components/CuisinePanel.vue'
 import MapContainer from './components/MapContainer.vue'
 import ViewAllModal from './components/ViewAllModal.vue'
 import AdminPanel from './components/AdminPanel.vue'
+import GroupsModal from './components/GroupsModal.vue'
 import MethodologyModal from './components/MethodologyModal.vue'
 import SpinWheelModal from './components/SpinWheelModal.vue'
 import BlogModal from './components/BlogModal.vue'
@@ -245,6 +288,9 @@ import { useFoodTracker } from './composables/useFoodTracker'
 import { useAdmin } from './composables/useAdmin'
 import { useVoting } from './composables/useVoting'
 import { useConfig } from './composables/useConfig'
+import { useGroups } from './composables/useGroups'
+import { useAuth } from './composables/useAuth'
+import { useRatings } from './composables/useRatings'
 import { filterPlaces } from './utils/filterPlaces'
 
 const TAGLINES = {
@@ -259,6 +305,7 @@ export default {
     MapContainer,
     ViewAllModal,
     AdminPanel,
+    GroupsModal,
     MethodologyModal,
     SpinWheelModal,
     BlogModal,
@@ -271,6 +318,7 @@ export default {
     const showMethodologyModal = ref(false)
     const showSpinWheelModal = ref(false)
     const showBlogModal = ref(false)
+    const showGroupsModal = ref(false)
     const mapContainer = ref(null)
 
     const {
@@ -292,6 +340,30 @@ export default {
     const { isAdmin, initAdmin } = useAdmin()
     const { getVotes, vote } = useVoting()
     const { loadConfig } = useConfig()
+    const { initGroups, groups } = useGroups()
+    const { isLoggedIn } = useAuth()
+    const { ratingsSummary, loadRatingsSummary } = useRatings()
+
+    // 'public' = the curated map everyone sees; 'friends' = group tiers
+    const viewMode = ref('public')
+
+    // Login state changes what places/ratings are visible
+    watch(isLoggedIn, async (loggedIn) => {
+      if (!loggedIn) viewMode.value = 'public'
+      await Promise.all([loadSavedData(), loadRatingsSummary()])
+    })
+
+    // Group membership changes place visibility (e.g. after joining via invite)
+    watch(groups, () => {
+      loadSavedData()
+    })
+
+    // Friends-mode spin wheel only offers places someone in the group has rated
+    const wheelPlaces = computed(() =>
+      viewMode.value === 'friends'
+        ? places.value.filter((place) => ratingsSummary.value[place.id])
+        : places.value
+    )
 
     const toggleSidebar = () => {
       showSidebar.value = !showSidebar.value
@@ -367,6 +439,7 @@ export default {
 
     onMounted(async () => {
       initAdmin()
+      initGroups()
       await loadConfig()
       loadSavedData()
     })
@@ -380,6 +453,7 @@ export default {
       showMethodologyModal,
       showSpinWheelModal,
       showBlogModal,
+      showGroupsModal,
       mapContainer,
       toggleSidebar,
       places,
@@ -397,6 +471,9 @@ export default {
       addComment,
       deleteComment,
       isAdmin,
+      isLoggedIn,
+      viewMode,
+      wheelPlaces,
       getVotes,
       vote,
       filteredCount,
