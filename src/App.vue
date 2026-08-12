@@ -197,6 +197,7 @@
         :search-query="searchQuery"
         :get-votes="getVotes"
         @close="showCuisinePanel = false"
+        @back="backToCategories"
         @select-place="focusOnPlace"
         @view-all="showViewAllModal = true"
         @update-search="searchQuery = $event"
@@ -380,6 +381,16 @@ export default {
       }
     }
 
+    // "Back" from the cuisine panel returns to the category list. On mobile the
+    // sidebar was closed when the panel opened, so reopen it; on desktop it's
+    // already visible underneath.
+    const backToCategories = () => {
+      showCuisinePanel.value = false
+      if (window.innerWidth < 1024) {
+        showSidebar.value = true
+      }
+    }
+
     const focusOnPlace = (place) => {
       if (mapContainer.value && mapContainer.value.focusOnPlace) {
         mapContainer.value.focusOnPlace(place)
@@ -456,6 +467,7 @@ export default {
       showGroupsModal,
       mapContainer,
       toggleSidebar,
+      backToCategories,
       places,
       searchQuery,
       selectedTier,

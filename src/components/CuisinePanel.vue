@@ -25,7 +25,7 @@
     <div class="px-5 lg:px-7 pt-3 lg:pt-7 pb-4 bg-white border-b border-stone-200">
       <!-- Back to categories -->
       <button
-        @click="$emit('close')"
+        @click="$emit('back')"
         class="flex items-center gap-1.5 text-stone-500 hover:text-stone-900 transition-colors mb-3"
         aria-label="Back to categories"
       >
@@ -212,6 +212,7 @@ export default {
   },
   emits: [
     'close',
+    'back',
     'select-place',
     'view-all',
     'update-search',
