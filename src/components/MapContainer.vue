@@ -25,6 +25,7 @@ import { useConfig } from '../composables/useConfig'
 import { useRatings } from '../composables/useRatings'
 import { createGoogleMapProvider } from './map/googleMapProvider'
 import { createOneMapProvider } from './map/oneMapProvider'
+import { filterPlaces } from '../utils/filterPlaces'
 import PlacePopup from './map/PlacePopup.vue'
 
 export default {
@@ -69,6 +70,20 @@ export default {
     viewMode: {
       type: String,
       default: 'public', // 'public' shows places.tier; 'friends' shows group tiers
+    },
+    // Optional filters applied on top of category. Empty = no filter, so the
+    // desktop callers that omit these are unaffected.
+    searchQuery: {
+      type: String,
+      default: '',
+    },
+    selectedTier: {
+      type: String,
+      default: '',
+    },
+    selectedRegion: {
+      type: String,
+      default: '',
     },
   },
   setup(props) {
@@ -186,9 +201,14 @@ export default {
       destroyActivePopup()
       mapProvider.clearMarkers()
 
-      const placesToAdd = props.places.filter(
-        (place) => place.cuisine_type === props.selectedCategory && place.coords
-      )
+      // An empty category means "All" — every place is eligible, then narrowed
+      // by the optional search/tier/region filters via the shared pipeline.
+      const placesToAdd = filterPlaces(props.places, {
+        category: props.selectedCategory,
+        search: props.searchQuery,
+        tier: props.selectedTier,
+        region: props.selectedRegion,
+      }).filter((place) => place.coords)
       for (const place of placesToAdd) {
         mapProvider.addMarker({
           place,
@@ -218,11 +238,21 @@ export default {
     )
 
     watch(
-      () => props.selectedCategory,
+      () => [props.selectedCategory, props.searchQuery, props.selectedTier, props.selectedRegion],
       () => {
         if (mapLoaded.value) addAllMarkers()
       }
     )
+
+    // Center the map on the visitor's current location (mobile locate button).
+    const locateUser = () => {
+      if (!mapProvider || !navigator.geolocation) return
+      navigator.geolocation.getCurrentPosition((position) => {
+        mapProvider.focusOn({
+          coords: { lat: position.coords.latitude, lng: position.coords.longitude },
+        })
+      })
+    }
 
     // Re-color pins when the view mode flips or the group summary changes
     watch(
@@ -265,6 +295,7 @@ export default {
       mapLoaded,
       mapError,
       focusOnPlace,
+      locateUser,
     }
   },
 }

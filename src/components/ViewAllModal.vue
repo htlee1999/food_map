@@ -1,11 +1,12 @@
 <template>
+  <Transition name="modal">
   <div
     v-if="isOpen"
     class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[9999] sm:p-4"
     @click="closeModal"
   >
     <div
-      class="bg-white sm:rounded-xl rounded-t-2xl shadow-xl w-full sm:w-[90%] max-w-5xl h-[92vh] sm:h-[80vh] flex flex-col"
+      class="modal-panel bg-white sm:rounded-xl rounded-t-2xl shadow-xl w-full sm:w-[90%] max-w-5xl h-[92vh] sm:h-[80vh] flex flex-col"
       @click.stop
     >
       <!-- Header -->
@@ -309,6 +310,7 @@
       </div>
     </div>
   </div>
+  </Transition>
 </template>
 
 <script>
@@ -467,3 +469,29 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* Backdrop fades; panel slides up (bottom-sheet on mobile, gentle rise on desktop). */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.25s ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+.modal-enter-active .modal-panel,
+.modal-leave-active .modal-panel {
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.modal-enter-from .modal-panel,
+.modal-leave-to .modal-panel {
+  transform: translateY(100%);
+}
+@media (min-width: 640px) {
+  .modal-enter-from .modal-panel,
+  .modal-leave-to .modal-panel {
+    transform: translateY(24px) scale(0.97);
+  }
+}
+</style>

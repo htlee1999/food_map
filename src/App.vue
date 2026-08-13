@@ -67,96 +67,261 @@
     </header>
 
     <div class="flex h-[100dvh] lg:pt-16 relative">
-      <!-- Mobile floating action buttons (stacked, safe-area aware) -->
+      <!-- Mobile top chrome: header + search + category chips (floats over map) -->
       <div
         v-show="!showSidebar"
-        class="lg:hidden fixed left-3 z-[100] flex flex-col gap-2"
-        style="top: calc(env(safe-area-inset-top, 0px) + 0.75rem)"
+        class="lg:hidden fixed top-0 left-0 right-0 z-[70] bg-stone-50/95 backdrop-blur-sm border-b border-stone-200/70"
+        style="padding-top: env(safe-area-inset-top, 0px)"
+      >
+        <!-- Header row -->
+        <div class="flex items-center justify-between px-4 h-14">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-lg bg-stone-900 flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6-5.686-6-10a6 6 0 1112 0c0 4.314-6 10-6 10z" />
+                <circle cx="12" cy="11" r="2" />
+              </svg>
+            </div>
+            <span class="text-lg font-semibold text-stone-900 tracking-tight">Map View</span>
+          </div>
+          <button
+            @click="toggleSidebar"
+            class="flex-shrink-0"
+            aria-label="Open profile menu"
+          >
+            <img
+              v-if="userAvatar"
+              :src="userAvatar"
+              alt="Profile"
+              referrerpolicy="no-referrer"
+              class="w-9 h-9 rounded-full border border-stone-200 object-cover"
+            />
+            <span v-else class="w-9 h-9 rounded-full border border-stone-200 bg-white flex items-center justify-center text-stone-500">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 21a8 8 0 0116 0" />
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <!-- Search + filter -->
+        <div class="px-4 pb-2.5">
+          <div class="flex items-center gap-2 bg-white rounded-xl border border-stone-200 shadow-sm h-11 px-3.5">
+            <svg class="w-4 h-4 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              v-model="searchQuery"
+              type="search"
+              placeholder="Search for food..."
+              class="flex-1 min-w-0 bg-transparent text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none"
+            />
+            <button
+              @click="showMobileFilters = true"
+              class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-md bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
+              :class="hasActiveFilters ? 'bg-stone-900 text-white hover:bg-stone-900' : ''"
+              aria-label="Filters"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M7 12h10M10 18h4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category chips -->
+        <div class="flex gap-2 px-4 pb-2.5 overflow-x-auto no-scrollbar">
+          <button
+            @click="selectCategoryChip('')"
+            :class="selectedCategory === '' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 border border-stone-200'"
+            class="flex-shrink-0 h-9 px-4 rounded-full text-sm font-medium transition-colors"
+          >
+            All
+          </button>
+          <button
+            v-for="category in cuisineNames"
+            :key="category"
+            @click="selectCategoryChip(category)"
+            :class="selectedCategory === category ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 border border-stone-200'"
+            class="flex-shrink-0 h-9 px-4 rounded-full text-sm font-medium transition-colors"
+          >
+            {{ category }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile floating controls: List View + locate (sit above bottom nav) -->
+      <div
+        v-show="!showSidebar"
+        class="lg:hidden fixed left-0 right-0 z-[70] flex items-center justify-center px-4"
+        style="bottom: calc(env(safe-area-inset-bottom, 0px) + 4.75rem)"
       >
         <button
-          @click="toggleSidebar"
-          class="bg-white w-11 h-11 flex items-center justify-center rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
-          aria-label="Open menu"
+          @click="showViewAllModal = true"
+          class="flex items-center gap-2 bg-stone-900 text-white rounded-full pl-5 pr-6 h-12 shadow-xl active:scale-95 transition-transform"
         >
-          <svg class="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
           </svg>
+          <span class="text-sm font-semibold">List View</span>
         </button>
         <button
-          @click="showSpinWheelModal = true"
-          class="bg-white w-11 h-11 flex items-center justify-center rounded-md shadow-lg hover:bg-stone-50 transition-colors border border-stone-200"
-          aria-label="Random pick"
+          @click="locateUser"
+          class="absolute right-4 w-12 h-12 bg-white rounded-full shadow-xl border border-stone-200 flex items-center justify-center text-stone-700 active:scale-95 transition-transform"
+          aria-label="Center on my location"
         >
-          <svg class="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none">
-            <circle cx="9" cy="9" r="1.5" fill="currentColor" />
-            <circle cx="15" cy="7" r="1.5" fill="currentColor" />
-            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M7 16c2-2 3 1 5 0s3 2 5 0" />
-          </svg>
-        </button>
-        <!-- Public / Friends view toggle (mobile) -->
-        <button
-          v-if="isLoggedIn"
-          @click="viewMode = viewMode === 'friends' ? 'public' : 'friends'"
-          :class="viewMode === 'friends' ? 'bg-stone-900 border-stone-900' : 'bg-white border-stone-200 hover:bg-stone-50'"
-          class="w-11 h-11 flex items-center justify-center rounded-md shadow-lg transition-colors border"
-          :aria-label="viewMode === 'friends' ? 'Switch to public view' : 'Switch to friends view'"
-        >
-          <svg
-            :class="viewMode === 'friends' ? 'text-white' : 'text-stone-700'"
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6-4a3 3 0 11-3-3" />
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3M12 19v3M2 12h3M19 12h3" />
           </svg>
         </button>
       </div>
 
-      <!-- Mobile pill: View All / Methodology -->
-      <div
+      <!-- Mobile bottom navigation -->
+      <nav
         v-show="!showSidebar"
-        class="lg:hidden fixed left-1/2 -translate-x-1/2 z-[100] flex items-center bg-white rounded-full shadow-lg border border-stone-200 overflow-hidden"
-        style="top: calc(env(safe-area-inset-top, 0px) + 0.75rem)"
+        class="lg:hidden fixed bottom-0 left-0 right-0 z-[70] bg-white border-t border-stone-200 flex"
+        style="padding-bottom: env(safe-area-inset-bottom, 0px)"
       >
         <button
-          @click="showViewAllModal = true"
-          class="flex items-center gap-1 pl-3 pr-2.5 h-8 hover:bg-stone-50 transition-colors text-stone-700"
-          aria-label="View all restaurants"
+          @click="goToMap"
+          class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-stone-900"
         >
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
           </svg>
-          <span class="text-[9px] tracking-[0.14em] uppercase font-medium">View All</span>
+          <span class="text-[10px] font-medium">Map</span>
         </button>
-        <div class="w-px h-4 bg-stone-200"></div>
         <button
-          @click="showMethodologyModal = true"
-          class="flex items-center gap-1 pl-2.5 pr-3 h-8 hover:bg-stone-50 transition-colors text-stone-700"
-          aria-label="About this map"
+          @click="showSpinWheelModal = true"
+          class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-stone-400"
         >
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="9" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 8l-2 6-6 2 2-6 6-2z" />
           </svg>
-          <span class="text-[9px] tracking-[0.14em] uppercase font-medium">About</span>
+          <span class="text-[10px] font-medium">Discover</span>
         </button>
-        <div class="w-px h-4 bg-stone-200"></div>
         <button
-          @click="showBlogModal = true"
-          class="flex items-center gap-1 pl-2.5 pr-3 h-8 hover:bg-stone-50 transition-colors text-stone-700"
-          aria-label="Blog"
+          @click="showViewAllModal = true"
+          class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-stone-400"
         >
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 5h12M4 9h12M4 13h8M4 17h6" />
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4V5z" />
           </svg>
-          <span class="text-[9px] tracking-[0.14em] uppercase font-medium">Blog</span>
+          <span class="text-[10px] font-medium">Saved</span>
         </button>
-      </div>
+        <button
+          @click="toggleSidebar"
+          class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-stone-400"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 21a8 8 0 0116 0" />
+          </svg>
+          <span class="text-[10px] font-medium">Profile</span>
+        </button>
+      </nav>
+
+      <!-- Mobile filter sheet -->
+      <teleport to="body">
+        <div v-if="showMobileFilters" class="lg:hidden fixed inset-0 z-[120]">
+          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showMobileFilters = false"></div>
+          <div
+            class="absolute bottom-0 inset-x-0 bg-white rounded-t-2xl shadow-2xl p-5 space-y-5"
+            style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1.5rem)"
+          >
+            <div class="mx-auto w-10 h-1 rounded-full bg-stone-200"></div>
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-semibold text-stone-900">Filters</h3>
+              <button
+                @click="clearFilters"
+                class="text-[11px] tracking-[0.14em] uppercase text-stone-400 hover:text-stone-900 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+
+            <!-- Rating tier -->
+            <div>
+              <div class="text-[10px] tracking-[0.22em] uppercase text-stone-500 mb-2">Rating tier</div>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  @click="selectedTier = ''"
+                  :class="selectedTier === '' ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-700'"
+                  class="h-8 px-3.5 rounded-full text-xs font-medium transition-colors"
+                >
+                  All
+                </button>
+                <button
+                  v-for="tier in tierOptions"
+                  :key="tier.code"
+                  @click="selectedTier = tier.code"
+                  :class="selectedTier === tier.code ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-700'"
+                  class="h-8 px-3.5 rounded-full text-xs font-medium transition-colors"
+                >
+                  {{ tier.code }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Public / Friends -->
+            <div v-if="isLoggedIn">
+              <div class="text-[10px] tracking-[0.22em] uppercase text-stone-500 mb-2">View</div>
+              <div class="flex items-center border border-stone-300 rounded-lg overflow-hidden text-xs font-medium">
+                <button
+                  @click="viewMode = 'public'"
+                  :class="viewMode === 'public' ? 'bg-stone-900 text-white' : 'text-stone-500'"
+                  class="flex-1 py-2 transition-colors"
+                >
+                  Public
+                </button>
+                <button
+                  @click="viewMode = 'friends'"
+                  :class="viewMode === 'friends' ? 'bg-stone-900 text-white' : 'text-stone-500'"
+                  class="flex-1 py-2 transition-colors"
+                >
+                  Friends
+                </button>
+              </div>
+            </div>
+
+            <!-- Secondary links -->
+            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-stone-100">
+              <button
+                @click="showMethodologyModal = true; showMobileFilters = false"
+                class="flex flex-col items-center gap-1 py-2 text-stone-600"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1" />
+                </svg>
+                <span class="text-[10px] tracking-[0.1em] uppercase">About</span>
+              </button>
+              <button
+                @click="showBlogModal = true; showMobileFilters = false"
+                class="flex flex-col items-center gap-1 py-2 text-stone-600"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 5h12M4 9h12M4 13h8M4 17h6" />
+                </svg>
+                <span class="text-[10px] tracking-[0.1em] uppercase">Blog</span>
+              </button>
+              <button
+                @click="showSpinWheelModal = true; showMobileFilters = false"
+                class="flex flex-col items-center gap-1 py-2 text-stone-600"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 8l-2 6-6 2 2-6 6-2z" />
+                </svg>
+                <span class="text-[10px] tracking-[0.1em] uppercase">Up to You</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </teleport>
 
       <!-- Mobile backdrop -->
       <div
@@ -219,6 +384,9 @@
           :get-votes="getVotes"
           :vote="vote"
           :view-mode="viewMode"
+          :search-query="searchQuery"
+          :selected-tier="selectedTier"
+          :selected-region="selectedRegion"
         />
 
         <!-- Currently Viewing card overlay -->
@@ -340,9 +508,12 @@ export default {
 
     const { isAdmin, initAdmin } = useAdmin()
     const { getVotes, vote } = useVoting()
-    const { loadConfig } = useConfig()
+    const { loadConfig, cuisineNames, tierOptions } = useConfig()
     const { initGroups, groups } = useGroups()
-    const { isLoggedIn } = useAuth()
+    const { isLoggedIn, currentUser } = useAuth()
+
+    // Mobile filter bottom-sheet
+    const showMobileFilters = ref(false)
     const { ratingsSummary, loadRatingsSummary } = useRatings()
 
     // 'public' = the curated map everyone sees; 'friends' = group tiers
@@ -448,6 +619,38 @@ export default {
       })
     }
 
+    // Avatar shown in the mobile header (falls back to a generic icon)
+    const userAvatar = computed(() => currentUser.value?.avatar_url || '')
+
+    // Mobile category chip: set the filter directly without opening the
+    // desktop cuisine panel. An empty string means "All".
+    const selectCategoryChip = (category) => {
+      selectedCategory.value = category
+      showCuisinePanel.value = false
+    }
+
+    const hasActiveFilters = computed(
+      () => !!selectedTier.value || viewMode.value === 'friends'
+    )
+
+    const clearFilters = () => {
+      selectedTier.value = ''
+      viewMode.value = 'public'
+    }
+
+    // Mobile "Map" tab: dismiss any overlays and reveal the map
+    const goToMap = () => {
+      showSidebar.value = false
+      showCuisinePanel.value = false
+      showMobileFilters.value = false
+    }
+
+    const locateUser = () => {
+      if (mapContainer.value && mapContainer.value.locateUser) {
+        mapContainer.value.locateUser()
+      }
+    }
+
     onMounted(async () => {
       initAdmin()
       initGroups()
@@ -486,6 +689,15 @@ export default {
       isLoggedIn,
       viewMode,
       wheelPlaces,
+      cuisineNames,
+      tierOptions,
+      userAvatar,
+      showMobileFilters,
+      selectCategoryChip,
+      hasActiveFilters,
+      clearFilters,
+      goToMap,
+      locateUser,
       getVotes,
       vote,
       filteredCount,
@@ -497,3 +709,14 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* Hide the scrollbar on the horizontal category chip row while keeping it swipeable. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+</style>
