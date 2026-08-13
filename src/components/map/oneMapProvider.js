@@ -2,6 +2,10 @@
 // MapContainer: init / addMarker / clearMarkers / openPopup / focusOn / destroy.
 // Used as the fallback when Google Maps fails to load or render.
 
+import { getPopupInsets } from '../../utils/mapPopupInsets'
+
+const POPUP_SIDE_PADDING_PX = 16
+
 const ONEMAP_ATTRIBUTION = '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" style="height:20px;width:20px;"/>&nbsp;<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap</a>&nbsp;&copy;&nbsp;contributors&nbsp;&#124;&nbsp;<a href="https://www.sla.gov.sg/" target="_blank" rel="noopener noreferrer">Singapore Land Authority</a>'
 
 export function createOneMapProvider() {
@@ -78,10 +82,15 @@ export function createOneMapProvider() {
     if (!map || !place.coords) return
 
     if (!popup) {
-      popup = window.L.popup({ autoPanPadding: [16, 16] })
+      popup = window.L.popup()
     }
-    popup.options.maxWidth = Math.min(window.innerWidth - 48, 340)
-    popup.options.maxHeight = Math.min(window.innerHeight - 160, 480)
+    const { top, bottom, maxWidth, maxHeight } = getPopupInsets()
+    popup.options.maxWidth = maxWidth
+    popup.options.maxHeight = maxHeight
+    // Split padding so Leaflet's auto-pan keeps the popup clear of the top
+    // chrome and the bottom controls, and re-pans as you zoom.
+    popup.options.autoPanPaddingTopLeft = window.L.point(POPUP_SIDE_PADDING_PX, top)
+    popup.options.autoPanPaddingBottomRight = window.L.point(POPUP_SIDE_PADDING_PX, bottom)
     popup
       .setLatLng([place.coords.lat, place.coords.lng])
       .setContent(contentEl)

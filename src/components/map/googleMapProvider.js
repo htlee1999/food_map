@@ -1,8 +1,15 @@
 // Google Maps implementation of the map provider interface used by
 // MapContainer: init / addMarker / clearMarkers / openPopup / focusOn / destroy.
 
+import { getPopupInsets } from '../../utils/mapPopupInsets'
+
 const SINGAPORE_CENTER = { lat: 1.3521, lng: 103.8198 }
 const TILE_CHECK_DELAY_MS = 5000
+// Extra vertical space the InfoWindow adds around our content (padding, close
+// button, and the pointer tail) — used when positioning it into view.
+const INFO_WINDOW_CHROME_PX = 60
+// Gap kept between the popup's top edge and the chrome above it.
+const POPUP_TOP_MARGIN_PX = 12
 
 export function createGoogleMapProvider({ onTileFailure }) {
   let map = null
@@ -100,6 +107,25 @@ export function createGoogleMapProvider({ onTileFailure }) {
     markers = []
   }
 
+  // Pan the map so a popup that opens upward from `place`'s marker sits fully
+  // inside the area not covered by the mobile chrome. Uses the popup's actual
+  // rendered height so short popups hug the top and tall ones stay clear of the
+  // bottom controls (their content scrolls internally).
+  const positionPopupInView = (place, contentEl) => {
+    if (!place.coords) return
+    const { top, bottom } = getPopupInsets()
+    const mapHeight = map.getDiv().offsetHeight
+    const popupHeight = contentEl.offsetHeight + INFO_WINDOW_CHROME_PX
+
+    // Desired marker Y: low enough that the upward popup clears the top chrome,
+    // but never below the bottom controls.
+    const idealMarkerY = top + POPUP_TOP_MARGIN_PX + popupHeight
+    const markerY = Math.min(idealMarkerY, mapHeight - bottom)
+
+    map.setCenter({ lat: place.coords.lat, lng: place.coords.lng })
+    map.panBy(0, mapHeight / 2 - markerY)
+  }
+
   const openPopup = (place, contentEl) => {
     const entry = markers.find((m) => m.placeId === place.id)
     if (!map || !entry) return
@@ -107,9 +133,27 @@ export function createGoogleMapProvider({ onTileFailure }) {
     if (!infoWindow) {
       infoWindow = new window.google.maps.InfoWindow()
     }
-    infoWindow.setOptions({ maxWidth: Math.min(window.innerWidth - 48, 340) })
+
+    const { isMobile, maxWidth, maxHeight } = getPopupInsets()
+    // InfoWindow has no maxHeight option, so cap the content and let it scroll.
+    contentEl.style.maxHeight = `${maxHeight - INFO_WINDOW_CHROME_PX}px`
+    contentEl.style.overflowY = 'auto'
+    contentEl.style.overflowX = 'hidden'
+
+    infoWindow.setOptions({
+      maxWidth,
+      // On mobile we position it ourselves; the built-in auto-pan is unaware of
+      // the fixed chrome overlaying the map.
+      disableAutoPan: isMobile,
+    })
     infoWindow.setContent(contentEl)
     infoWindow.open(map, entry.marker)
+
+    if (isMobile) {
+      window.google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
+        positionPopupInView(place, contentEl)
+      })
+    }
   }
 
   const focusOn = (place) => {

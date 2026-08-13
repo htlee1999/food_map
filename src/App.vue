@@ -288,7 +288,7 @@
             </div>
 
             <!-- Secondary links -->
-            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-stone-100">
+            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-stone-100">
               <button
                 @click="showMethodologyModal = true; showMobileFilters = false"
                 class="flex flex-col items-center gap-1 py-2 text-stone-600"
@@ -307,16 +307,6 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 5h12M4 9h12M4 13h8M4 17h6" />
                 </svg>
                 <span class="text-[10px] tracking-[0.1em] uppercase">Blog</span>
-              </button>
-              <button
-                @click="showSpinWheelModal = true; showMobileFilters = false"
-                class="flex flex-col items-center gap-1 py-2 text-stone-600"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 8l-2 6-6 2 2-6 6-2z" />
-                </svg>
-                <span class="text-[10px] tracking-[0.1em] uppercase">Up to You</span>
               </button>
             </div>
           </div>
