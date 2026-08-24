@@ -160,7 +160,7 @@
 <script>
 import { ref, reactive, computed, watch } from 'vue'
 import { useConfig } from '../composables/useConfig'
-import { classifyRegion } from '../utils/regionMapping'
+import { geocodeAddress } from '../utils/geocode'
 
 export default {
   name: 'AddPlaceForm',
@@ -188,124 +188,6 @@ export default {
     watch(() => formData.cuisine_type, () => {
       formData.tags = []
     })
-
-    // Geocode address using Google Geocoding API with multiple fallback strategies
-    const geocodeAddress = async (address) => {
-      try {
-        const apiKey = import.meta.env.VITE_GOOGLE_MAP_API || 'your_google_maps_api_key_here'
-        
-        if (apiKey === 'your_google_maps_api_key_here') {
-          throw new Error('Google Maps API key not configured. Please set VITE_GOOGLE_MAP_API in your environment variables.')
-        }
-
-        // Strategy 1: Try the full address as provided
-        let response = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}&region=sg`
-        )
-        let data = await response.json()
-
-        if (data.status === 'OK' && data.results.length > 0) {
-          const result = data.results[0]
-          const region = classifyRegion(address, result.formatted_address)
-          return {
-            lat: result.geometry.location.lat,
-            lng: result.geometry.location.lng,
-            confidence: 'high',
-            formatted_address: result.formatted_address,
-            region
-          }
-        }
-
-        // Strategy 2: Try without unit number (remove #01-20)
-        const addressWithoutUnit = address
-          .replace(/#\d+-\d+/g, '')
-          .replace(/\s+/g, ' ')
-          .trim()
-        if (addressWithoutUnit !== address) {
-          response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addressWithoutUnit)}&key=${apiKey}&region=sg`
-          )
-          data = await response.json()
-
-          if (data.status === 'OK' && data.results.length > 0) {
-            const result = data.results[0]
-            const region = classifyRegion(addressWithoutUnit, result.formatted_address)
-            return {
-              lat: result.geometry.location.lat,
-              lng: result.geometry.location.lng,
-              confidence: 'medium',
-              formatted_address: result.formatted_address,
-              region
-            }
-          }
-        }
-
-        // Strategy 3: Try with just the street name and building name
-        const streetMatch = address.match(/(\d+\s+[^,]+)/)
-        const buildingMatch = address.match(
-          /([A-Za-z\s]+Plaza|[A-Za-z\s]+Building|[A-Za-z\s]+Centre|[A-Za-z\s]+Mall)/i
-        )
-
-        if (streetMatch && buildingMatch) {
-          const simplifiedAddress = `${streetMatch[1]}, ${buildingMatch[1]}, Singapore`
-          response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(simplifiedAddress)}&key=${apiKey}&region=sg`
-          )
-          data = await response.json()
-
-          if (data.status === 'OK' && data.results.length > 0) {
-            const result = data.results[0]
-            const region = classifyRegion(simplifiedAddress, result.formatted_address)
-            return {
-              lat: result.geometry.location.lat,
-              lng: result.geometry.location.lng,
-              confidence: 'low',
-              formatted_address: result.formatted_address,
-              region
-            }
-          }
-        }
-
-        // Strategy 4: Try with just the street name
-        if (streetMatch) {
-          const streetOnly = `${streetMatch[1]}, Singapore`
-          response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(streetOnly)}&key=${apiKey}&region=sg`
-          )
-          data = await response.json()
-
-          if (data.status === 'OK' && data.results.length > 0) {
-            const result = data.results[0]
-            const region = classifyRegion(streetOnly, result.formatted_address)
-            return {
-              lat: result.geometry.location.lat,
-              lng: result.geometry.location.lng,
-              confidence: 'very-low',
-              formatted_address: result.formatted_address,
-              region
-            }
-          }
-        }
-
-        // Handle specific Google Maps API errors
-        if (data.status === 'ZERO_RESULTS') {
-          throw new Error('Address not found. Please check the spelling and try again.')
-        } else if (data.status === 'OVER_QUERY_LIMIT') {
-          throw new Error('Geocoding service temporarily unavailable. Please try again later.')
-        } else if (data.status === 'REQUEST_DENIED') {
-          throw new Error('Geocoding service access denied. Please check your API key configuration.')
-        }
-
-        return null
-      } catch (err) {
-        if (err.message.includes('API key')) {
-          throw err
-        }
-        throw new Error(
-          'Failed to geocode address. Please check your internet connection and try again.'
-        )
-      }
-    }
 
     const handleSubmit = async () => {
       if (!formData.name.trim() || !formData.address.trim() || !formData.tier) {

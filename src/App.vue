@@ -9,6 +9,9 @@
       </a>
       <nav class="flex items-center gap-8 text-[13px] tracking-wide text-stone-500">
         <button class="text-stone-900 font-medium border-b-2 border-stone-900 pb-1">Explore</button>
+        <button @click="showNearbyModal = true" class="hover:text-stone-900 transition-colors">
+          Near Me
+        </button>
         <button @click="showSpinWheelModal = true" class="hover:text-stone-900 transition-colors">
           Up to You
         </button>
@@ -157,6 +160,16 @@
         class="lg:hidden fixed left-0 right-0 z-[70] flex items-center justify-center px-4"
         style="bottom: calc(env(safe-area-inset-bottom, 0px) + 4.75rem)"
       >
+        <button
+          @click="showNearbyModal = true"
+          class="absolute left-4 w-12 h-12 bg-white rounded-full shadow-xl border border-stone-200 flex items-center justify-center text-stone-700 active:scale-95 transition-transform"
+          aria-label="Find food near a destination"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6-5.686-6-10a6 6 0 1112 0c0 4.314-6 10-6 10z" />
+            <circle cx="12" cy="11" r="2" />
+          </svg>
+        </button>
         <button
           @click="showViewAllModal = true"
           class="flex items-center gap-2 bg-stone-900 text-white rounded-full pl-5 pr-6 h-12 shadow-xl active:scale-95 transition-transform"
@@ -428,6 +441,13 @@
         @close="showSpinWheelModal = false"
         @select-place="handleSpinWheelSelect"
       />
+      <NearbyModal
+        :is-open="showNearbyModal"
+        :places="places"
+        @close="closeNearbyModal"
+        @anchor-set="showNearbyAnchor"
+        @select-place="handleNearbySelect"
+      />
     </div>
   </div>
 </template>
@@ -442,6 +462,7 @@ import AdminPanel from './components/AdminPanel.vue'
 import GroupsModal from './components/GroupsModal.vue'
 import MethodologyModal from './components/MethodologyModal.vue'
 import SpinWheelModal from './components/SpinWheelModal.vue'
+import NearbyModal from './components/NearbyModal.vue'
 import BlogModal from './components/BlogModal.vue'
 import { useFoodTracker } from './composables/useFoodTracker'
 import { useAdmin } from './composables/useAdmin'
@@ -467,6 +488,7 @@ export default {
     GroupsModal,
     MethodologyModal,
     SpinWheelModal,
+    NearbyModal,
     BlogModal,
   },
   setup() {
@@ -476,6 +498,7 @@ export default {
     const showAdminPanel = ref(false)
     const showMethodologyModal = ref(false)
     const showSpinWheelModal = ref(false)
+    const showNearbyModal = ref(false)
     const showBlogModal = ref(false)
     const showGroupsModal = ref(false)
     const mapContainer = ref(null)
@@ -641,6 +664,24 @@ export default {
       }
     }
 
+    // ─── "Where are you headed?" nearby suggestions ───
+
+    // Draw the destination + radius on the map when the user searches.
+    const showNearbyAnchor = ({ coords, radiusKm }) => {
+      mapContainer.value?.showNearbyAnchor?.(coords, radiusKm)
+    }
+
+    // Clearing the anchor keeps the map free of a stale radius once we're done.
+    const closeNearbyModal = () => {
+      showNearbyModal.value = false
+      mapContainer.value?.clearNearbyAnchor?.()
+    }
+
+    const handleNearbySelect = (place) => {
+      closeNearbyModal()
+      focusOnPlace(place)
+    }
+
     onMounted(async () => {
       initAdmin()
       initGroups()
@@ -656,6 +697,7 @@ export default {
       showAdminPanel,
       showMethodologyModal,
       showSpinWheelModal,
+      showNearbyModal,
       showBlogModal,
       showGroupsModal,
       mapContainer,
@@ -672,6 +714,9 @@ export default {
       deletePlace,
       focusOnPlace,
       handleSpinWheelSelect,
+      showNearbyAnchor,
+      closeNearbyModal,
+      handleNearbySelect,
       getComments,
       addComment,
       deleteComment,

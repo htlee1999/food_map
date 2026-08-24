@@ -244,6 +244,14 @@ export default {
       }
     )
 
+    // Draw / clear the "where are you headed?" destination + radius overlay.
+    const showNearbyAnchor = (coords, radiusKm) => {
+      if (mapProvider?.showAnchor) mapProvider.showAnchor(coords, radiusKm)
+    }
+    const clearNearbyAnchor = () => {
+      if (mapProvider?.clearAnchor) mapProvider.clearAnchor()
+    }
+
     // Center the map on the visitor's current location (mobile locate button).
     const locateUser = () => {
       if (!mapProvider || !navigator.geolocation) return
@@ -296,6 +304,8 @@ export default {
       mapError,
       focusOnPlace,
       locateUser,
+      showNearbyAnchor,
+      clearNearbyAnchor,
     }
   },
 }

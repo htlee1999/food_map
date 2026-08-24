@@ -6,12 +6,17 @@ import { getPopupInsets } from '../../utils/mapPopupInsets'
 
 const POPUP_SIDE_PADDING_PX = 16
 
+// Dark neutral matching the app's stone-900 chrome, used for the destination
+// pin and the "within N km" radius overlay.
+const ANCHOR_COLOR = '#1c1917'
+
 const ONEMAP_ATTRIBUTION = '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" style="height:20px;width:20px;"/>&nbsp;<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener noreferrer">OneMap</a>&nbsp;&copy;&nbsp;contributors&nbsp;&#124;&nbsp;<a href="https://www.sla.gov.sg/" target="_blank" rel="noopener noreferrer">Singapore Land Authority</a>'
 
 export function createOneMapProvider() {
   let map = null
   let markers = []
   let popup = null
+  let anchorLayer = null
 
   const init = () => {
     if (!window.L) return false
@@ -105,13 +110,49 @@ export function createOneMapProvider() {
     })
   }
 
+  const clearAnchor = () => {
+    if (anchorLayer) {
+      anchorLayer.remove()
+      anchorLayer = null
+    }
+  }
+
+  // Mark a "where are you headed?" destination and the search radius around it,
+  // then frame the map to that radius.
+  const showAnchor = (coords, radiusKm) => {
+    if (!map) return
+    clearAnchor()
+
+    const L = window.L
+    const center = [coords.lat, coords.lng]
+    const radiusCircle = L.circle(center, {
+      radius: radiusKm * 1000,
+      color: ANCHOR_COLOR,
+      weight: 1,
+      opacity: 0.5,
+      fillColor: ANCHOR_COLOR,
+      fillOpacity: 0.06,
+    })
+    const pin = L.circleMarker(center, {
+      radius: 7,
+      color: '#ffffff',
+      weight: 3,
+      fillColor: ANCHOR_COLOR,
+      fillOpacity: 1,
+    })
+
+    anchorLayer = L.layerGroup([radiusCircle, pin]).addTo(map)
+    map.fitBounds(radiusCircle.getBounds())
+  }
+
   const destroy = () => {
     clearMarkers()
+    clearAnchor()
     if (map) {
       map.remove()
       map = null
     }
   }
 
-  return { init, addMarker, clearMarkers, openPopup, focusOn, destroy }
+  return { init, addMarker, clearMarkers, openPopup, focusOn, showAnchor, clearAnchor, destroy }
 }

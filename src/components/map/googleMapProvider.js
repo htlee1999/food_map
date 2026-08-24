@@ -11,10 +11,16 @@ const INFO_WINDOW_CHROME_PX = 60
 // Gap kept between the popup's top edge and the chrome above it.
 const POPUP_TOP_MARGIN_PX = 12
 
+// Dark neutral matching the app's stone-900 chrome, used for the destination
+// pin and the "within N km" radius overlay.
+const ANCHOR_COLOR = '#1c1917'
+
 export function createGoogleMapProvider({ onTileFailure }) {
   let map = null
   let markers = []
   let infoWindow = null
+  let anchorMarker = null
+  let anchorCircle = null
 
   const init = () => {
     if (!window.google || !window.google.maps) {
@@ -162,13 +168,64 @@ export function createGoogleMapProvider({ onTileFailure }) {
     map.setZoom(16)
   }
 
+  const clearAnchor = () => {
+    if (anchorMarker) {
+      anchorMarker.setMap(null)
+      anchorMarker = null
+    }
+    if (anchorCircle) {
+      anchorCircle.setMap(null)
+      anchorCircle = null
+    }
+  }
+
+  // Mark a "where are you headed?" destination and the search radius around it,
+  // then frame the map to that radius.
+  const showAnchor = (coords, radiusKm) => {
+    if (!map) return
+    clearAnchor()
+
+    const google = window.google
+    const position = { lat: coords.lat, lng: coords.lng }
+
+    anchorMarker = new google.maps.Marker({
+      position,
+      map,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 7,
+        fillColor: ANCHOR_COLOR,
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3,
+        anchor: new google.maps.Point(0, 0),
+      },
+      title: 'Your destination',
+      zIndex: 9999,
+    })
+
+    anchorCircle = new google.maps.Circle({
+      map,
+      center: position,
+      radius: radiusKm * 1000,
+      strokeColor: ANCHOR_COLOR,
+      strokeOpacity: 0.5,
+      strokeWeight: 1,
+      fillColor: ANCHOR_COLOR,
+      fillOpacity: 0.06,
+    })
+
+    map.fitBounds(anchorCircle.getBounds())
+  }
+
   const destroy = () => {
     clearMarkers()
+    clearAnchor()
     infoWindow = null
     map = null
     const mapDiv = document.getElementById('map')
     if (mapDiv) mapDiv.innerHTML = ''
   }
 
-  return { init, addMarker, clearMarkers, openPopup, focusOn, destroy }
+  return { init, addMarker, clearMarkers, openPopup, focusOn, showAnchor, clearAnchor, destroy }
 }
